@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="469.0" prefWidth="774.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.KmanController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+      <ColumnConstraints />
+      <ColumnConstraints />
+      <ColumnConstraints />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="29.0" minHeight="29.0" prefHeight="29.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+      <RowConstraints />
+      <RowConstraints />
+  </rowConstraints>
+   <children>
+      <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnSpan="4" GridPane.halignment="LEFT" GridPane.valignment="TOP">
+         <children>
+            <MenuBar>
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                        <MenuItem mnemonicParsing="false" text="Preferences" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                    <MenuItem mnemonicParsing="false" onAction="#miExitOnAction" text="Exit">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Tools">
+                  <items>
+                        <MenuItem mnemonicParsing="false" onAction="#miAccountInsertOnAction" text="Add new account..." />
+                        <MenuItem mnemonicParsing="false" onAction="#miAccountEditOnAction" text="Edit current account..." />
+                        <MenuItem mnemonicParsing="false" onAction="#miDeleteAccountOnAction" text="Delete current account..." />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                    <MenuItem mnemonicParsing="false" onAction="#miCurrenciesManageOnAction" text="Manage Currency">
+                           <accelerator>
+                              <KeyCodeCombination alt="DOWN" code="C" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#miManageCategoriesOnAction" text="Manage Categories">
+                           <accelerator>
+                              <KeyCodeCombination alt="DOWN" code="T" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#miPayeesManageOnAction" text="Manage Payees">
+                           <accelerator>
+                              <KeyCodeCombination alt="DOWN" code="P" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator></MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu mnemonicParsing="false" text="Import">
+                          <items>
+                              <MenuItem mnemonicParsing="false" onAction="#miImportMMEXOnAction" text="Import from mmex" />
+                          </items>
+                        </Menu>
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" onAction="#miAboutOnAction" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+         </children>
+      </VBox>
+      <TabPane prefHeight="200.0" prefWidth="200.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" GridPane.columnSpan="4" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.rowSpan="3" GridPane.vgrow="ALWAYS">
+        <tabs>
+          <Tab text="main">
+               <content>
+                  <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                     <children>
+                        <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="NEVER" maxWidth="155.0" minWidth="155.0" prefWidth="155.0" />
+                              <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints maxHeight="28.0" minHeight="28.0" prefHeight="28.0" vgrow="NEVER" />
+                              <RowConstraints vgrow="ALWAYS" />
+                              <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="NEVER" />
+                           </rowConstraints>
+                           <children>
+                              <TreeView fx:id="tvNavigation" prefHeight="200.0" prefWidth="200.0" GridPane.rowSpan="3">
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </TreeView>
+                              <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1">
+                                 <children>
+                                    <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionInsertOnAction" prefHeight="26.0" prefWidth="70.0" text="Insert">
+                                       <HBox.margin>
+                                          <Insets left="1.5" right="3.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionEditOnAction" prefHeight="26.0" prefWidth="70.0" text="Edit">
+                                       <HBox.margin>
+                                          <Insets right="3.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                    <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionDeleteOnAction" prefHeight="26.0" prefWidth="70.0" text="Delete" />
+                                 </children>
+                              </HBox>
+                              <TreeTableView fx:id="ttvTransactions" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                                 <GridPane.margin>
+                                    <Insets left="1.5" />
+                                 </GridPane.margin>
+                              </TreeTableView>
+                              <TextArea fx:id="taTransactionNote" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Transaction note" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets left="1.5" />
+                                 </GridPane.margin>
+                              </TextArea>
+                           </children>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+          <Tab text="reports">
+               <content>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</GridPane>

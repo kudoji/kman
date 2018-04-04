@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.MMEXImportController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="296.0" minWidth="10.0" prefWidth="182.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="474.0" minWidth="10.0" prefWidth="412.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
+      <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="293.0" vgrow="ALWAYS" />
+      <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
+   </rowConstraints>
+   <children>
+      <Text fx:id="tHeader" strokeType="OUTSIDE" strokeWidth="0.0" text="mmex import" GridPane.columnSpan="2" GridPane.halignment="CENTER">
+         <font>
+            <Font name="System Bold" size="30.0" />
+         </font>
+      </Text>
+      <HBox alignment="CENTER_LEFT" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+         <children>
+            <Label text="mmex *.mmb file:">
+               <font>
+                  <Font name="System Bold" size="17.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="3.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="tfMMEXFile" disable="true" maxWidth="1.7976931348623157E308" promptText="Please, select *.mmb file" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets right="3.0" />
+               </HBox.margin>
+            </TextField>
+            <Button mnemonicParsing="false" onAction="#btnMMEXFileOnAction" text="..." />
+         </children>
+      </HBox>
+      <TableView fx:id="tvCurrencies" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+         <columns>
+            <TableColumn fx:id="tcName" maxWidth="239.0" minWidth="200.0" prefWidth="234.0" text="name" />
+            <TableColumn fx:id="tcSample" prefWidth="130.0" text="sample" />
+            <TableColumn fx:id="tcRate" prefWidth="159.0" text="rate" />
+         </columns>
+      </TableView>
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+         <children>
+            <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCancelOnAction" prefWidth="70.0" text="Close" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="3.0" left="3.0" right="3.0" />
+   </padding>
+</GridPane>
