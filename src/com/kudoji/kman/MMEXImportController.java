@@ -39,7 +39,7 @@ public class MMEXImportController extends Controller {
             
             if (mmexImport.getStatus()){
                 //no errors
-                Kman.showInformation("Data moved sucessfully. Restart application, please");
+                Kman.showInformation("Data moved sucessfully. Please, restart application");
             }else{
                 Kman.showErrorMessage("Cannot move data");
             }

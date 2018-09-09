@@ -188,7 +188,7 @@ public class MMEXImport {
      * 
      * @param _category_id mmex category id
      * @param _category_sub_id mmex sub category id
-     * @return 2 (Unknown) if nothing found, or id
+     * @return 2 (Unknown) if nothing found, or fount id
      */
     private int findCategory(int _category_id, int _category_sub_id){
         //mmex tables:

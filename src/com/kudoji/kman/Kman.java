@@ -20,7 +20,7 @@ public class Kman extends Application {
     
     public Kman(){
         kmanDB = new DB("kudoji.kmd");
-        kmanDB.setDebugMode(false);
+        kmanDB.setDebugMode(true);
         kmanDB.connect();
         kmanDB.createAllTables(true);
     }

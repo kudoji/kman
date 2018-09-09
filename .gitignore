@@ -4,6 +4,14 @@ materials/
 #default db
 kudoji.kmd
 
+#fossil db
+*.fossil
+
+#idea folders
+.idea
+*.iml
+out/
+
 #ant specific folders
 build/
 dist/

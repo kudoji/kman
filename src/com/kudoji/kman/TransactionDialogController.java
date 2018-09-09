@@ -152,7 +152,7 @@ public class TransactionDialogController extends Controller {
 
             int transactionTypeID = this.transaction.getTypeID();
             Kman.selectItemInCombobox(cbType, transactionTypeID);
-            cbTypeOnAction(null); //make necessary fiels visible
+            cbTypeOnAction(null); //make necessary fields visible
 
             switch (transactionTypeID){
                 case TransactionType.ACCOUNT_TYPES_DEPOSIT:
@@ -205,7 +205,7 @@ public class TransactionDialogController extends Controller {
     
     /**
      * 
-     * @param _compobox
+     * @param _combobox
      * @param _accountToSkip don't add this account to _combobox
      */
     private void populateAccountsComboBox(ComboBox _combobox, Account _accountToSkip){
@@ -280,7 +280,8 @@ public class TransactionDialogController extends Controller {
             amountFrom = 0;
             balanceFrom = 0;
             
-            //it is important! Take data from cbAccountFrom not cbAccountTo
+            // It is important!
+            // Take data from cbAccountFrom not cbAccountTo
             Account account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
             accountToID = account.getID();
             
