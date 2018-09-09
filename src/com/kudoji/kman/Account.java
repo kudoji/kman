@@ -19,7 +19,7 @@ public class Account {
     private float balance_initial, balance_current;
     private String name;
     private Currency currency;
-    
+
     public Account(){
         this.id = 0;
         this.name = "<<accounts>>";
@@ -86,27 +86,44 @@ public class Account {
     }
     
     /**
-     * Returns account's balance on particular date (end of the day)
+     * Returns account's balance on particular date
+     * It might be end of the day or balance for the date but before particular transaction id
+     *
      * @param _date date to return balance on
-     * @return 
+     * @param _tid transaction id
+     *             can be -1, in this case doesn't compare ids but dates only
+     *             if it's not -1, method returns balance BEFORE _tid for _date
+     *
+     * @return float
      */
-    public float getBalanceDate(String _date){
-        //this is the recent transaction for the account which means recent balance is current account's balance
-        if (LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE).equals(_date)){
+    public float getBalanceDate(String _date, int _tid){
+        if ( (LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE).equals(_date))
+        && (_tid == -1) ){
+            // this is the recent transaction for the account
+            // which means recent balance is current account's balance
             return this.getBalanceCurrent();
         }
         
         //the idea is to get last transaction for the _date and take its balance
         //why date <= _date but not date = _date because where might not be transactions for the _date, in that case we need to take last one from the previous day
-        //select * from transactions where (account_from_id = id or account_to_id = id) and date <= _date order by date desc, id desc limit 1;
+        //select * from transactions where (account_from_id = id or account_to_id = id) and date <= _date [ and id < _tid ] order by date desc, id desc limit 1;
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "transactions");
-        params.put("where", "(account_from_id = " + this.id + " or account_to_id = " + this.id + ") and date <= '" + _date + "'");
+        if (_tid == -1){
+            // in this case transaction id doesn't matter (new transaction)
+            // check dates only
+            params.put("where", "(account_from_id = " + this.id + " or account_to_id = " + this.id + ") and date <= '" + _date + "'");
+        }else{
+            // in this case there is a need to find transaction for the _date which is before _tid
+            // excluding _tid
+            params.put("where", "(account_from_id = " + this.id + " or account_to_id = " + this.id + ") and date <= '" + _date + "' and id < " + _tid);
+        }
         params.put("order", "date desc, id desc");
         params.put("limit", "1");
         
         java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
-        if (rows.isEmpty()){ //no transactions from the very first day till the _date
+        if (rows.isEmpty()){
+            //  no transactions from the very first day till the _date (and/or _tid)
             return this.getBalanceInitial();
         }else{
             //record is found

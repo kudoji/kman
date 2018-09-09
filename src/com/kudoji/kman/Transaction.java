@@ -502,7 +502,7 @@ public class Transaction {
         
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "transactions");
-        params.put("order", "date asc");
+        params.put("order", "date asc, id asc");
         Account accountFotTransaction = null;
         if (_accountFilter != null){
             int accountID = _accountFilter.getID();

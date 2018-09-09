@@ -275,6 +275,7 @@ public class TransactionDialogController extends Controller {
         
         int accountFromID = 0, accountToID = 0;
         float amountFrom = 0, amountTo = 0, balanceFrom = 0, balanceTo = 0;
+
         if (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             accountFromID = 0;
             amountFrom = 0;
@@ -288,10 +289,35 @@ public class TransactionDialogController extends Controller {
             amountTo = Float.parseFloat(tfAmountFrom.getText());
 
             float delta = amountTo;
-            balanceTo = account.getBalanceDate(transactionDate);
+
+            // REMEMBER, all transactions ordered by date asc, id asc
+            //
+            // Need to get transaction's balance which is BEFORE current transaction
+            // ********** In case of a NEW transaction ********** //
+            // Balance is account's balance to the END of transaction's date
+            // (or end of the closest previous date if no transactions for the current date)
+            // ********** In case of a EXISTED transaction ********** //
+            // Balance is account's balance for transaction's date which is BEFORE
+            // (located higher, less than, not included, <) its id
+            // (or end of the closest previous date if no transactions for the current date)
+
             if (this.transaction != null){
-                //in case of editing, increase amount by delta
+                // existed transaction
+
+                // get balance for the transaction date but before its id
+                balanceTo = account.getBalanceDate(transactionDate, this.transaction.getID());
+                // BUT... have to include NEW transaction sum
+                // BECAUSE this is the balance after this transaction happened
+                // increasing by OLD t sum
+                // because later delta will be included into balance as well
+                // which'll lead to OLD sum elimination and addition of the NEW one
+                balanceTo += this.transaction.getAmountTo();
+
+                // increase amount by delta
                 delta -= this.transaction.getAmountTo();
+            }else{
+                // new transaction, get balance for the end of transaction date
+                balanceTo = account.getBalanceDate(transactionDate, -1);
             }
             balanceTo += delta;
 
@@ -315,10 +341,25 @@ public class TransactionDialogController extends Controller {
             amountFrom = Float.parseFloat(tfAmountFrom.getText());
 
             float delta = -amountFrom;
-            balanceFrom = account.getBalanceDate(transactionDate);
+
             if (this.transaction != null){
-                //in case of editing, increase amount by delta
+                // existed transaction
+
+                // get balance BEFORE transaction id
+                balanceFrom = account.getBalanceDate(transactionDate, this.transaction.getID());
+                // BUT... have to remove NEW transaction sum
+                // BECAUSE this is the balance after this transaction happened
+                // increasing by OLD t sum
+                // because later delta will be included into balance as well
+                // which'll lead to OLD sum elimination and subtraction of the NEW one
+                balanceFrom -= this.transaction.getAmountFrom();
+
+                // increase amount by delta
                 delta += this.transaction.getAmountFrom();
+            }else{
+                // new transaction
+
+                balanceFrom = account.getBalanceDate(transactionDate, -1);
             }
             balanceFrom += delta;
 
@@ -350,10 +391,24 @@ public class TransactionDialogController extends Controller {
             amountFrom = Float.parseFloat(tfAmountFrom.getText());
 
             float delta = -amountFrom;
-            balanceFrom = account.getBalanceDate(transactionDate);
+
             if (this.transaction != null){
-                //in case of editing, increase amount by delta
+                // existed transaction
+
+                // get balance before particular transaction id
+                balanceFrom = account.getBalanceDate(transactionDate, this.transaction.getID());
+                // BUT... have to remove NEW transaction sum
+                // BECAUSE this is the balance after this transaction happened
+                // increasing by OLD t sum
+                // because later delta will be included into balance as well
+                // which'll lead to OLD sum elimination and subtraction of the NEW one
+                balanceFrom -= this.transaction.getAmountTo();
+
+                // increase amount by delta
                 delta += this.transaction.getAmountFrom();
+            }else{
+                // this is a new transaction
+                balanceFrom = account.getBalanceDate(transactionDate, -1);
             }
             balanceFrom += delta;
 
@@ -384,10 +439,24 @@ public class TransactionDialogController extends Controller {
             }
             
             delta = amountTo;
-            balanceTo = account.getBalanceDate(transactionDate);
+
             if (this.transaction != null){
-                //in case of editing, increase amount by delta
+                // existed transaction
+
+                // get balance BEFORE current transaction
+                balanceTo = account.getBalanceDate(transactionDate, this.transaction.getID());
+                // BUT... have to include NEW transaction sum
+                // BECAUSE this is the balance after this transaction happened
+                // increasing by OLD t sum
+                // because later delta will be included into balance as well
+                // which'll lead to OLD sum subtraction and addition of the NEW one
+                balanceTo += this.transaction.getAmountTo();
+
+                // increase amount by delta
                 delta -= this.transaction.getAmountTo();
+            }else{
+                // new transaction
+                balanceTo = account.getBalanceDate(transactionDate, -1);
             }
             balanceTo += delta;
             account.setBalanceCurrent(account.getBalanceCurrent() + delta);
