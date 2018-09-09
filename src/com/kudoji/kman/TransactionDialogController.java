@@ -329,7 +329,18 @@ public class TransactionDialogController extends Controller {
                     System.err.println("Unable to save current balance for " + account + " account");
                     return false;
                 }
-                boolean transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
+
+                boolean transactionsUpdated = false;
+
+                if (this.transaction == null){
+                    transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
+                }else{
+                    //  this is existed transaction
+                    //  need to change all transaction after its date
+                    //  see method's description for more details
+                    transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.TO, delta);
+                }
+
                 if (!transactionsUpdated){
                     System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountToID);
                     return false;
@@ -375,7 +386,16 @@ public class TransactionDialogController extends Controller {
                     return false;
                 }
 
-                transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
+                if (this.transaction == null){
+                    //  this is new transaction
+                    transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
+                }else{
+                    //  this is existed transaction
+                    //  need to change all transaction after its date
+                    //  see method's description for more details
+                    transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.FROM, delta);
+                }
+
                 if (!transactionsUpdated){
                     System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
                     return false;
@@ -423,7 +443,16 @@ public class TransactionDialogController extends Controller {
                     return false;
                 }
 
-                transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
+                if (this.transaction == null){
+                    //  this is a new transaction
+                    transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
+                }else{
+                    //  this is existed transaction
+                    //  need to change all transaction after its date
+                    //  see method's description for more details
+                    transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.FROM, delta);
+                }
+
                 if (!transactionsUpdated){
                     System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
                     return false;
@@ -466,8 +495,17 @@ public class TransactionDialogController extends Controller {
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
             }
-            
-            transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
+
+            if (this.transaction == null){
+                //  this is a new transaction
+                transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
+            }else{
+                //  this is existed transaction
+                //  need to change all transaction after its date
+                //  see method's description for more details
+                transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.TO, delta);
+            }
+
             if (!transactionsUpdated){
                 System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountToID);
                 return false;

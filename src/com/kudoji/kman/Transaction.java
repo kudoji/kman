@@ -417,27 +417,36 @@ public class Transaction {
     
     /**
      * Increases transactions' balance for the _accountID after particular _dateAfter (excluding it)
-     * 
+     * Make sense of using this method with NEW transaction ONLY
+     *
+     * For existed transaction use overridden method
+     *
      * @param _dateAfter
      * @param _accountID
      * @param _delta can be negative
      * @return 
      */
     public static boolean increaseBalance(String _dateAfter, int _accountID, float _delta){
-        //update transactions set 
-        //balance_from = balance_from + case when account_from_id = _accountID then _delta else 0 end, 
-        //balance_to = balance_to + case when account_to_id = _accountID then _delta else 0 end 
-        //where (account_from_id = _accountID or account_to_id = _accountID) and date > _dateAfter;
+        //  update transactions set
+        //
+        // balance_from = balance_from + case when account_from_id = _accountID then _delta else 0 end,
+        //  balance_to = balance_to + case when account_to_id = _accountID then _delta else 0 end
+        //  where (account_from_id = _accountID or account_to_id = _accountID) and date > _dateAfter;
+
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "transactions");
         params.put("set", "balance_from = balance_from + case when account_from_id = " + _accountID + " then " + _delta + " else 0 end, balance_to = balance_to + case when account_to_id = " + _accountID + " then " + _delta + " else 0 end");
+
+        // this is a new transaction
+        // need to change transactions after its date only
         params.put("where", "(account_from_id = " + _accountID + " or account_to_id = " + _accountID + ") and date > '" + _dateAfter + "'");
-        
+
         return (Kman.getDB().updateData(false, params) != 0);
     }
     
     /**
      * Increases transactions' balance for all  transaction after _transaction (excluding it)
+     * Make sense for using the method for EXISTED transaction only
      * 
      * @param _transaction
      * @param _accountTake increase balance for _accountTake transactions
@@ -462,14 +471,17 @@ public class Transaction {
             return false;
         }else switch (_accountTake) {
             case FROM:
+                // for withdrawal
                 account_from_id = String.valueOf(_transaction.getAccountFromID());
                 account_to_id = account_from_id;
                 break;
             case TO:
+                // for deposit
                 account_from_id = String.valueOf(_transaction.getAccountToID());
                 account_to_id = account_from_id;
                 break;
             case BOTH:
+                // for transfer
                 account_from_id = String.valueOf(_transaction.getAccountToID()) + ", " + String.valueOf(_transaction.getAccountToID());
                 account_to_id = account_from_id;
                 break;
