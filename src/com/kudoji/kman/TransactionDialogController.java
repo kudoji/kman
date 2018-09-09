@@ -294,17 +294,20 @@ public class TransactionDialogController extends Controller {
                 delta -= this.transaction.getAmountTo();
             }
             balanceTo += delta;
-            account.setBalanceCurrent(account.getBalanceCurrent() + delta);
 
-            boolean accountSaved = account.updateDB();
-            if (!accountSaved){
-                System.err.println("Unable to save current balance for " + account + " account");
-                return false;
-            }
-            boolean transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
-            if (!transactionsUpdated){
-                System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountToID);
-                return false;
+            if (delta != 0){
+                account.setBalanceCurrent(account.getBalanceCurrent() + delta);
+
+                boolean accountSaved = account.updateDB();
+                if (!accountSaved){
+                    System.err.println("Unable to save current balance for " + account + " account");
+                    return false;
+                }
+                boolean transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
+                if (!transactionsUpdated){
+                    System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountToID);
+                    return false;
+                }
             }
         }else if (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
             Account account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
@@ -318,18 +321,24 @@ public class TransactionDialogController extends Controller {
                 delta += this.transaction.getAmountFrom();
             }
             balanceFrom += delta;
-            account.setBalanceCurrent(account.getBalanceCurrent() + delta);
 
-            boolean accountSaved = account.updateDB();
-            if (!accountSaved){
-                System.err.println("Unable to save current balance for " + account + " account");
-                return false;
-            }
+            boolean accountSaved = false;
+            boolean transactionsUpdated = false;
 
-            boolean transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
-            if (!transactionsUpdated){
-                System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
-                return false;
+            if (delta != 0){
+                account.setBalanceCurrent(account.getBalanceCurrent() + delta);
+
+                accountSaved = account.updateDB();
+                if (!accountSaved){
+                    System.err.println("Unable to save current balance for " + account + " account");
+                    return false;
+                }
+
+                transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
+                if (!transactionsUpdated){
+                    System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
+                    return false;
+                }
             }
 
             accountToID = 0;
@@ -347,20 +356,25 @@ public class TransactionDialogController extends Controller {
                 delta += this.transaction.getAmountFrom();
             }
             balanceFrom += delta;
-            account.setBalanceCurrent(account.getBalanceCurrent() + delta);
 
-            boolean accountSaved = account.updateDB();
-            if (!accountSaved){
-                System.err.println("Unable to save current balance for " + account + " account");
-                return false;
+            boolean accountSaved = false;
+            boolean transactionsUpdated = false;
+            if (delta != 0){
+                account.setBalanceCurrent(account.getBalanceCurrent() + delta);
+
+                accountSaved = account.updateDB();
+                if (!accountSaved){
+                    System.err.println("Unable to save current balance for " + account + " account");
+                    return false;
+                }
+
+                transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
+                if (!transactionsUpdated){
+                    System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
+                    return false;
+                }
             }
-            
-            boolean transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
-            if (!transactionsUpdated){
-                System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
-                return false;
-            }
-            
+
             account = (Account)cbAccountTo.getSelectionModel().getSelectedItem();
             accountToID = account.getID();
             if (chbAdvanced.isSelected()){ //advanced value is set
@@ -390,6 +404,7 @@ public class TransactionDialogController extends Controller {
                 return false;
             }
         }
+
         if (accountFromID == 0){
             params.put("account_from_id", null); //to avoid foreign_key constrain error
         }else{
