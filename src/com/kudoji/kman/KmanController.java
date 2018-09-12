@@ -166,89 +166,9 @@ public class KmanController implements Initializable {
         if (!Kman.showConfirmation("The selected transaction will be deleted.", "Are you sure?")){
             return;
         }
-        
-        if (!Kman.getDB().startTransaction()){
-            Kman.showErrorMessage("Couldn't start SQL transaction...");
-            return;
-        }
-        
-        Account account;
-        switch (transactionSelected.getTypeID()){
-            case TransactionType.ACCOUNT_TYPES_DEPOSIT:
-                //increase all transactions after the current one
-                if (!Transaction.increaseBalance(transactionSelected, Transaction.AccountTake.TO, -transactionSelected.getAmountTo())){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to update transactions' balance after '" + transactionSelected.getID() + "' for accountID: " + transactionSelected.getAccountToID());
-                    return;
-                }
-                //decrease accounts balance
-                account = transactionSelected.getAccount(true);
-                account.increaseBalanceCurrent(-transactionSelected.getAmountTo());
-                if (!account.updateDB()){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return;
-                }
 
-                break;
-            case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                if (!Transaction.increaseBalance(transactionSelected, Transaction.AccountTake.FROM, transactionSelected.getAmountFrom())){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to update transactions' balance after '" + transactionSelected.getID() + "' for accountID: " + transactionSelected.getAccountFromID());
-                    return;
-                }
-                //increase accounts balance
-                account = transactionSelected.getAccount(false);
-                account.increaseBalanceCurrent(transactionSelected.getAmountFrom());
-                if (!account.updateDB()){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return;
-                }
-
-                break;
-            case TransactionType.ACCOUNT_TYPES_TRANSFER:
-                //in case of transfer, transaction touches both accounts
-                if (!Transaction.increaseBalance(transactionSelected, Transaction.AccountTake.FROM, transactionSelected.getAmountFrom())){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to update transactions' balance after '" + transactionSelected.getID() + "' for accountID: " + transactionSelected.getAccountFromID());
-                    return;
-                }
-                //increase accounts balance
-                account = transactionSelected.getAccount(false);
-                account.increaseBalanceCurrent(transactionSelected.getAmountFrom());
-                if (!account.updateDB()){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return;
-                }
-
-                if (!Transaction.increaseBalance(transactionSelected, Transaction.AccountTake.TO, -transactionSelected.getAmountTo())){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to update transactions' balance after '" + transactionSelected.getID() + "' for accountID: " + transactionSelected.getAccountToID());
-                    return;
-                }
-                //decrese accounts balance
-                account = transactionSelected.getAccount(true);
-                account.increaseBalanceCurrent(-transactionSelected.getAmountTo());
-                if (!account.updateDB()){
-                    Kman.getDB().rollbackTransaction();
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return;
-                }
-
-                break;
-            default: //something is wrong
-        }
-
-        //finally, delete transaction
-        java.util.HashMap<String, String> params = new java.util.HashMap<>();
-        params.put("table", "transactions");
-        params.put("where", "id = " + transactionSelected.getID());
-
-        if (!Kman.getDB().deleteData(params)){
-            Kman.getDB().rollbackTransaction();
-            System.err.println("Unable to detele transaction with id: " + transactionSelected.getID());
+        if (!transactionSelected.delete(true)){
+            Kman.showErrorMessage("Unable to delete the transaction");
             return;
         }
 
@@ -265,8 +185,6 @@ public class KmanController implements Initializable {
         ttvTransactionsOnSelect();
         //update accounts tree (balance to accounts)
         Account.populateAccountsTree(tvNavigation);
-
-        Kman.getDB().commitTransaction();
     }
     
     private void miAccountInsertEvent(ActionEvent _event){

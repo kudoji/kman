@@ -252,243 +252,80 @@ public class TransactionDialogController extends Controller {
         }
     }
 
-    private boolean saveData(){
-        java.util.HashMap<String, String> params = new java.util.HashMap<>();
-        params.put("table", "transactions");
-        
-        String transactionDate = dpDate.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        params.put("date", transactionDate);
-        TransactionType ttSelected = (TransactionType)cbType.getSelectionModel().getSelectedItem();
-        params.put("transaction_types_id", Integer.toString(ttSelected.getID()));
-        params.put("categories_id", Integer.toString(category.getID()));
-        
-        int payeeID = 0;
-        if ( (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT) || (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ){
-            Payee payee = (Payee)cbPayee.getSelectionModel().getSelectedItem();
-            payeeID = payee.getID();
-        }
-        if (payeeID == 0){
-            params.put("payees_id", null); //to avoid foreign_key constain error
-        }else{
-            params.put("payees_id", Integer.toString(payeeID));
-        }
-        
-        int accountFromID = 0, accountToID = 0;
-        float amountFrom = 0, amountTo = 0, balanceFrom = 0, balanceTo = 0;
+    /**
+     *  Auxiliary method for additional calculations and committing necessary changes
+     *  Used in case of new transaction
+     */
+    private boolean saveDataTransactionNew(java.util.HashMap<String, String> _params){
+        String tdNew = _params.get("date");
+        int ttIDNew = Integer.valueOf(_params.get("transaction_types_id"));
 
-        if (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT){
-            accountFromID = 0;
-            amountFrom = 0;
-            balanceFrom = 0;
-            
+        Account account;
+        boolean accountSaved = false;
+        boolean transactionsUpdated = false;
+
+        int accountFromIDNew = 0, accountToIDNew = 0;
+        float amountFromNew = 0, amountToNew = 0, balanceFromNew = 0, balanceToNew = 0;
+
+        if (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             // It is important!
             // Take data from cbAccountFrom not cbAccountTo
-            Account account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountToID = account.getID();
-            
-            amountTo = Float.parseFloat(tfAmountFrom.getText());
+            account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
+            accountToIDNew = account.getID();
 
-            float delta = amountTo;
+            amountToNew = Float.parseFloat(tfAmountFrom.getText());
+            // new transaction, get balance for the end of transaction date
+            balanceToNew = account.getBalanceDate(tdNew, -1) + amountToNew;
 
-            // REMEMBER, all transactions ordered by date asc, id asc
-            //
-            // Need to get transaction's balance which is BEFORE current transaction
-            // ********** In case of a NEW transaction ********** //
-            // Balance is account's balance to the END of transaction's date
-            // (or end of the closest previous date if no transactions for the current date)
-            // ********** In case of a EXISTED transaction ********** //
-            // Balance is account's balance for transaction's date which is BEFORE
-            // (located higher, less than, not included, <) its id
-            // (or end of the closest previous date if no transactions for the current date)
-
-            if (this.transaction != null){
-                // existed transaction
-
-                // get balance for the transaction date but before its id
-                balanceTo = account.getBalanceDate(transactionDate, this.transaction.getID());
-                // BUT... have to include NEW transaction sum
-                // BECAUSE this is the balance after this transaction happened
-                // increasing by OLD t sum
-                // because later delta will be included into balance as well
-                // which'll lead to OLD sum elimination and addition of the NEW one
-                balanceTo += this.transaction.getAmountTo();
-
-                // increase amount by delta
-                delta -= this.transaction.getAmountTo();
-            }else{
-                // new transaction, get balance for the end of transaction date
-                balanceTo = account.getBalanceDate(transactionDate, -1);
-            }
-            balanceTo += delta;
-
-            if (delta != 0){
-                account.setBalanceCurrent(account.getBalanceCurrent() + delta);
-
-                boolean accountSaved = account.updateDB();
-                if (!accountSaved){
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return false;
-                }
-
-                boolean transactionsUpdated = false;
-
-                if (this.transaction == null){
-                    transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
-                }else{
-                    //  this is existed transaction
-                    //  need to change all transaction after its date
-                    //  see method's description for more details
-                    transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.TO, delta);
-                }
-
-                if (!transactionsUpdated){
-                    System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountToID);
-                    return false;
-                }
-            }
-        }else if (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
-            Account account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountFromID = account.getID();
-            amountFrom = Float.parseFloat(tfAmountFrom.getText());
-
-            float delta = -amountFrom;
-
-            if (this.transaction != null){
-                // existed transaction
-
-                // get balance BEFORE transaction id
-                balanceFrom = account.getBalanceDate(transactionDate, this.transaction.getID());
-                // BUT... have to remove NEW transaction sum
-                // BECAUSE this is the balance after this transaction happened
-                // increasing by OLD t sum
-                // because later delta will be included into balance as well
-                // which'll lead to OLD sum elimination and subtraction of the NEW one
-                balanceFrom -= this.transaction.getAmountFrom();
-
-                // increase amount by delta
-                delta += this.transaction.getAmountFrom();
-            }else{
-                // new transaction
-
-                balanceFrom = account.getBalanceDate(transactionDate, -1);
-            }
-            balanceFrom += delta;
-
-            boolean accountSaved = false;
-            boolean transactionsUpdated = false;
-
-            if (delta != 0){
-                account.setBalanceCurrent(account.getBalanceCurrent() + delta);
-
-                accountSaved = account.updateDB();
-                if (!accountSaved){
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return false;
-                }
-
-                if (this.transaction == null){
-                    //  this is new transaction
-                    transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
-                }else{
-                    //  this is existed transaction
-                    //  need to change all transaction after its date
-                    //  see method's description for more details
-                    transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.FROM, delta);
-                }
-
-                if (!transactionsUpdated){
-                    System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
-                    return false;
-                }
+            account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew);
+            accountSaved = account.updateDB();
+            if (!accountSaved){
+                System.err.println("Unable to save current balance for " + account + " account");
+                return false;
             }
 
-            accountToID = 0;
-            amountTo = 0;
-            balanceTo = 0;
-        }else if (ttSelected.getID() == TransactionType.ACCOUNT_TYPES_TRANSFER){
-            Account account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountFromID = account.getID();
-            amountFrom = Float.parseFloat(tfAmountFrom.getText());
-
-            float delta = -amountFrom;
-
-            if (this.transaction != null){
-                // existed transaction
-
-                // get balance before particular transaction id
-                balanceFrom = account.getBalanceDate(transactionDate, this.transaction.getID());
-                // BUT... have to remove NEW transaction sum
-                // BECAUSE this is the balance after this transaction happened
-                // increasing by OLD t sum
-                // because later delta will be included into balance as well
-                // which'll lead to OLD sum elimination and subtraction of the NEW one
-                balanceFrom -= this.transaction.getAmountTo();
-
-                // increase amount by delta
-                delta += this.transaction.getAmountFrom();
-            }else{
-                // this is a new transaction
-                balanceFrom = account.getBalanceDate(transactionDate, -1);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew);
+            if (!transactionsUpdated) {
+                System.err.println("Unable to update transactions' balance after '" +
+                        tdNew + "' for accountID: " + accountToIDNew);
+                return false;
             }
-            balanceFrom += delta;
+        }else if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ||
+                (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER) ) {
+            account = (Account) cbAccountFrom.getSelectionModel().getSelectedItem();
+            accountFromIDNew = account.getID();
+            amountFromNew = Float.parseFloat(tfAmountFrom.getText());
 
-            boolean accountSaved = false;
-            boolean transactionsUpdated = false;
-            if (delta != 0){
-                account.setBalanceCurrent(account.getBalanceCurrent() + delta);
+            balanceFromNew = account.getBalanceDate(tdNew, -1) - amountFromNew;
 
-                accountSaved = account.updateDB();
-                if (!accountSaved){
-                    System.err.println("Unable to save current balance for " + account + " account");
-                    return false;
-                }
-
-                if (this.transaction == null){
-                    //  this is a new transaction
-                    transactionsUpdated = Transaction.increaseBalance(transactionDate, accountFromID, delta);
-                }else{
-                    //  this is existed transaction
-                    //  need to change all transaction after its date
-                    //  see method's description for more details
-                    transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.FROM, delta);
-                }
-
-                if (!transactionsUpdated){
-                    System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountFromID);
-                    return false;
-                }
+            account.setBalanceCurrent(account.getBalanceCurrent() - amountFromNew);
+            accountSaved = account.updateDB();
+            if (!accountSaved) {
+                System.err.println("Unable to save current balance for " + account + " account");
+                return false;
             }
 
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountFromIDNew, -amountFromNew);
+            if (!transactionsUpdated) {
+                System.err.println("Unable to update transactions' balance after '" +
+                        tdNew + "' for accountID: " + accountFromIDNew);
+                return false;
+            }
+        }
+
+        //  and additional condition for transfer (part about to account)
+        if (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER){
+            //  this part is almost identical to DEPOSIT section with few changes
             account = (Account)cbAccountTo.getSelectionModel().getSelectedItem();
-            accountToID = account.getID();
+            accountToIDNew = account.getID();
             if (chbAdvanced.isSelected()){ //advanced value is set
-                amountTo = Float.parseFloat(tfAmountTo.getText());
+                amountToNew = Float.parseFloat(tfAmountTo.getText());
             }else{
-                amountTo = amountFrom;
+                amountToNew = amountFromNew;
             }
-            
-            delta = amountTo;
 
-            if (this.transaction != null){
-                // existed transaction
-
-                // get balance BEFORE current transaction
-                balanceTo = account.getBalanceDate(transactionDate, this.transaction.getID());
-                // BUT... have to include NEW transaction sum
-                // BECAUSE this is the balance after this transaction happened
-                // increasing by OLD t sum
-                // because later delta will be included into balance as well
-                // which'll lead to OLD sum subtraction and addition of the NEW one
-                balanceTo += this.transaction.getAmountTo();
-
-                // increase amount by delta
-                delta -= this.transaction.getAmountTo();
-            }else{
-                // new transaction
-                balanceTo = account.getBalanceDate(transactionDate, -1);
-            }
-            balanceTo += delta;
-            account.setBalanceCurrent(account.getBalanceCurrent() + delta);
+            balanceToNew = account.getBalanceDate(tdNew, -1) + amountToNew;
+            account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew);
 
             accountSaved = account.updateDB();
             if (!accountSaved){
@@ -496,50 +333,115 @@ public class TransactionDialogController extends Controller {
                 return false;
             }
 
-            if (this.transaction == null){
-                //  this is a new transaction
-                transactionsUpdated = Transaction.increaseBalance(transactionDate, accountToID, delta);
-            }else{
-                //  this is existed transaction
-                //  need to change all transaction after its date
-                //  see method's description for more details
-                transactionsUpdated = Transaction.increaseBalance(this.transaction, Transaction.AccountTake.TO, delta);
-            }
-
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew);
             if (!transactionsUpdated){
-                System.err.println("Unable to update transactions' balance after '" + transactionDate + "' for accountID: " + accountToID);
+                System.err.println("Unable to update transactions' balance after '" +
+                        tdNew + "' for accountID: " + accountToIDNew);
                 return false;
             }
         }
 
-        if (accountFromID == 0){
-            params.put("account_from_id", null); //to avoid foreign_key constrain error
+        if (accountFromIDNew == 0){
+            _params.put("account_from_id", null); //to avoid foreign_key constrain error
         }else{
-            params.put("account_from_id", Integer.toString(accountFromID));
+            _params.put("account_from_id", Integer.toString(accountFromIDNew));
         }
-        if (accountToID == 0){
-            params.put("account_to_id", null); //to avoid foreign_key constrain error
+        if (accountToIDNew == 0){
+            _params.put("account_to_id", null); //to avoid foreign_key constrain error
         }else{
-            params.put("account_to_id", Integer.toString(accountToID));
+            _params.put("account_to_id", Integer.toString(accountToIDNew));
         }
-        params.put("amount_from", Float.toString(amountFrom));
-        params.put("amount_to", Float.toString(amountTo));
-        
-        params.put("balance_from", Float.toString(balanceFrom));
-        params.put("balance_to", Float.toString(balanceTo));
-        
+        _params.put("amount_from", Float.toString(amountFromNew));
+        _params.put("amount_to", Float.toString(amountToNew));
+
+        _params.put("balance_from", Float.toString(balanceFromNew));
+        _params.put("balance_to", Float.toString(balanceToNew));
+
+        return true;
+    }
+
+    /**
+     *  Auxiliary method for additional calculations and committing necessary changes
+     *  Used in case of existed transaction
+     */
+    private boolean saveDataTransactionExisted(java.util.HashMap<String, String> _params){
+        //  instead of writting logic for transaction editing,
+        //  easier to treat it as deletion and insertion of a new transaction
+        //
+        //  Agree, it is not real fun but much easier to implement and DB calculations are going to be almost the same
+
+        //  delete current transaction
+        //  don't use DB transaction because this method is already wrapped inside DB transaction block
+        if (!this.transaction.delete(false)){
+            return false;
+        }
+
+        //  after deleting,
+        //  insert it as a new transaction
+        if (!saveDataTransactionNew(_params)){
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Saves transaction data into a database
+     *
+     * @return  True means data successfully saved,
+     *          False - otherwise
+     */
+    private boolean saveData(){
+        boolean isError = false;
+        if (!Kman.getDB().startTransaction()) return false; //    something went wrong
+
+        String tdNew = dpDate.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        int ttIDNew = ((TransactionType)cbType.getSelectionModel().getSelectedItem()).getID();
+        int payeeIDNew = 0;
+        if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT) ||
+                (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL)){
+            Payee payee = (Payee)cbPayee.getSelectionModel().getSelectedItem();
+            payeeIDNew = payee.getID();
+        }
+
+        java.util.HashMap<String, String> params = new java.util.HashMap<>();
+        params.put("table", "transactions");
+        params.put("date", tdNew);
+        params.put("transaction_types_id", Integer.toString(ttIDNew));
+        params.put("categories_id", Integer.toString(category.getID()));
+        if (payeeIDNew == 0){
+            params.put("payees_id", null); //to avoid foreign_key constrain error
+        }else{
+            params.put("payees_id", Integer.toString(payeeIDNew));
+        }
+
+        if (this.transaction == null){
+            //  this is a new transaction
+            if (!saveDataTransactionNew(params)) isError = true;
+        }else{
+            // this is an existed transaction
+            if (!saveDataTransactionExisted(params)) isError = true;
+        }
+
         params.put("notes", taNotes.getText());
-        
-        if (this.transaction != null){//update existed transaction
-            params.put("id", Integer.toString(this.transaction.getID()));
+
+        //  always insert new record
+        int transactionID = Kman.getDB().updateData(true, params);
+
+        if (isError || !Kman.getDB().commitTransaction()){ //trying to commit changes
+            //  unable to commit transaction, rolling it back
+            Kman.getDB().rollbackTransaction();
+
+            return false;
         }
-        
-        int transactionID = Kman.getDB().updateData(this.transaction == null, params);
-        
+
+        if (transactionID > 0) {
+            //  create new instance or update existed one to get it back to the class which called this controller
+            params.put("id", Integer.toString(transactionID));
+        }
         if (this.transaction == null){ //new transaction is created
             if (transactionID > 0){
-                //create new instance to get it back to the class which called this controller
-                params.put("id", Integer.toString(transactionID));
                 this.transaction = new Transaction(params);
             }else{ //possible DB error
                 return false;
@@ -547,10 +449,10 @@ public class TransactionDialogController extends Controller {
         }else{ //need to save new data to the instance
             this.transaction.setFields(params);
         }
-        
+
         return (transactionID > 0);
     }
-    
+
     private boolean validateFields(){
         if (dpDate.getValue() == null){
             this.errorMessage = "Please, pick the transaction date";

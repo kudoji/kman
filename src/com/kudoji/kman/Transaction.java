@@ -414,7 +414,134 @@ public class Transaction {
                 return "";
         }
     }
-    
+
+    /**
+     * Deletes current transaction from DB making all necessary changes to other transactions
+     *
+     * @param _useDBTransaction
+     * @return
+     */
+    public boolean delete(boolean _useDBTransaction){
+        if (_useDBTransaction){
+            if (!Kman.getDB().startTransaction()){
+                Kman.showErrorMessage("Couldn't start SQL transaction...");
+                return false;
+            }
+        }
+
+        Account account;
+        switch (this.getTypeID()){
+            case TransactionType.ACCOUNT_TYPES_DEPOSIT:
+                //increase all transactions after the current one
+                if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to update transactions' balance after '" +
+                            this.getID() + "' for accountID: " + this.getAccountToID());
+
+                    return false;
+                }
+                //decrease accounts balance
+                account = this.getAccount(true);
+                account.increaseBalanceCurrent(-this.getAmountTo());
+                if (!account.updateDB()){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to save current balance for " + account + " account");
+
+                    return false;
+                }
+
+                break;
+            case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
+                if (!Transaction.increaseBalance(this, Transaction.AccountTake.FROM, this.getAmountFrom())){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to update transactions' balance after '" +
+                            this.getID() + "' for accountID: " + this.getAccountFromID());
+
+                    return false;
+                }
+                //increase accounts balance
+                account = this.getAccount(false);
+                account.increaseBalanceCurrent(this.getAmountFrom());
+                if (!account.updateDB()){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to save current balance for " + account + " account");
+
+                    return false;
+                }
+
+                break;
+            case TransactionType.ACCOUNT_TYPES_TRANSFER:
+                //in case of transfer, transaction touches both accounts
+                if (!Transaction.increaseBalance(this, Transaction.AccountTake.FROM, this.getAmountFrom())){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to update transactions' balance after '" +
+                            this.getID() + "' for accountID: " + this.getAccountFromID());
+
+                    return false;
+                }
+                //increase accounts balance
+                account = this.getAccount(false);
+                account.increaseBalanceCurrent(this.getAmountFrom());
+                if (!account.updateDB()){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to save current balance for " + account + " account");
+
+                    return false;
+                }
+
+                if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to update transactions' balance after '" +
+                            this.getID() + "' for accountID: " + this.getAccountToID());
+
+                    return false;
+                }
+                //decrese accounts balance
+                account = this.getAccount(true);
+                account.increaseBalanceCurrent(-this.getAmountTo());
+                if (!account.updateDB()){
+                    if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+                    System.err.println("Unable to save current balance for " + account + " account");
+
+                    return false;
+                }
+
+                break;
+            default: //something is wrong
+        }
+
+        //finally, delete the transaction
+        java.util.HashMap<String, String> params = new java.util.HashMap<>();
+        params.put("table", "transactions");
+        params.put("where", "id = " + this.getID());
+
+        if (!Kman.getDB().deleteData(params)){
+            if (_useDBTransaction) Kman.getDB().rollbackTransaction();
+
+            System.err.println("Unable to detele transaction with id: " + this.getID());
+
+            return false;
+        }
+
+        if (_useDBTransaction){
+            if (!Kman.getDB().commitTransaction()){
+                Kman.getDB().rollbackTransaction();
+                System.err.println("Unable to commit SQL transaction");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Increases transactions' balance for the _accountID after particular _dateAfter (excluding it)
      * Make sense of using this method with NEW transaction ONLY
