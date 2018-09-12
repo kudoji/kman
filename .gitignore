@@ -4,6 +4,14 @@ materials/
 #default db
 kudoji.kmd
 
+#fossil db
+*.fossil
+
+#idea folders
+.idea
+*.iml
+out/
+
 #ant specific folders
 build/
 dist/
@@ -33,4 +41,11 @@ nbproject/*
 *.rar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+<<<<<<< HEAD
 hs_err_pid*
+=======
+hs_err_pid*
+
+# mac os specific files
+.DS_Store
+>>>>>>> release-0.3

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.CurrenciesDialogController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
+      <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="NEVER" />
+      <RowConstraints minHeight="10.0" prefHeight="293.0" vgrow="ALWAYS" />
+      <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" vgrow="NEVER" />
+   </rowConstraints>
+   <children>
+      <Text fx:id="tHeader" strokeType="OUTSIDE" strokeWidth="0.0" text="Currencies list" GridPane.columnSpan="2" GridPane.halignment="CENTER">
+         <font>
+            <Font name="System Bold" size="30.0" />
+         </font>
+      </Text>
+      <TableView fx:id="tvCurrencies" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+         <columns>
+            <TableColumn fx:id="tcName" maxWidth="239.0" minWidth="200.0" prefWidth="234.0" text="name" />
+            <TableColumn fx:id="tcSample" prefWidth="130.0" text="sample" />
+            <TableColumn fx:id="tcRate" prefWidth="159.0" text="rate" />
+         </columns>
+      </TableView>
+      <HBox maxHeight="26.0" minHeight="26.0" prefHeight="26.0" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+         <children>
+            <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCurrencyInsertOnAction" prefWidth="70.0" text="Insert" HBox.hgrow="NEVER">
+               <HBox.margin>
+                  <Insets right="3.0" />
+               </HBox.margin>
+            </Button>
+            <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCurrencyEditOnAction" prefWidth="70.0" text="Edit">
+               <HBox.margin>
+                  <Insets right="3.0" />
+               </HBox.margin>
+            </Button>
+            <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCurrencyDeleteOnAction" prefWidth="70.0" text="Delete">
+               <HBox.margin>
+                  <Insets right="3.0" />
+               </HBox.margin></Button>
+            <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCurrencyUpdateOnAction" prefWidth="70.0" text="Update">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <tooltip>
+                  <Tooltip text="Update currencies" />
+               </tooltip>
+            </Button>
+            <GridPane HBox.hgrow="ALWAYS">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <TextField fx:id="tfFilter" promptText="filter the currencies data" GridPane.columnIndex="1" />
+                  <Label text="filter:" GridPane.halignment="RIGHT">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="3.0" />
+                     </GridPane.margin>
+                  </Label>
+               </children>
+            </GridPane>
+         </children>
+         <GridPane.margin>
+            <Insets bottom="3.0" top="3.0" />
+         </GridPane.margin>
+      </HBox>
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+         <children>
+            <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCancelOnAction" prefWidth="70.0" text="Close" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="3.0" left="3.0" right="3.0" />
+   </padding>
+</GridPane>
