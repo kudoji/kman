@@ -250,11 +250,13 @@ public class KmanController implements Initializable {
             Account aSelected = tiSelected.getValue();
             
             Transaction.populateTransactionsTable(ttvTransactions, aSelected);
+            //  update transaction note as well
+            ttvTransactionsOnSelect();
         }
     }
     
     /**
-     * Called every time ttvTransactions is clicked
+     * Called every time ttvTransactions is selected by mouse or keyboard
      */
     private void ttvTransactionsOnSelect(){
         TreeItem<Transaction> tiSelected = ttvTransactions.getSelectionModel().getSelectedItem();
@@ -262,6 +264,8 @@ public class KmanController implements Initializable {
             Transaction transactionSelected = tiSelected.getValue();
             
             taTransactionNote.setText(transactionSelected.getNotes());
+        }else{
+            taTransactionNote.setText("");
         }
     }
     
@@ -382,6 +386,15 @@ public class KmanController implements Initializable {
                         btnTransactionEditOnAction(null);
                         break;
                 }
+            }
+        });
+
+        //  update note every time user use navigational keys
+        //  OnKeyPressed cannot be user because current transaction is not selected yet
+        //  and note data is taken from previous transaction
+        ttvTransactions.setOnKeyReleased(event -> {
+            if (event.getCode().isNavigationKey()){
+                ttvTransactionsOnSelect();
             }
         });
     }    
