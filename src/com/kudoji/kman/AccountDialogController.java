@@ -96,38 +96,34 @@ public class AccountDialogController extends Controller {
      * saves account date to DB
      */
     private boolean saveData(){
-        java.util.HashMap<String, String> params = new java.util.HashMap<>();
-        params.put("table", "accounts");
-        params.put("name", tfName.getText());
-        params.put("balance_initial", tfBalanceInitial.getText());
+        boolean isAccountNew = this.account == null;
+        Account tmpAcc = new Account();
+        tmpAcc.setName(tfName.getText());
+        tmpAcc.setBalanceInitial(Float.valueOf(tfBalanceInitial.getText()));
         if (this.account == null){
-            params.put("balance_current", tfBalanceInitial.getText());//current balance for new accouunt is the same
+            //  current balance for new account is the same
+            tmpAcc.setBalanceCurrent(Float.valueOf(tfBalanceInitial.getText()));
         }else{
-            params.put("balance_current", tfBalanceCurrent.getText());//current balance for new accouunt is the same
+            tmpAcc.setBalanceCurrent(Float.valueOf(tfBalanceCurrent.getText()));
         }
-        
-        params.put("currencies_id", Integer.toString(this.currency.getID()));
+        tmpAcc.setCurrencyId(this.currency.getID());
 
         if (this.account != null){ //edit existed account, need to put its id to update sql query
-            params.put("id", Integer.toString(this.account.getID()));
+            tmpAcc.setId(this.account.getId());
         }
-        int accountID;
-        //use insert since the account is new (this.isNew = true)
-        //use update since the account is existed (this.isNew = false)
-        accountID = Kman.getDB().updateData(this.account == null, params);
 
-        if (this.account == null){ //new account have been created
-            if (accountID > 0){
-                params.put("id", Integer.toString(accountID));
-                this.account = new Account(params);
-            }else{ //posible DB error
-                return false;
+        if (tmpAcc.update()){
+            //  account is updated
+            if (this.account == null){
+                this.account = tmpAcc;
+            }else{
+                this.account.copyFrom(tmpAcc);
             }
         }else{
-            this.account.setFields(params); //update instanse' variables
+            return false;
         }
-        
-        return (accountID > 0);
+
+        return true;
     }
     
     /**
@@ -140,14 +136,13 @@ public class AccountDialogController extends Controller {
         this.account = this.formObject.get("object");
         
         if (this.account != null){//edit account form is opened
-            tfId.setText(Integer.toString(this.account.getID()));
+            tfId.setText(String.valueOf(this.account.getId()));
             tfName.setText(this.account.getName());
-            tfBalanceInitial.setText(Float.toString(this.account.getBalanceInitial()));
+            tfBalanceInitial.setText(String.valueOf(this.account.getBalanceInitial()));
             tfBalanceInitial.setDisable(true);
-            tfBalanceCurrent.setText(Float.toString(this.account.getBalanceCurrent()));
+            tfBalanceCurrent.setText(String.valueOf(this.account.getBalanceCurrent()));
             tfBalanceCurrent.setDisable(true);
 
-            int selectedCurrencyID = this.account.getCurrencyID();
             this.currency = this.account.getCurrency();
                     
             btnCurrency.setText(this.currency.getName());

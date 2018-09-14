@@ -127,7 +127,7 @@ public class Kman extends Application {
             }else if (item instanceof Account){
                 Account itemClass = (Account)item;
 
-                if (itemClass.getID() == _id){
+                if (itemClass.getId() == _id){
                     _combobox.getSelectionModel().select(item);
                     break;
                 }

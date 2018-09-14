@@ -338,9 +338,9 @@ public class Transaction {
                 return getAccountString(false) + " > " + getAccountString(true);
             }else{
                 //transaction is shown for the pacrticular account
-                if (this.accountForTransaction.getID() == this.account_from_id){
+                if (this.accountForTransaction.getId() == this.account_from_id){
                     return " > " + getAccountString(true);
-                }else if (this.accountForTransaction.getID() == this.account_to_id){
+                }else if (this.accountForTransaction.getId() == this.account_to_id){
                     return " < " + getAccountString(false);
                 }else{ //something is wrong
                     return "";
@@ -373,9 +373,9 @@ public class Transaction {
                     return " -" + String.valueOf(this.amount_from) + " > +" + String.valueOf(this.amount_to);
                 }else{
                     //show amount for the account
-                    if (this.accountForTransaction.getID() == this.account_from_id){
+                    if (this.accountForTransaction.getId() == this.account_from_id){
                         return "-" + String.valueOf(this.amount_from);
-                    }else if (this.accountForTransaction.getID() == this.account_to_id){
+                    }else if (this.accountForTransaction.getId() == this.account_to_id){
                         return "+" + String.valueOf(this.amount_to);
                     }else{ //something is wrong
                         return "";
@@ -401,9 +401,9 @@ public class Transaction {
                     return String.valueOf(this.balance_from) + " > " + String.valueOf(this.balance_to);
                 }else{
                     //show balance for the selected account
-                    if (this.accountForTransaction.getID() == this.account_from_id){
+                    if (this.accountForTransaction.getId() == this.account_from_id){
                         return String.valueOf(this.balance_from);
-                    }else if (this.accountForTransaction.getID() == this.account_to_id){
+                    }else if (this.accountForTransaction.getId() == this.account_to_id){
                         return String.valueOf(this.balance_to);
                     }else{ //something is wrong
                         return "";
@@ -444,7 +444,7 @@ public class Transaction {
                 //decrease accounts balance
                 account = this.getAccount(true);
                 account.increaseBalanceCurrent(-this.getAmountTo());
-                if (!account.updateDB()){
+                if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -465,7 +465,7 @@ public class Transaction {
                 //increase accounts balance
                 account = this.getAccount(false);
                 account.increaseBalanceCurrent(this.getAmountFrom());
-                if (!account.updateDB()){
+                if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -487,7 +487,7 @@ public class Transaction {
                 //increase accounts balance
                 account = this.getAccount(false);
                 account.increaseBalanceCurrent(this.getAmountFrom());
-                if (!account.updateDB()){
+                if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -506,7 +506,7 @@ public class Transaction {
                 //decrese accounts balance
                 account = this.getAccount(true);
                 account.increaseBalanceCurrent(-this.getAmountTo());
-                if (!account.updateDB()){
+                if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -644,7 +644,7 @@ public class Transaction {
         params.put("order", "date asc, id asc");
         Account accountFotTransaction = null;
         if (_accountFilter != null){
-            int accountID = _accountFilter.getID();
+            int accountID = _accountFilter.getId();
             if (accountID > 0){
                 params.put("where", "account_from_id = " + accountID + " or account_to_id = " + accountID);
                 accountFotTransaction = _accountFilter;
