@@ -142,7 +142,6 @@ public class CurrencyDialogController extends Controller {
                 params.put("id", String.valueOf(currencyID));
 
                 Currency.getCurrencies().add(new Currency(params));
-//                Currency.getCurrencies().add(new Currency(params));
             }else{
                 //DB error
                 return false;
@@ -171,7 +170,7 @@ public class CurrencyDialogController extends Controller {
                     currency.setRate(1f); //base currency must be 1
                 }
             }
-            tfRate.setText(Float.toString(currency.getRate()));
+            tfRate.setText(String.valueOf(currency.getRate()));
             lRate.setText("rate (" + currency.getRateString() + "):");
             
             //update sample text

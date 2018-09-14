@@ -96,7 +96,7 @@ public class KmanController implements Initializable {
         }
         
         Account aSelected = tiSelected.getValue();
-        if (aSelected.getID() < 1){ //root is selected
+        if (aSelected.getId() < 1){ //root is selected
             Kman.showErrorMessage("Please, select particular account first");
             return;
         }
@@ -136,7 +136,7 @@ public class KmanController implements Initializable {
             TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
             if (tiAccountSelected != null){ //nothing is selected
                 Account aSelected = tiAccountSelected.getValue();
-                if (aSelected.getID() < 1){ //root is selected
+                if (aSelected.getId() < 1){ //root is selected
                     Transaction.populateTransactionsTable(ttvTransactions, null);
                 }else{
                     Transaction.populateTransactionsTable(ttvTransactions, aSelected);
@@ -175,7 +175,7 @@ public class KmanController implements Initializable {
         TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
         if (tiAccountSelected != null){ //nothing is selected
             Account aSelected = tiAccountSelected.getValue();
-            if (aSelected.getID() < 1){ //root is selected
+            if (aSelected.getId() < 1){ //root is selected
                 Transaction.populateTransactionsTable(ttvTransactions, null);
             }else{
                 Transaction.populateTransactionsTable(ttvTransactions, aSelected);
@@ -190,7 +190,7 @@ public class KmanController implements Initializable {
     private void miAccountInsertEvent(ActionEvent _event){
         java.util.HashMap<String, Account> params = new java.util.HashMap<>();
         params.put("object", null);
-        
+
         if (Kman.showAndWaitForm("AccountDialog.fxml", "Add Account...", params)){
             //new account is inserted
             tiAccounts.getChildren().add(new TreeItem(params.get("object")));
@@ -202,7 +202,7 @@ public class KmanController implements Initializable {
         if (tiSelected != null){
             Account aSelected = tiSelected.getValue();
             
-            if (aSelected.getID() > 0){ //real account is selected
+            if (aSelected.getId() > 0){ //real account is selected
                 java.util.HashMap<String, Account> params = new java.util.HashMap<>();
                 params.put("object", aSelected);
                 if (Kman.showAndWaitForm("AccountDialog.fxml", "Edit Account...", params)){
@@ -222,7 +222,7 @@ public class KmanController implements Initializable {
         }
         
         Account selected = tiSelected.getValue();
-        if (selected.getID() < 1){
+        if (selected.getId() < 1){
             Kman.showErrorMessage("Please, select a particular account (root one cannot be deleted)");
             
             return;
@@ -231,13 +231,8 @@ public class KmanController implements Initializable {
         if (!Kman.showConfirmation("All transactions for the account will also be deleted.", "Are you sure?")){
             return;
         }
-        
-        java.util.HashMap<String, String> params = new java.util.HashMap<>();
-        params.put("table", "accounts");
-        params.put("where", "id = " + selected.getID());
-        
-        if (Kman.getDB().deleteData(params)){
-            selected = null;
+
+        if (selected.delete()){
             tiAccounts.getChildren().remove(tiSelected);
             //select the root node
             tvNavigation.getSelectionModel().select(tiAccounts);

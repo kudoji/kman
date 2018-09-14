@@ -37,10 +37,6 @@ public class TransactionDialogController extends Controller {
      */
     private Transaction transaction = null;
     /**
-     * contains full list of accounts' instances
-     */
-    private ArrayList<Account> cacheAccounts = new ArrayList<>();
-    /**
      * True when OK button is pressed
      */
     @FXML private Label tAccount, tPayee;
@@ -189,53 +185,26 @@ public class TransactionDialogController extends Controller {
             taNotes.setText(this.transaction.getNotes());
         }else{
             //new element dialog
-            Kman.selectItemInCombobox(cbAccountFrom, account.getID());
-        }
-    }
-    
-    public void setAccount(Account _account){
-        for (Object item: cbAccountFrom.getItems()){
-            Account aItem = (Account)item;
-            if (aItem.getID() == _account.getID()){
-                cbAccountFrom.getSelectionModel().select(item);
-                break;
-            }
+            Kman.selectItemInCombobox(cbAccountFrom, account.getId());
         }
     }
     
     /**
-     * 
+     * Populates accounts combo boxes
+     *
      * @param _combobox
      * @param _accountToSkip don't add this account to _combobox
      */
     private void populateAccountsComboBox(ComboBox _combobox, Account _accountToSkip){
         _combobox.getItems().clear();
         
-        if (this.cacheAccounts.isEmpty()){ //cache is empty
-            java.util.HashMap<String, String> params = new java.util.HashMap<>();
-            params.put("table", "accounts");
-
-            ArrayList<java.util.HashMap<String, String>> rows = Kman.getDB().selectData(params);
-            for (java.util.HashMap<String, String> row: rows){
-                Account aItem = new Account(row);
-                this.cacheAccounts.add(aItem);
-
-                if (_accountToSkip != null){
-                    if (aItem.getID() == _accountToSkip.getID()){
-                        continue;
-                    }
+        for (Account account: Account.getAccounts()){
+            if (_accountToSkip != null){
+                if (account.getId() == _accountToSkip.getId()){
+                    continue;
                 }
-                _combobox.getItems().add(aItem);
             }
-        }else{ //don't ask DB but take evething from cache
-            for (Account account: this.cacheAccounts){
-                if (_accountToSkip != null){
-                    if (account.getID() == _accountToSkip.getID()){
-                        continue;
-                    }
-                }
-                _combobox.getItems().add(account);
-            }
+            _combobox.getItems().add(account);
         }
     }
     
@@ -271,14 +240,14 @@ public class TransactionDialogController extends Controller {
             // It is important!
             // Take data from cbAccountFrom not cbAccountTo
             account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountToIDNew = account.getID();
+            accountToIDNew = account.getId();
 
             amountToNew = Float.parseFloat(tfAmountFrom.getText());
             // new transaction, get balance for the end of transaction date
             balanceToNew = account.getBalanceDate(tdNew, -1) + amountToNew;
 
             account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew);
-            accountSaved = account.updateDB();
+            accountSaved = account.update();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
@@ -293,13 +262,13 @@ public class TransactionDialogController extends Controller {
         }else if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ||
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER) ) {
             account = (Account) cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountFromIDNew = account.getID();
+            accountFromIDNew = account.getId();
             amountFromNew = Float.parseFloat(tfAmountFrom.getText());
 
             balanceFromNew = account.getBalanceDate(tdNew, -1) - amountFromNew;
 
             account.setBalanceCurrent(account.getBalanceCurrent() - amountFromNew);
-            accountSaved = account.updateDB();
+            accountSaved = account.update();
             if (!accountSaved) {
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
@@ -317,7 +286,7 @@ public class TransactionDialogController extends Controller {
         if (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER){
             //  this part is almost identical to DEPOSIT section with few changes
             account = (Account)cbAccountTo.getSelectionModel().getSelectedItem();
-            accountToIDNew = account.getID();
+            accountToIDNew = account.getId();
             if (chbAdvanced.isSelected()){ //advanced value is set
                 amountToNew = Float.parseFloat(tfAmountTo.getText());
             }else{
@@ -327,7 +296,7 @@ public class TransactionDialogController extends Controller {
             balanceToNew = account.getBalanceDate(tdNew, -1) + amountToNew;
             account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew);
 
-            accountSaved = account.updateDB();
+            accountSaved = account.update();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
