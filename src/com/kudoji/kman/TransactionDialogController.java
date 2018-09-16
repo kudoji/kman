@@ -344,12 +344,14 @@ public class TransactionDialogController extends Controller {
 
         //  delete current transaction
         //  don't use DB transaction because this method is already wrapped inside DB transaction block
+        int tid = this.transaction.getID();
         if (!this.transaction.delete(false)){
             return false;
         }
 
         //  after deleting,
-        //  insert it as a new transaction
+        //  insert it as a new transaction with the same id to keep transactions in the same order
+        _params.put("id", String.valueOf(tid));
         if (!saveDataTransactionNew(_params)){
             return false;
         }
@@ -399,6 +401,7 @@ public class TransactionDialogController extends Controller {
         params.put("notes", taNotes.getText());
 
         //  always insert new record
+        //
         int transactionID = Kman.getDB().updateData(true, params);
 
         if (isError || !Kman.getDB().commitTransaction()){ //trying to commit changes
