@@ -81,6 +81,7 @@ public class AccountDialogController extends Controller {
         }
 
         //  remove user format so later strings can be easily converted to float
+        tfBalanceCurrent.setText(Strings.userFormatRemove(tfBalanceCurrent.getText()));
         tfBalanceInitial.setText(Strings.userFormatRemove(tfBalanceInitial.getText()));
 
         if (!tfBalanceInitial.getText().matches("[0-9]+\\.*[0-9]*")){
