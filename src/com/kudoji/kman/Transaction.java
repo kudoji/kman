@@ -6,6 +6,8 @@
 package com.kudoji.kman;
 
 import java.util.HashMap;
+
+import com.kudoji.kman.utils.Strings;
 import javafx.scene.control.TreeItem;
 
 /**
@@ -554,6 +556,9 @@ public class Transaction {
      * @return 
      */
     public static boolean increaseBalance(String _dateAfter, int _accountID, float _delta){
+        //  keep only two digits after point
+        _delta = Strings.formatFloat(_delta);
+
         //  update transactions set
         //
         // balance_from = balance_from + case when account_from_id = _accountID then _delta else 0 end,
@@ -581,6 +586,9 @@ public class Transaction {
      * @return 
      */
     public static boolean increaseBalance(Transaction _transaction, AccountTake _accountTake, float _delta){
+        //  keep only two digits after point
+        _delta = Strings.formatFloat(_delta);
+
         //transaction id is not reliable data because date affects the order. For instance,
         //
         //date       | id   id (not possible)

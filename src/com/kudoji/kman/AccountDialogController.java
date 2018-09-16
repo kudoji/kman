@@ -99,12 +99,12 @@ public class AccountDialogController extends Controller {
         boolean isAccountNew = this.account == null;
         Account tmpAcc = new Account();
         tmpAcc.setName(tfName.getText());
-        tmpAcc.setBalanceInitial(Float.valueOf(tfBalanceInitial.getText()));
+        tmpAcc.setBalanceInitial(Float.parseFloat(tfBalanceInitial.getText()));
         if (this.account == null){
             //  current balance for new account is the same
-            tmpAcc.setBalanceCurrent(Float.valueOf(tfBalanceInitial.getText()));
+            tmpAcc.setBalanceCurrent(Float.parseFloat(tfBalanceInitial.getText()));
         }else{
-            tmpAcc.setBalanceCurrent(Float.valueOf(tfBalanceCurrent.getText()));
+            tmpAcc.setBalanceCurrent(Float.parseFloat(tfBalanceCurrent.getText()));
         }
         tmpAcc.setCurrencyId(this.currency.getID());
 
