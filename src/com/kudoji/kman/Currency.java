@@ -7,6 +7,8 @@ package com.kudoji.kman;
 
 import java.util.HashMap;
 import java.util.List;
+
+import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -116,11 +118,11 @@ public class Currency {
     }
     
     public String getRateString(){
-        return "1 " + Currency.BASE_CURRENCY_CODE + " = " + Float.toString(this.rate.get()) + " " + this.code.get();
+        return "1 " + Currency.BASE_CURRENCY_CODE + " = " + Strings.userFormat(this.rate.get()) + " " + this.code.get();
     }
     
     public static String getRateString(String _code, float _rate){
-        return "1 " + Currency.BASE_CURRENCY_CODE + " = " + Float.toString(_rate) + " " + _code;
+        return "1 " + Currency.BASE_CURRENCY_CODE + " = " + Strings.userFormat(_rate) + " " + _code;
     }
     
     public StringProperty rateStringProperty(){

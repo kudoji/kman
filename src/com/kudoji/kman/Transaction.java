@@ -367,18 +367,18 @@ public class Transaction {
         
         switch (this.transaction_types_id){
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
-                return "+" + String.valueOf(this.amount_to);
+                return "+" + Strings.userFormat(this.amount_to);
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                return "-" + String.valueOf(this.amount_from);
+                return "-" + Strings.userFormat(this.amount_from);
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
                 if (this.accountForTransaction == null){
-                    return " -" + String.valueOf(this.amount_from) + " > +" + String.valueOf(this.amount_to);
+                    return " -" + Strings.userFormat(this.amount_from) + " > +" + Strings.userFormat(this.amount_to);
                 }else{
                     //show amount for the account
                     if (this.accountForTransaction.getId() == this.account_from_id){
-                        return "-" + String.valueOf(this.amount_from);
+                        return "-" + Strings.userFormat(this.amount_from);
                     }else if (this.accountForTransaction.getId() == this.account_to_id){
-                        return "+" + String.valueOf(this.amount_to);
+                        return "+" + Strings.userFormat(this.amount_to);
                     }else{ //something is wrong
                         return "";
                     }
@@ -395,18 +395,18 @@ public class Transaction {
         
         switch (this.transaction_types_id){
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
-                return String.valueOf(this.balance_to);
+                return Strings.userFormat(this.balance_to);
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                return String.valueOf(this.balance_from);
+                return Strings.userFormat(this.balance_from);
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
                 if (this.accountForTransaction == null){
-                    return String.valueOf(this.balance_from) + " > " + String.valueOf(this.balance_to);
+                    return Strings.userFormat(this.balance_from) + " > " + Strings.userFormat(this.balance_to);
                 }else{
                     //show balance for the selected account
                     if (this.accountForTransaction.getId() == this.account_from_id){
-                        return String.valueOf(this.balance_from);
+                        return Strings.userFormat(this.balance_from);
                     }else if (this.accountForTransaction.getId() == this.account_to_id){
-                        return String.valueOf(this.balance_to);
+                        return Strings.userFormat(this.balance_to);
                     }else{ //something is wrong
                         return "";
                     }
