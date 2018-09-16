@@ -7,6 +7,8 @@ package com.kudoji.kman;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
@@ -102,9 +104,11 @@ public class CurrencyDialogController extends Controller {
             this.errorMessage = "Please, set currency code less than " + MAX_CURRENCY_CODE_LENGTH + " characters";
             return false;
         }
-        
+
+        //  remove user format so rate can be easily converted to float later
+        tfRate.setText(Strings.userFormatRemove(tfRate.getText()));
         if (tfRate.getText().trim().length() == 0){
-            tfRate.setText("0.0");
+            tfRate.setText("0.00");
         }
         
         if (!tfRate.getText().matches("[0-9]+\\.*[0-9]*")){
@@ -170,7 +174,7 @@ public class CurrencyDialogController extends Controller {
                     currency.setRate(1f); //base currency must be 1
                 }
             }
-            tfRate.setText(String.valueOf(currency.getRate()));
+            tfRate.setText(Strings.userFormat(currency.getRate()));
             lRate.setText("rate (" + currency.getRateString() + "):");
             
             //update sample text

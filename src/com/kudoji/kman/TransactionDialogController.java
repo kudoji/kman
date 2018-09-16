@@ -156,7 +156,7 @@ public class TransactionDialogController extends Controller {
                 case TransactionType.ACCOUNT_TYPES_DEPOSIT:
                     Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountToID());
                     Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeID());
-                    tfAmountFrom.setText(String.valueOf(this.transaction.getAmountTo()));
+                    tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountTo()));
                     tfAmountTo.setText("0.00");
                     chbAdvanced.setSelected(false);
 
@@ -164,7 +164,7 @@ public class TransactionDialogController extends Controller {
                 case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
                     Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromID());
                     Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeID());
-                    tfAmountFrom.setText(String.valueOf(this.transaction.getAmountFrom()));
+                    tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
                     tfAmountTo.setText("0.00");
                     chbAdvanced.setSelected(false);
 
@@ -172,8 +172,8 @@ public class TransactionDialogController extends Controller {
                 case TransactionType.ACCOUNT_TYPES_TRANSFER:
                     Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromID());
                     Kman.selectItemInCombobox(cbAccountTo, this.transaction.getAccountToID());
-                    tfAmountFrom.setText(String.valueOf(this.transaction.getAmountFrom()));
-                    tfAmountTo.setText(String.valueOf(this.transaction.getAmountTo()));
+                    tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
+                    tfAmountTo.setText(Strings.userFormat(this.transaction.getAmountTo()));
 
                     chbAdvanced.setSelected(this.transaction.getAmountFrom() != this.transaction.getAmountTo());
 
@@ -466,11 +466,14 @@ public class TransactionDialogController extends Controller {
             this.errorMessage = "Something is wrong...";
             return false;
         }
-        
-        if (tfAmountFrom.getText().trim().length() == 0){
-            tfAmountFrom.setText("0.0");
+
+        //  remove user format so later strings can be easily converted to float
+        tfAmountFrom.setText(Strings.userFormatRemove(tfAmountFrom.getText()));
+
+        if (tfAmountFrom.getText().length() == 0){
+            tfAmountFrom.setText("0.00");
         }
-        
+
         if (!tfAmountFrom.getText().matches("[0-9]+\\.*[0-9]*")){
             this.errorMessage = "Please, set the value for amount correctly";
             return false;
@@ -482,8 +485,11 @@ public class TransactionDialogController extends Controller {
         }
         
         if (chbAdvanced.isSelected()){
-            if (tfAmountTo.getText().trim().length() == 0){
-                tfAmountTo.setText("0.0");
+            //  remove user format so later strings can be easily converted to float
+            tfAmountTo.setText(Strings.userFormatRemove(tfAmountTo.getText()));
+
+            if (tfAmountTo.getText().length() == 0){
+                tfAmountTo.setText("0.00");
             }
 
             if (!tfAmountTo.getText().matches("[0-9]+\\.*[0-9]*")){
@@ -529,7 +535,7 @@ public class TransactionDialogController extends Controller {
         populateAccountsComboBox(cbAccountFrom, null);
         populatePayeesComboBox();
         
-        tfAmountFrom.setText("0.0");
-        tfAmountTo.setText("0.0");
+        tfAmountFrom.setText("0.00");
+        tfAmountTo.setText("0.00");
     }
 }

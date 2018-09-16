@@ -16,6 +16,16 @@ public class Strings {
     }
 
     /**
+     * Removes user format
+     *
+     * @param _value
+     * @return
+     */
+    public static String userFormatRemove(String _value){
+        return _value.trim().replace(",", "");
+    }
+
+    /**
      * Keeps two digits after point only.
      * For instance, value 123.34824234 would be converted to 123.35
      *

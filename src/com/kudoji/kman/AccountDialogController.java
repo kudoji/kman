@@ -7,6 +7,8 @@ package com.kudoji.kman;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
@@ -77,7 +79,10 @@ public class AccountDialogController extends Controller {
             this.errorMessage = "Please, set account name less than " + MAX_ACCOUNT_NAMELENGTH + " characters";
             return false;
         }
-        
+
+        //  remove user format so later strings can be easily converted to float
+        tfBalanceInitial.setText(Strings.userFormatRemove(tfBalanceInitial.getText()));
+
         if (!tfBalanceInitial.getText().matches("[0-9]+\\.*[0-9]*")){
             this.errorMessage = "Please, set value for balance correctly";
             return false;
@@ -138,9 +143,9 @@ public class AccountDialogController extends Controller {
         if (this.account != null){//edit account form is opened
             tfId.setText(String.valueOf(this.account.getId()));
             tfName.setText(this.account.getName());
-            tfBalanceInitial.setText(String.valueOf(this.account.getBalanceInitial()));
+            tfBalanceInitial.setText(Strings.userFormat(this.account.getBalanceInitial()));
             tfBalanceInitial.setDisable(true);
-            tfBalanceCurrent.setText(String.valueOf(this.account.getBalanceCurrent()));
+            tfBalanceCurrent.setText(Strings.userFormat(this.account.getBalanceCurrent()));
             tfBalanceCurrent.setDisable(true);
 
             this.currency = this.account.getCurrency();
