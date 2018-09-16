@@ -5,6 +5,8 @@
  */
 package com.kudoji.kman;
 
+import com.kudoji.kman.utils.Strings;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -421,14 +423,14 @@ public class MMEXImport {
         
         if (account_from_id > 0){
             //keep only two digits after point
-            balance_from = Float.parseFloat(String.format("%.2f", this.accounts.get(account_from_id) - amount_from));
+            balance_from = Strings.formatFloat(this.accounts.get(account_from_id) - amount_from);
             this.accounts.put(account_from_id, balance_from);
         }else{
             balance_from = 0;
         }
         if (account_to_id > 0){
             //keep only two digits after point
-            balance_to = Float.parseFloat(String.format("%.2f", this.accounts.get(account_to_id) + amount_to));
+            balance_to = Strings.formatFloat(this.accounts.get(account_to_id) + amount_to);
             this.accounts.put(account_to_id, balance_to);
         }else{
             balance_to = 0;

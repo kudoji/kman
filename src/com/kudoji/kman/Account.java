@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
+import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -94,6 +95,9 @@ public class Account {
     }
 
     public final void setBalanceCurrent(float _value){
+        //  keep only two digits after point
+        _value = Strings.formatFloat(_value);
+
         this.balanceCurrent.set(_value);
     }
 
@@ -114,6 +118,9 @@ public class Account {
     }
 
     public final void increaseBalanceCurrent(float _delta){
+        //  keep only two digits after point
+        _delta = Strings.formatFloat(_delta);
+
         this.balanceCurrent.set(this.balanceCurrent.get() + _delta);
     }
 
@@ -124,7 +131,7 @@ public class Account {
     @Override
     public String toString(){
         if (this.id.get() > 0){
-            return this.name.get() + " (" + this.balanceCurrent.get() + ")";
+            return this.name.get() + " (" + Strings.userFormat(this.balanceCurrent.get()) + ")";
         }else{
             return this.name.get(); //don't show balance for the fake account
         }
@@ -304,8 +311,8 @@ public class Account {
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "accounts");
         params.put("name", this.getName());
-        params.put("balance_initial", String.valueOf(this.getBalanceInitial()));
-        params.put("balance_current", String.valueOf(this.getBalanceCurrent()));
+        params.put("balance_initial", Strings.formatFloatToString(this.getBalanceInitial()));
+        params.put("balance_current", Strings.formatFloatToString(this.getBalanceCurrent()));
         params.put("currencies_id", String.valueOf(this.getCurrencyId()));
 
         if (this.getId() > 0){
