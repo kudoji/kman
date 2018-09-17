@@ -151,44 +151,40 @@ public class KmanController implements Initializable {
     
     @FXML
     private void btnTransactionDeleteOnAction(ActionEvent event){
-        Account acc = Account.getAccounts().get(0);
-        acc.setBalanceCurrent(5000);
-        System.out.println(acc);
+        TreeItem<Transaction> tiSelected = ttvTransactions.getSelectionModel().getSelectedItem();
+        if (tiSelected == null){ //nothing is selected
+            Kman.showErrorMessage("Please, select a transaction first");
+            return;
+        }
 
-//        TreeItem<Transaction> tiSelected = ttvTransactions.getSelectionModel().getSelectedItem();
-//        if (tiSelected == null){ //nothing is selected
-//            Kman.showErrorMessage("Please, select a transaction first");
-//            return;
-//        }
-//
-//        Transaction transactionSelected = tiSelected.getValue();
-//        if (transactionSelected.getID() < 1){ //root is selected
-//            Kman.showErrorMessage("Please, select a particular transaction first");
-//            return;
-//        }
-//
-//        if (!Kman.showConfirmation("The selected transaction will be deleted.", "Are you sure?")){
-//            return;
-//        }
-//
-//        if (!transactionSelected.delete(true)){
-//            Kman.showErrorMessage("Unable to delete the transaction");
-//            return;
-//        }
-//
-//        TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
-//        if (tiAccountSelected != null){ //nothing is selected
-//            Account aSelected = tiAccountSelected.getValue();
-//            if (aSelected.getId() < 1){ //root is selected
-//                Transaction.populateTransactionsTable(ttvTransactions, null);
-//            }else{
-//                Transaction.populateTransactionsTable(ttvTransactions, aSelected);
-//            }
-//        }
-//        //re-read transaction note as well
-//        ttvTransactionsOnSelect();
-//        //update accounts tree (balance to accounts)
-//        Account.populateAccountsTree(tvNavigation);
+        Transaction transactionSelected = tiSelected.getValue();
+        if (transactionSelected.getID() < 1){ //root is selected
+            Kman.showErrorMessage("Please, select a particular transaction first");
+            return;
+        }
+
+        if (!Kman.showConfirmation("The selected transaction will be deleted.", "Are you sure?")){
+            return;
+        }
+
+        if (!transactionSelected.delete(true)){
+            Kman.showErrorMessage("Unable to delete the transaction");
+            return;
+        }
+
+        TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
+        if (tiAccountSelected != null){ //nothing is selected
+            Account aSelected = tiAccountSelected.getValue();
+            if (aSelected.getId() < 1){ //root is selected
+                Transaction.populateTransactionsTable(ttvTransactions, null);
+            }else{
+                Transaction.populateTransactionsTable(ttvTransactions, aSelected);
+            }
+        }
+        //re-read transaction note as well
+        ttvTransactionsOnSelect();
+        //update accounts tree (balance to accounts)
+        Account.populateAccountsTree(tvNavigation);
     }
     
     private void miAccountInsertEvent(ActionEvent _event){
@@ -210,8 +206,11 @@ public class KmanController implements Initializable {
                 java.util.HashMap<String, Account> params = new java.util.HashMap<>();
                 params.put("object", aSelected);
                 if (Kman.showAndWaitForm("AccountDialog.fxml", "Edit Account...", params)){
-                    tiSelected.setValue(null);
-                    tiSelected.setValue(params.get("object"));
+                    //  TreeItem will be automatically updated due to listeners
+
+                    //  the silly code below not needed anymore
+//                    tiSelected.setValue(null);
+//                    tiSelected.setValue(params.get("object"));
                 }
             }
         }
