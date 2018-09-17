@@ -102,7 +102,6 @@ public class AccountDialogController extends Controller {
      * saves account date to DB
      */
     private boolean saveData(){
-        boolean isAccountNew = this.account == null;
         Account tmpAcc = new Account();
         tmpAcc.setName(tfName.getText());
         tmpAcc.setBalanceInitial(Float.parseFloat(tfBalanceInitial.getText()));

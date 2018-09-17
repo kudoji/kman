@@ -11,9 +11,11 @@ import java.util.List;
 
 import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
@@ -25,6 +27,8 @@ public class Account {
     private IntegerProperty id, currencyId;
     private FloatProperty balanceInitial, balanceCurrent;
     private StringProperty name;
+    //  account's user name which depends on name and current balance
+    private StringProperty userName = new SimpleStringProperty("");
 
     /**
      * Keeps information about accounts which allows reduce of DB usage
@@ -43,11 +47,15 @@ public class Account {
         this.balanceInitial = new SimpleFloatProperty(0);
         this.balanceCurrent = new SimpleFloatProperty(0);
         this.currencyId = new SimpleIntegerProperty(0);
+
+        this.setUserName();
     }
     
     public Account(int _id, String _name){
         this.id = new SimpleIntegerProperty(_id);
         this.name = new SimpleStringProperty(_name);
+
+        this.setUserName();
     }
     
     public Account(HashMap<String, String> _params){
@@ -56,14 +64,20 @@ public class Account {
         this.balanceInitial = new SimpleFloatProperty(Float.parseFloat(_params.get("balance_initial")));
         this.balanceCurrent = new SimpleFloatProperty(Float.parseFloat(_params.get("balance_current")));
         this.currencyId = new SimpleIntegerProperty(Integer.parseInt(_params.get("currencies_id")));
+
+        this.setUserName();
     }
 
     public final int getId(){
         return this.id.get();
     }
 
-    public final void setId(int _value){
+    public final void setId(int _value)
+    {
         this.id.set(_value);
+
+        //  update account's user name as well
+        this.setUserName();
     }
 
     public final String getName(){
@@ -72,6 +86,9 @@ public class Account {
 
     public final void setName(String _name){
         this.name.set(_name);
+
+        //  update account's user name as well
+        this.setUserName();
     }
 
     public StringProperty nameProperty(){
@@ -99,10 +116,32 @@ public class Account {
         _value = Strings.formatFloat(_value);
 
         this.balanceCurrent.set(_value);
+
+        //  update account's user name as well
+        this.setUserName();
     }
 
     public FloatProperty balanceCurrentProperty(){
         return this.balanceCurrent;
+    }
+
+    public final String getUserName(){
+        return this.userName.get();
+    }
+
+    /**
+     * Sets accoun's user name based on its current data
+     */
+    private final void setUserName(){
+        if (this.id.get() > 0){
+            this.userName.set(this.name.get() + " (" + Strings.userFormat(this.balanceCurrent.get()) + ")");
+        }else{
+            this.userName.set(this.name.get()); //don't show balance for the fake account
+        }
+    }
+
+    public StringProperty userNameProperty(){
+        return this.userName;
     }
 
     public final int getCurrencyId(){
@@ -130,12 +169,7 @@ public class Account {
 
     @Override
     public String toString(){
-        if (this.id.get() > 0){
-            return this.name.get() + " (" + Strings.userFormat(this.balanceCurrent.get()) + ")";
-        }else{
-            return this.name.get(); //don't show balance for the fake account
-        }
-        
+        return this.getUserName();
     }
     
     /**
@@ -221,11 +255,41 @@ public class Account {
         }
 
         for (Account account: Account.getAccounts()){
-            TreeItem<Account> tiAccount = new TreeItem<>(account);
-            tiAccounts.getChildren().add(tiAccount);
+            tiAccounts.getChildren().add(addTreeItem(account));
         }
 
         return tiAccounts;
+    }
+
+    /**
+     * Wrap Account instance into TreeItem<Account> with necessary listeners
+     * Good article is here https://stackoverflow.com/questions/32478383/updating-treeview-items-from-textfield?lq=1
+     *
+     * @param _account
+     * @return
+     */
+    private static TreeItem<Account> addTreeItem(Account _account){
+        TreeItem<Account> tiAccount = new TreeItem<>(_account);
+
+        ChangeListener<String> userNameListener = (obs, oldName, newName) -> {
+            TreeItem.TreeModificationEvent<Account> event = new TreeItem.TreeModificationEvent<>(TreeItem.valueChangedEvent(), tiAccount);
+            Event.fireEvent(tiAccount, event);
+        };
+        //  any time userName changes fire TreeModificationEvent on tiAccount
+        _account.userName.addListener(userNameListener);
+
+        //  if value wrapped by TreeItem is changed need to remove listener
+        tiAccount.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null){
+                oldValue.userNameProperty().removeListener(userNameListener);
+            }
+
+            if (newValue != null){
+                newValue.userNameProperty().addListener(userNameListener);
+            }
+        });
+
+        return tiAccount;
     }
 
     private static void getAccountsCache(){
