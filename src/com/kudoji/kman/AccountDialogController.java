@@ -21,7 +21,7 @@ import javafx.scene.control.TextField;
 public class AccountDialogController extends Controller {
     //used by validate function
     private String errorMessage;
-    private final int MAX_ACCOUNT_NAMELENGTH = 15;
+    private final int MAX_ACCOUNT_NAMELENGTH = 25;
     
     /**
      * keeps account object

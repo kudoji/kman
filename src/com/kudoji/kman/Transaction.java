@@ -8,7 +8,8 @@ package com.kudoji.kman;
 import java.util.HashMap;
 
 import com.kudoji.kman.utils.Strings;
-import javafx.scene.control.TreeItem;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  *
@@ -16,7 +17,16 @@ import javafx.scene.control.TreeItem;
  */
 public class Transaction {
     private int id;
-    private String date;
+    private StringProperty date;
+    /**
+     * Keeps
+     */
+    private StringProperty typeUserFormat;
+    private StringProperty accountUserFormat;
+    private StringProperty categoryUserFormat;
+    private StringProperty amountUserFormat;
+    private StringProperty balanceUserFormat;
+
     private int transaction_types_id;
     private int categories_id;
     private int payees_id;
@@ -27,7 +37,7 @@ public class Transaction {
     private float amount_to;
     private float balance_to;
     private String notes;
-    
+
     /**
      * What account to take into consideration
      */
@@ -46,10 +56,6 @@ public class Transaction {
         BOTH
     }
     /**
-     * Keeps transaction type for the transaction
-     */
-    private TransactionType transactionType = null;
-    /**
      * Keeps payee for the transaction
      */
     private Payee payee = null;
@@ -58,7 +64,7 @@ public class Transaction {
      */
     private Account accountTo = null;
     /**
-     * Keeps account where money transfered from for the transaction
+     * Keeps account money transferred from for the transaction
      */
     private Account accountFrom = null;
     /**
@@ -72,40 +78,58 @@ public class Transaction {
      */
     private Category category = null;
     
-    
     public Transaction(HashMap<String, String> _params){
         this.id = Integer.parseInt(_params.get("id"));
-        this.date = _params.get("date");
-        this.transaction_types_id = Integer.parseInt(_params.get("transaction_types_id"));
-        this.categories_id = Integer.parseInt(_params.get("categories_id"));
+        this.date = new SimpleStringProperty(_params.get("date"));
+
+        this.typeUserFormat = new SimpleStringProperty("");
+        setTypeId(Integer.parseInt(_params.get("transaction_types_id")));
+
+        this.categoryUserFormat = new SimpleStringProperty("");
+        setCategoryId(Integer.parseInt(_params.get("categories_id")));
+
         if (_params.get("payees_id") == null){
-            this.payees_id = 0;
+            setPayeeId(0);
         }else{
-            this.payees_id = Integer.parseInt(_params.get("payees_id"));
+            setPayeeId(Integer.parseInt(_params.get("payees_id")));
         }
         if (_params.get("account_from_id") == null){
-            this.account_from_id = 0;
+            setAccountFromId(0);
         }else{
-            this.account_from_id = Integer.parseInt(_params.get("account_from_id"));
+            setAccountFromId(Integer.parseInt(_params.get("account_from_id")));
         }
+
         this.amount_from = Float.parseFloat(_params.get("amount_from"));
         this.balance_from = Float.parseFloat(_params.get("balance_from"));
         if (_params.get("account_to_id") == null){
-            this.account_to_id = 0;
+            setAccountToId(0);
         }else{
-            this.account_to_id = Integer.parseInt(_params.get("account_to_id"));
+            setAccountToId(Integer.parseInt(_params.get("account_to_id")));
         }
         this.amount_to = Float.parseFloat(_params.get("amount_to"));
         this.balance_to = Float.parseFloat(_params.get("balance_to"));
         this.notes = _params.get("notes");
+
+        this.accountUserFormat = new SimpleStringProperty("");
+        setAccountUserFormat(getAccountString());
+
+        this.amountUserFormat = new SimpleStringProperty("");
+        setAmountUserFormat(getAmountString());
+
+        this.balanceUserFormat = new SimpleStringProperty("");
+        setBalanceUserFormat(getBalanceString());
     }
-    
-    public Transaction(String _date){
-        this.date = _date;
-    }
-    
+
+    /**
+     * Sets the account this transactions is shown for
+     * Affects on visual part of account's, amount's and balance's user representation
+     *
+     * @param _account
+     */
     public void setAccountForTransaction(Account _account){
         this.accountForTransaction = _account;
+
+        setAccountUserFormat(getAccountString());
     }
     
     /**
@@ -114,120 +138,167 @@ public class Transaction {
      */
     public void setFields(HashMap<String, String> _params){
 //        this.id = (int)_params.get("id");
-        this.date = _params.get("date");
-        this.transaction_types_id = Integer.parseInt(_params.get("transaction_types_id"));
-        this.categories_id = Integer.parseInt(_params.get("categories_id"));
+        setDate(_params.get("date"));
+        setTypeId(Integer.parseInt(_params.get("transaction_types_id")));
+
+        setCategoryId(Integer.parseInt(_params.get("categories_id")));
         if (_params.get("payees_id") == null){
-            this.payees_id = 0;
+            setPayeeId(0);
         }else{
-            this.payees_id = Integer.parseInt(_params.get("payees_id"));
+            setPayeeId(Integer.parseInt(_params.get("payees_id")));
         }
         if (_params.get("account_from_id") == null){
-            this.account_from_id = 0;
+            setAccountFromId(0);
         }else{
-            this.account_from_id = Integer.parseInt(_params.get("account_from_id"));
+            setAccountFromId(Integer.parseInt(_params.get("account_from_id")));
         }
         this.amount_from = Float.parseFloat(_params.get("amount_from"));
         this.balance_from = Float.parseFloat(_params.get("balance_from"));
         if (_params.get("account_to_id") == null){
-            this.account_to_id = 0;
+            setAccountToId(0);
         }else{
-            this.account_to_id = Integer.parseInt(_params.get("account_to_id"));
+            setAccountToId(Integer.parseInt(_params.get("account_to_id")));
         }
         this.amount_to = Float.parseFloat(_params.get("amount_to"));
         this.balance_to = Float.parseFloat(_params.get("balance_to"));
         this.notes = _params.get("notes");
+
+        setAccountUserFormat(getAccountString());
+        setAmountUserFormat(getAmountString());
+        setBalanceUserFormat(getBalanceString());
     }
     
     public int getID(){
         return this.id;
     }
     
-    public String getDate(){
+    public final String getDate(){
+        return this.date.get();
+    }
+
+    public final void setDate(String _date){
+        this.date.set(_date);
+    }
+
+    public StringProperty dateProperty(){
         return this.date;
     }
-    
-    public int getTypeID(){
+
+    /**
+     * Returns transaction's type id
+     *
+     * @return
+     */
+    public final int getTypeId(){
         return this.transaction_types_id;
     }
-    
-    public int getAccountFromID(){
+
+    /**
+     * Changes transaction's type to the selected _id
+     *
+     * @param _id
+     */
+    public final void setTypeId(int _id){
+        if (this.transaction_types_id != _id){
+            //  just to avoid re-setting to the same value
+            this.transaction_types_id = _id;
+            this.typeUserFormat.set(TransactionType.getTransactionType(this.transaction_types_id).toString());
+        }
+    }
+
+    public StringProperty typeUserFormatProperty(){
+        return this.typeUserFormat;
+    }
+
+    public void setPayeeId(int _id){
+        if (this.payees_id != _id){
+            this.payees_id = _id;
+            this.payee = Payee.getPayee(this.payees_id);
+        }
+    }
+
+    public int getPayeeId(){
+        return this.payees_id;
+    }
+
+    public void setAccountFromId(int _id){
+        if (this.account_from_id != _id){
+            this.account_from_id = _id;
+            this.accountFrom = Account.getAccount(this.account_from_id);
+        }
+    }
+
+    public int getAccountFromId(){
         return this.account_from_id;
     }
-    
+
+    public void setAccountToId(int _id){
+        if (this.account_to_id != _id){
+            this.account_to_id = _id;
+            this.accountTo = Account.getAccount(this.account_to_id);
+        }
+    }
+
     public int getAccountToID(){
         return this.account_to_id;
     }
-    
-    public int getPayeeID(){
-        return this.payees_id;
+
+    /**
+     * Sets account formatted string to the specified value
+     * @param _account
+     */
+    public final void setAccountUserFormat(String _account){
+        this.accountUserFormat.set(_account);
     }
-    
-    public int getCategoryID(){
+
+    public StringProperty accountUserFormatProperty(){
+        return this.accountUserFormat;
+    }
+
+    public int getCategoryId(){
         return this.categories_id;
     }
-    
+
+    public void setCategoryId(int _id){
+        if (this.categories_id != _id){
+            this.categories_id = _id;
+            this.category = Category.getCategory(this.categories_id);
+            this.categoryUserFormat.set(getCategoryString());
+        }
+    }
+
+    public StringProperty categoryUserFormatProperty(){
+        return this.categoryUserFormat;
+    }
+
     public float getAmountFrom(){
         return this.amount_from;
     }
-    
+
     public float getAmountTo(){
         return this.amount_to;
+    }
+
+    public void setAmountUserFormat(String _value){
+        this.amountUserFormat.set(_value);
+    }
+
+    public StringProperty amountUserFormatProperty(){
+        return this.amountUserFormat;
+    }
+
+    public void setBalanceUserFormat(String _value){
+        this.balanceUserFormat.set(_value);
+    }
+    public StringProperty balanceUserFormatProperty(){
+        return this.balanceUserFormat;
     }
     
     public String getNotes(){
         return this.notes;
     }
     
-    /**
-     * Returns the TransactionType instance for the transaction
-     * @return 
-     */
-    public TransactionType getType(){
-        if (this.id < 1){ //this is a root transaction node (fake transaction)
-            return null;
-        }
-        
-        if (this.transactionType == null){
-            this.transactionType = TransactionType.getTransactionType(this.transaction_types_id);
-        }
-        
-        return this.transactionType;
-    }
-    
-    public String getTypeString(){
-        if (this.transactionType == null){
-            this.transactionType = getType();
-        }
-        
-        if (this.transactionType == null){ //maybe a root node
-            return "";
-        }else{
-            return this.transactionType.toString();
-        }
-    }
-    
-    /**
-     * Returns the payee for the current transaction
-     * @return 
-     */
-    public Payee getPayee(){
-        if (this.id < 1) { //this is a fake transaction
-            return null;
-        }
-        
-        if (this.payee == null){
-            this.payee = Payee.getPayee(this.payees_id);
-        }
-        
-        return this.payee;
-    }
-    
     public String getPayeeString(){
-        if (this.payee == null){
-            this.payee = getPayee();
-        }
-        
         if (this.payee == null){
             return "";
         }else{
@@ -235,23 +306,7 @@ public class Transaction {
         }
     }
     
-    public Category getCategory(){
-        if (this.id < 1){ //fake transaction
-            return null;
-        }
-        
-        if (this.category == null){
-            this.category = Category.getCategory(this.categories_id);
-        }
-        
-        return this.category;
-    }
-    
     public String getCategoryString(){
-        if (this.category == null){
-            this.category = getCategory();
-        }
-        
         if (this.category == null){
             return "";
         }else{
@@ -270,46 +325,23 @@ public class Transaction {
         }
         
         if (_getAccountTo){
-            if (this.accountTo == null){
-                this.accountTo = Account.getAccount(this.account_to_id);
-            }
-
             return this.accountTo;
         }else{
-            if (this.accountFrom == null){
-                this.accountFrom = Account.getAccount(this.account_from_id);
-            }
-            
             return this.accountFrom;
         }
     }
     
     public String getAccountString(boolean _getAccountTo){
-        if (_getAccountTo){
-            if (this.accountTo == null){
-                this.accountTo = getAccount(_getAccountTo);
-            }
-
-            if (this.accountTo == null){
-                return "";
-            }else{
-                return this.accountTo.getName();
-            }
+        Account acc = getAccount(_getAccountTo);
+        if (acc != null){
+            return getAccount(_getAccountTo).getName();
         }else{
-            if (this.accountFrom == null){
-                this.accountFrom = getAccount(_getAccountTo);
-            }
-
-            if (this.accountFrom == null){
-                return "";
-            }else{
-                return this.accountFrom.getName();
-            }
+            return "";
         }
     }
     
     /**
-     * Used in TreeTableView to show current account string
+     * Used in TableView to show current account string
      * 
      * @return 
      */
@@ -320,7 +352,7 @@ public class Transaction {
         
         if (this.transaction_types_id == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             //in that case it makes sense to show payee in the table
-            if (this.accountForTransaction == null){
+            if (this.accountForTransaction == null || this.accountForTransaction.getId() == 0){   //  root account
                 return getAccountString(true) + " < " + getPayeeString();
             }else{
                 return " < " + getPayeeString();
@@ -328,14 +360,14 @@ public class Transaction {
             
         }else if (this.transaction_types_id == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
             //show payee as well
-            if (this.accountForTransaction == null){
+            if (this.accountForTransaction == null || this.accountForTransaction.getId() == 0){
                 return getAccountString(false) + " > " + getPayeeString();
             }else{
                 return " > " + getPayeeString();
             }
         }else if (this.transaction_types_id == TransactionType.ACCOUNT_TYPES_TRANSFER){
             //show account where money transfered to
-            if (this.accountForTransaction == null){
+            if (this.accountForTransaction == null || this.accountForTransaction.getId() == 0){
                 //show both sides
                 return getAccountString(false) + " > " + getAccountString(true);
             }else{
@@ -348,15 +380,13 @@ public class Transaction {
                     return "";
                 }
             }
-            
-            
         }else { //something wrong
             return "";
         }
     }
     
     /**
-     * Shows transaction's amount depending on the transaction's type
+     * Shows transaction's user formatted amount depending on the transaction's type
      * 
      * @return 
      */
@@ -371,7 +401,7 @@ public class Transaction {
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
                 return "-" + Strings.userFormat(this.amount_from);
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
-                if (this.accountForTransaction == null){
+                if (this.accountForTransaction == null || this.accountForTransaction.getId() == 0){
                     return " -" + Strings.userFormat(this.amount_from) + " > +" + Strings.userFormat(this.amount_to);
                 }else{
                     //show amount for the account
@@ -399,7 +429,7 @@ public class Transaction {
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
                 return Strings.userFormat(this.balance_from);
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
-                if (this.accountForTransaction == null){
+                if (this.accountForTransaction == null || this.accountForTransaction.getId() == 0){
                     return Strings.userFormat(this.balance_from) + " > " + Strings.userFormat(this.balance_to);
                 }else{
                     //show balance for the selected account
@@ -432,7 +462,7 @@ public class Transaction {
         }
 
         Account account;
-        switch (this.getTypeID()){
+        switch (this.getTypeId()){
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
                 //increase all transactions after the current one
                 if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
@@ -460,7 +490,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountFromID());
+                            this.getID() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
                 }
@@ -482,7 +512,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountFromID());
+                            this.getID() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
                 }
@@ -607,7 +637,7 @@ public class Transaction {
         }else switch (_accountTake) {
             case FROM:
                 // for withdrawal
-                account_from_id = String.valueOf(_transaction.getAccountFromID());
+                account_from_id = String.valueOf(_transaction.getAccountFromId());
                 account_to_id = account_from_id;
                 break;
             case TO:
@@ -640,32 +670,15 @@ public class Transaction {
 
     /**
      * 
-     * @param _ttvTransactions
+     * @param _tvTransactions
      * @param _accountFilter filter transactions for the account. No filter if _accountFilter is null or its ID < 1
      */
-    public static void populateTransactionsTable(javafx.scene.control.TreeTableView<Transaction> _ttvTransactions, Account _accountFilter){
-        TreeItem<Transaction> tiRoot = (TreeItem<Transaction>)_ttvTransactions.getRoot();//.getChildren().get(0);
-        tiRoot.getChildren().clear(); //clear the table before filling it
-        
-        HashMap<String, String> params = new HashMap<>();
-        params.put("table", "transactions");
-        params.put("order", "date asc, id asc");
-        Account accountFotTransaction = null;
-        if (_accountFilter != null){
-            int accountID = _accountFilter.getId();
-            if (accountID > 0){
-                params.put("where", "account_from_id = " + accountID + " or account_to_id = " + accountID);
-                accountFotTransaction = _accountFilter;
-            }
+    public static void populateTransactionsTable(javafx.scene.control.TableView<Transaction> _tvTransactions, Account _accountFilter){
+        if (_accountFilter == null || _accountFilter.getId() == 0){
+            //  show no transactions for root account
+            return;
         }
-//        params.put("where", "");
-        java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
-        for (HashMap<String, String> row: rows){
-            Transaction transaction = new Transaction(row);
-            transaction.setAccountForTransaction(accountFotTransaction);
-            TreeItem<Transaction> tiTransaction = new TreeItem(transaction);
-            
-            tiRoot.getChildren().add(tiTransaction);
-        }
+
+        _tvTransactions.setItems(_accountFilter.getTransactions());
     }
 }

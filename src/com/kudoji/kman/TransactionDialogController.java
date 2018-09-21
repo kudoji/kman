@@ -38,9 +38,12 @@ public class TransactionDialogController extends Controller {
      * Otherwise, it is filled by loadFields() method
      */
     private Transaction transaction = null;
+
     /**
-     * True when OK button is pressed
+     * Keeps instance for which account transaction is created/updated
      */
+    private Account account = null;
+
     @FXML private Label tAccount, tPayee;
     @FXML private DatePicker dpDate;
     @FXML private ComboBox cbType, cbAccountFrom, cbPayee, cbAccountTo;
@@ -54,7 +57,7 @@ public class TransactionDialogController extends Controller {
     @FXML
     private void cbTypeOnAction(ActionEvent event){
         TransactionType atSelected = (TransactionType)cbType.getSelectionModel().getSelectedItem();
-        int atSelectedIndex = atSelected.getID();
+        int atSelectedIndex = atSelected.getId();
 
         switch (atSelectedIndex) {
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
@@ -141,36 +144,36 @@ public class TransactionDialogController extends Controller {
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Object>)_formObject;
         this.transaction = (Transaction)this.formObject.get("object");
-        Account account = (Account)this.formObject.get("account");
-        
+        this.account = (Account)this.formObject.get("account");
+
         if (this.transaction != null){
             //an edit form
             tfId.setText(Integer.toString(this.transaction.getID()));
             dpDate.setValue(LocalDate.parse(this.transaction.getDate()));
 
-            int transactionTypeID = this.transaction.getTypeID();
-            Kman.selectItemInCombobox(cbType, transactionTypeID);
+            int transactionTypeId = this.transaction.getTypeId();
+            Kman.selectItemInCombobox(cbType, transactionTypeId);
             cbTypeOnAction(null); //make necessary fields visible
 
-            switch (transactionTypeID){
+            switch (transactionTypeId){
                 case TransactionType.ACCOUNT_TYPES_DEPOSIT:
                     Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountToID());
-                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeID());
+                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeId());
                     tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountTo()));
                     tfAmountTo.setText("0.00");
                     chbAdvanced.setSelected(false);
 
                     break;
                 case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromID());
-                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeID());
+                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromId());
+                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeId());
                     tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
                     tfAmountTo.setText("0.00");
                     chbAdvanced.setSelected(false);
 
                     break;
                 case TransactionType.ACCOUNT_TYPES_TRANSFER:
-                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromID());
+                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromId());
                     Kman.selectItemInCombobox(cbAccountTo, this.transaction.getAccountToID());
                     tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
                     tfAmountTo.setText(Strings.userFormat(this.transaction.getAmountTo()));
@@ -182,7 +185,7 @@ public class TransactionDialogController extends Controller {
             }
             //set amount to visibility
             chbAdvancedOnAction(null);
-            this.category = Category.getCategory(this.transaction.getCategoryID());
+            this.category = Category.getCategory(this.transaction.getCategoryId());
             btnCategory.setText(this.category.getFullPath());
             taNotes.setText(this.transaction.getNotes());
         }else{
@@ -371,7 +374,7 @@ public class TransactionDialogController extends Controller {
         if (!Kman.getDB().startTransaction()) return false; //    something went wrong
 
         String tdNew = dpDate.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        int ttIDNew = ((TransactionType)cbType.getSelectionModel().getSelectedItem()).getID();
+        int ttIDNew = ((TransactionType)cbType.getSelectionModel().getSelectedItem()).getId();
         int payeeIDNew = 0;
         if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT) ||
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL)){
@@ -418,6 +421,9 @@ public class TransactionDialogController extends Controller {
         if (this.transaction == null){ //new transaction is created
             if (transactionID > 0){
                 this.transaction = new Transaction(params);
+                //  add newly created transaction to the account
+                this.transaction.setAccountForTransaction(this.account);
+                this.account.addTransaction(this.transaction);
             }else{ //possible DB error
                 return false;
             }
@@ -441,7 +447,7 @@ public class TransactionDialogController extends Controller {
         }
         
         if (cbAccountFrom.getSelectionModel().getSelectedItem() == null){
-            if ( (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT) || (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ){
+            if ( (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_DEPOSIT) || (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ){
                 this.errorMessage = "Please, select account field";
             }else{//transfer
                 this.errorMessage = "Please, select account you want to transfer money from";
@@ -450,17 +456,17 @@ public class TransactionDialogController extends Controller {
             return false;
         }
         
-        if (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT){
+        if (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             if (cbPayee.getSelectionModel().getSelectedItem() == null){
                 this.errorMessage = "Please, select who you received money from";
                 return false;
             }
-        }else if (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
+        }else if (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
             if (cbPayee.getSelectionModel().getSelectedItem() == null){
                 this.errorMessage = "Please, select payee field";
                 return false;
             }
-        }else if (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_TRANSFER){
+        }else if (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_TRANSFER){
             if (cbAccountTo.getSelectionModel().getSelectedItem() == null){
                 this.errorMessage = "Please, select account you want to transfer money to";
                 return false;

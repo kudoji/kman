@@ -19,15 +19,15 @@ public class TransactionType {
     public final static int ACCOUNT_TYPES_WITHDRAWAL = 2;
     public final static int ACCOUNT_TYPES_TRANSFER = 3;
     
-    int id;
-    String name;
+    private int id;
+    private String name;
     
     public TransactionType(HashMap<String, String> _params){
         this.id = Integer.parseInt(_params.get("id"));
         this.name = _params.get("name");
     }
     
-    public int getID(){
+    public int getId(){
         return this.id;
     }
     
