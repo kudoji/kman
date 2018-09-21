@@ -130,6 +130,8 @@ public class Transaction {
         this.accountForTransaction = _account;
 
         setAccountUserFormat(getAccountString());
+        setAmountUserFormat(getAmountString());
+        setBalanceUserFormat(getBalanceString());
     }
     
     /**
@@ -239,7 +241,7 @@ public class Transaction {
         }
     }
 
-    public int getAccountToID(){
+    public int getAccountToId(){
         return this.account_to_id;
     }
 
@@ -357,7 +359,6 @@ public class Transaction {
             }else{
                 return " < " + getPayeeString();
             }
-            
         }else if (this.transaction_types_id == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
             //show payee as well
             if (this.accountForTransaction == null || this.accountForTransaction.getId() == 0){
@@ -469,7 +470,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountToID());
+                            this.getID() + "' for accountID: " + this.getAccountToId());
 
                     return false;
                 }
@@ -531,7 +532,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountToID());
+                            this.getID() + "' for accountID: " + this.getAccountToId());
 
                     return false;
                 }
@@ -569,6 +570,90 @@ public class Transaction {
                 System.err.println("Unable to commit SQL transaction");
                 return false;
             }
+        }
+
+        //  the last step is to delete transaction from account(s)
+        //  has to be done AFTER DB operations to make sure that there is no DB error(s)
+        deleteFromAccounts();
+
+        return true;
+    }
+
+    /**
+     * Adds transaction to account(s) (AccountTo and/or AccountFrom) which depends upon
+     * transaction type
+     *
+     * @return
+     */
+    public boolean addToAccounts(){
+        Account account;
+        switch (this.getTypeId()){
+            case TransactionType.ACCOUNT_TYPES_DEPOSIT:
+                this.accountForTransaction.addTransaction(this);
+
+                break;
+            case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
+                this.accountForTransaction.addTransaction(this);
+
+                break;
+            case TransactionType.ACCOUNT_TYPES_TRANSFER:
+                this.accountForTransaction.addTransaction(this);
+
+                account = this.getAccount(true);
+                if (this.accountForTransaction.getId() == account.getId()){
+                    account = this.getAccount(false);
+                    //  transaction with the same id should be added to the account
+                    //  but instance should be different
+                    //  this is why let's drop transactions cache so it will be re-created then user goes there
+                    account.dropTransactions();
+                }else{
+                    //  accountForTransaction == getAccount(false)
+                    account.dropTransactions();
+                }
+
+                break;
+            default:
+        }
+
+        return true;
+    }
+
+    /**
+     * Deletes current transaction from account(s) (AccountTo and/or AccountFrom) which depends upon
+     * transaction type
+     *
+     * @return
+     */
+    private boolean deleteFromAccounts(){
+        Account account;
+        switch (this.getTypeId()){
+            case TransactionType.ACCOUNT_TYPES_DEPOSIT:
+                this.accountForTransaction.deleteTransaction(this);
+
+                break;
+            case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
+                this.accountForTransaction.deleteTransaction(this);
+
+                break;
+            case TransactionType.ACCOUNT_TYPES_TRANSFER:
+                //  this is where transaction is attached
+                this.accountForTransaction.deleteTransaction(this);
+
+                account = this.getAccount(true);
+                if (this.accountForTransaction.getId() == account.getId()){
+                    account = this.getAccount(false);
+                    //  transaction with the same id should be in this account also BUT instance is different
+                    //  can create cycle to find transaction by id
+                    //  but easier to drop cache so then user goes to the account cache will be re-created
+                    account.dropTransactions();
+                }else{
+                    //  means that this.accountForTransaction.getId() == this.getAccount(false).getId()
+                    account.dropTransactions();
+
+                }
+
+                break;
+            default:
         }
 
         return true;
@@ -642,12 +727,12 @@ public class Transaction {
                 break;
             case TO:
                 // for deposit
-                account_from_id = String.valueOf(_transaction.getAccountToID());
+                account_from_id = String.valueOf(_transaction.getAccountToId());
                 account_to_id = account_from_id;
                 break;
             case BOTH:
                 // for transfer
-                account_from_id = String.valueOf(_transaction.getAccountToID()) + ", " + String.valueOf(_transaction.getAccountToID());
+                account_from_id = String.valueOf(_transaction.getAccountToId()) + ", " + String.valueOf(_transaction.getAccountToId());
                 account_to_id = account_from_id;
                 break;
             default:

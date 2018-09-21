@@ -141,13 +141,13 @@ public class KmanController implements Initializable {
 
         //  find selected account
         TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
-        if (tiAccountSelected == null) { //nothing is selected
+        if (tiAccountSelected == null) { // no account is selected
             //  this error should never happen...
             //  due to transactions exist for selected account only
             Kman.showErrorMessage("Unable to delete the transaction for particular account");
         }
 
-        if (!tiAccountSelected.getValue().deleteTransaction(transactionSelected)){
+        if (!transactionSelected.delete(true)){
             Kman.showErrorMessage("Unable to delete the transaction");
             return;
         }

@@ -46,7 +46,12 @@ public class TransactionDialogController extends Controller {
 
     @FXML private Label tAccount, tPayee;
     @FXML private DatePicker dpDate;
-    @FXML private ComboBox cbType, cbAccountFrom, cbPayee, cbAccountTo;
+    @FXML private ComboBox<TransactionType> cbType;
+    @FXML
+    private ComboBox<Account> cbAccountFrom, cbAccountTo;
+    @FXML
+    private ComboBox<Payee> cbPayee;
+
     @FXML private CheckBox chbAdvanced;
     @FXML private TextField tfId, tfAmountFrom, tfAmountTo;
     @FXML private Button btnCategory;
@@ -157,7 +162,7 @@ public class TransactionDialogController extends Controller {
 
             switch (transactionTypeId){
                 case TransactionType.ACCOUNT_TYPES_DEPOSIT:
-                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountToID());
+                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountToId());
                     Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeId());
                     tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountTo()));
                     tfAmountTo.setText("0.00");
@@ -174,7 +179,7 @@ public class TransactionDialogController extends Controller {
                     break;
                 case TransactionType.ACCOUNT_TYPES_TRANSFER:
                     Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromId());
-                    Kman.selectItemInCombobox(cbAccountTo, this.transaction.getAccountToID());
+                    Kman.selectItemInCombobox(cbAccountTo, this.transaction.getAccountToId());
                     tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
                     tfAmountTo.setText(Strings.userFormat(this.transaction.getAmountTo()));
 
@@ -421,14 +426,17 @@ public class TransactionDialogController extends Controller {
         if (this.transaction == null){ //new transaction is created
             if (transactionID > 0){
                 this.transaction = new Transaction(params);
-                //  add newly created transaction to the account
                 this.transaction.setAccountForTransaction(this.account);
-                this.account.addTransaction(this.transaction);
+
+                //  add newly created transaction to the account(s)
+                this.transaction.addToAccounts();
             }else{ //possible DB error
                 return false;
             }
         }else{ //need to save new data to the instance
             this.transaction.setFields(params);
+            //  add edited transaction to the account(s)
+            this.transaction.addToAccounts();
         }
 
         return (transactionID > 0);

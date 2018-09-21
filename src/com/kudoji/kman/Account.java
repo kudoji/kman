@@ -464,12 +464,20 @@ public class Account {
         params.put("where", "id = " + this.getId());
 
         if (Kman.getDB().deleteData(params)) {
+            this.dropTransactions();
             Account.getAccounts().remove(this);
 
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Drops transaction cache
+     */
+    public void dropTransactions(){
+        this.olTransactions.clear();
     }
 
     /**
@@ -480,26 +488,18 @@ public class Account {
     public boolean addTransaction(Transaction _transaction){
         //  do not use getTransactions() method here because
         //  cache is going to be re-built in case it is empty
-        this.olTransactions.add(_transaction);
-
-        return true;
+        return this.olTransactions.add(_transaction);
     }
 
     /**
-     * Deletes transaction physically and from account
+     * Deletes transaction from account only
+     * Does not delete transaction from DB
      *
      * @param _transaction Transaction to be deleted
      * @return
      */
     public boolean deleteTransaction(Transaction _transaction){
-        //  do all necessary actions to delete transaction using DB transaction
-        if (!_transaction.delete(true)){
-            return false;
-        }
-
-        this.getTransactions().remove(_transaction);
-
-        return true;
+        return this.olTransactions.remove(_transaction);
     }
 
     /**
