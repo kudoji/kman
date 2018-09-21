@@ -41,6 +41,11 @@ public class Account {
      */
     private final static ObservableList<Account> olAccountsList = FXCollections.observableArrayList();
 
+    /**
+     * Keeps transactions for current account
+     */
+    private final ObservableList<Transaction> olTransactions = FXCollections.observableArrayList();
+
     public Account(){
         this.id = new SimpleIntegerProperty(0);
         this.name = new SimpleStringProperty("<<accounts>>");
@@ -160,7 +165,7 @@ public class Account {
         //  keep only two digits after point
         _delta = Strings.formatFloat(_delta);
 
-        this.balanceCurrent.set(this.balanceCurrent.get() + _delta);
+        setBalanceCurrent(this.balanceCurrent.get() + _delta);
     }
 
     public Currency getCurrency() {
@@ -362,6 +367,44 @@ public class Account {
     }
 
     /**
+     * Builds transactions cache for the account
+     * Cache re-builds any time method called
+     */
+    private void buildTransactionsCache(){
+        olTransactions.clear();
+        int accountId = this.getId();
+
+        if (accountId == 0){
+            //  root account has no transactions
+            return;
+        }
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("table", "transactions");
+        params.put("order", "date asc, id asc");
+        params.put("where", "account_from_id = " + accountId + " or account_to_id = " + accountId);
+
+        java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
+        for (HashMap<String, String> row: rows) {
+            Transaction transaction = new Transaction(row);
+            transaction.setAccountForTransaction(this);
+            olTransactions.add(transaction);
+        }
+    }
+
+    /**
+     * Returns transactions for the account
+     * @return
+     */
+    public ObservableList<Transaction> getTransactions(){
+        if (olTransactions.isEmpty()){
+            buildTransactionsCache();
+        }
+
+        return olTransactions;
+    }
+
+    /**
      * Does all necessary operation for updating/inserting account
      * It works with DB and account cache
      *
@@ -427,6 +470,36 @@ public class Account {
         }
 
         return false;
+    }
+
+    /**
+     * Adds transaction to the account
+     * @param _transaction
+     * @return
+     */
+    public boolean addTransaction(Transaction _transaction){
+        //  do not use getTransactions() method here because
+        //  cache is going to be re-built in case it is empty
+        this.olTransactions.add(_transaction);
+
+        return true;
+    }
+
+    /**
+     * Deletes transaction physically and from account
+     *
+     * @param _transaction Transaction to be deleted
+     * @return
+     */
+    public boolean deleteTransaction(Transaction _transaction){
+        //  do all necessary actions to delete transaction using DB transaction
+        if (!_transaction.delete(true)){
+            return false;
+        }
+
+        this.getTransactions().remove(_transaction);
+
+        return true;
     }
 
     /**
