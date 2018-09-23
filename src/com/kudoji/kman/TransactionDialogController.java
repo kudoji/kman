@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+
+import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -36,16 +38,20 @@ public class TransactionDialogController extends Controller {
      * Otherwise, it is filled by loadFields() method
      */
     private Transaction transaction = null;
+
     /**
-     * contains full list of accounts' instances
+     * Keeps instance for which account transaction is created/updated
      */
-    private ArrayList<Account> cacheAccounts = new ArrayList<>();
-    /**
-     * True when OK button is pressed
-     */
+    private Account account = null;
+
     @FXML private Label tAccount, tPayee;
     @FXML private DatePicker dpDate;
-    @FXML private ComboBox cbType, cbAccountFrom, cbPayee, cbAccountTo;
+    @FXML private ComboBox<TransactionType> cbType;
+    @FXML
+    private ComboBox<Account> cbAccountFrom, cbAccountTo;
+    @FXML
+    private ComboBox<Payee> cbPayee;
+
     @FXML private CheckBox chbAdvanced;
     @FXML private TextField tfId, tfAmountFrom, tfAmountTo;
     @FXML private Button btnCategory;
@@ -56,7 +62,7 @@ public class TransactionDialogController extends Controller {
     @FXML
     private void cbTypeOnAction(ActionEvent event){
         TransactionType atSelected = (TransactionType)cbType.getSelectionModel().getSelectedItem();
-        int atSelectedIndex = atSelected.getID();
+        int atSelectedIndex = atSelected.getId();
 
         switch (atSelectedIndex) {
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
@@ -143,39 +149,39 @@ public class TransactionDialogController extends Controller {
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Object>)_formObject;
         this.transaction = (Transaction)this.formObject.get("object");
-        Account account = (Account)this.formObject.get("account");
-        
+        this.account = (Account)this.formObject.get("account");
+
         if (this.transaction != null){
             //an edit form
             tfId.setText(Integer.toString(this.transaction.getID()));
             dpDate.setValue(LocalDate.parse(this.transaction.getDate()));
 
-            int transactionTypeID = this.transaction.getTypeID();
-            Kman.selectItemInCombobox(cbType, transactionTypeID);
+            int transactionTypeId = this.transaction.getTypeId();
+            Kman.selectItemInCombobox(cbType, transactionTypeId);
             cbTypeOnAction(null); //make necessary fields visible
 
-            switch (transactionTypeID){
+            switch (transactionTypeId){
                 case TransactionType.ACCOUNT_TYPES_DEPOSIT:
-                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountToID());
-                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeID());
-                    tfAmountFrom.setText(String.valueOf(this.transaction.getAmountTo()));
+                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountToId());
+                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeId());
+                    tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountTo()));
                     tfAmountTo.setText("0.00");
                     chbAdvanced.setSelected(false);
 
                     break;
                 case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromID());
-                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeID());
-                    tfAmountFrom.setText(String.valueOf(this.transaction.getAmountFrom()));
+                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromId());
+                    Kman.selectItemInCombobox(cbPayee, this.transaction.getPayeeId());
+                    tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
                     tfAmountTo.setText("0.00");
                     chbAdvanced.setSelected(false);
 
                     break;
                 case TransactionType.ACCOUNT_TYPES_TRANSFER:
-                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromID());
-                    Kman.selectItemInCombobox(cbAccountTo, this.transaction.getAccountToID());
-                    tfAmountFrom.setText(String.valueOf(this.transaction.getAmountFrom()));
-                    tfAmountTo.setText(String.valueOf(this.transaction.getAmountTo()));
+                    Kman.selectItemInCombobox(cbAccountFrom, this.transaction.getAccountFromId());
+                    Kman.selectItemInCombobox(cbAccountTo, this.transaction.getAccountToId());
+                    tfAmountFrom.setText(Strings.userFormat(this.transaction.getAmountFrom()));
+                    tfAmountTo.setText(Strings.userFormat(this.transaction.getAmountTo()));
 
                     chbAdvanced.setSelected(this.transaction.getAmountFrom() != this.transaction.getAmountTo());
 
@@ -184,58 +190,31 @@ public class TransactionDialogController extends Controller {
             }
             //set amount to visibility
             chbAdvancedOnAction(null);
-            this.category = Category.getCategory(this.transaction.getCategoryID());
+            this.category = Category.getCategory(this.transaction.getCategoryId());
             btnCategory.setText(this.category.getFullPath());
             taNotes.setText(this.transaction.getNotes());
         }else{
             //new element dialog
-            Kman.selectItemInCombobox(cbAccountFrom, account.getID());
-        }
-    }
-    
-    public void setAccount(Account _account){
-        for (Object item: cbAccountFrom.getItems()){
-            Account aItem = (Account)item;
-            if (aItem.getID() == _account.getID()){
-                cbAccountFrom.getSelectionModel().select(item);
-                break;
-            }
+            Kman.selectItemInCombobox(cbAccountFrom, account.getId());
         }
     }
     
     /**
-     * 
+     * Populates accounts combo boxes
+     *
      * @param _combobox
      * @param _accountToSkip don't add this account to _combobox
      */
     private void populateAccountsComboBox(ComboBox _combobox, Account _accountToSkip){
         _combobox.getItems().clear();
         
-        if (this.cacheAccounts.isEmpty()){ //cache is empty
-            java.util.HashMap<String, String> params = new java.util.HashMap<>();
-            params.put("table", "accounts");
-
-            ArrayList<java.util.HashMap<String, String>> rows = Kman.getDB().selectData(params);
-            for (java.util.HashMap<String, String> row: rows){
-                Account aItem = new Account(row);
-                this.cacheAccounts.add(aItem);
-
-                if (_accountToSkip != null){
-                    if (aItem.getID() == _accountToSkip.getID()){
-                        continue;
-                    }
+        for (Account account: Account.getAccounts()){
+            if (_accountToSkip != null){
+                if (account.getId() == _accountToSkip.getId()){
+                    continue;
                 }
-                _combobox.getItems().add(aItem);
             }
-        }else{ //don't ask DB but take evething from cache
-            for (Account account: this.cacheAccounts){
-                if (_accountToSkip != null){
-                    if (account.getID() == _accountToSkip.getID()){
-                        continue;
-                    }
-                }
-                _combobox.getItems().add(account);
-            }
+            _combobox.getItems().add(account);
         }
     }
     
@@ -258,33 +237,34 @@ public class TransactionDialogController extends Controller {
      */
     private boolean saveDataTransactionNew(java.util.HashMap<String, String> _params){
         String tdNew = _params.get("date");
-        int ttIDNew = Integer.valueOf(_params.get("transaction_types_id"));
+        int ttIDNew = Integer.parseInt(_params.get("transaction_types_id"));
 
         Account account;
         boolean accountSaved = false;
         boolean transactionsUpdated = false;
 
         int accountFromIDNew = 0, accountToIDNew = 0;
-        float amountFromNew = 0, amountToNew = 0, balanceFromNew = 0, balanceToNew = 0;
+        int amountFromNew = 0, amountToNew = 0, balanceFromNew = 0, balanceToNew = 0;
 
         if (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             // It is important!
             // Take data from cbAccountFrom not cbAccountTo
             account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountToIDNew = account.getID();
+            accountToIDNew = account.getId();
 
-            amountToNew = Float.parseFloat(tfAmountFrom.getText());
+            amountToNew = (int)(100 * Float.parseFloat(tfAmountFrom.getText()));
             // new transaction, get balance for the end of transaction date
-            balanceToNew = account.getBalanceDate(tdNew, -1) + amountToNew;
+            balanceToNew = (int)(100 * account.getBalanceDate(tdNew, -1)) + amountToNew;
 
-            account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew);
-            accountSaved = account.updateDB();
+            //  without 100f (f) it would devide without digits (.00)® after point
+            account.setBalanceCurrent((account.getBalanceCurrent() * 100 + amountToNew) / 100f);
+            accountSaved = account.update();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
             }
 
-            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew / 100f);
             if (!transactionsUpdated) {
                 System.err.println("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountToIDNew);
@@ -293,19 +273,19 @@ public class TransactionDialogController extends Controller {
         }else if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ||
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER) ) {
             account = (Account) cbAccountFrom.getSelectionModel().getSelectedItem();
-            accountFromIDNew = account.getID();
-            amountFromNew = Float.parseFloat(tfAmountFrom.getText());
+            accountFromIDNew = account.getId();
+            amountFromNew = (int)(100 * Float.parseFloat(tfAmountFrom.getText()));
 
-            balanceFromNew = account.getBalanceDate(tdNew, -1) - amountFromNew;
+            balanceFromNew = (int)(100 * account.getBalanceDate(tdNew, -1)) - amountFromNew;
 
-            account.setBalanceCurrent(account.getBalanceCurrent() - amountFromNew);
-            accountSaved = account.updateDB();
+            account.setBalanceCurrent(account.getBalanceCurrent() - amountFromNew / 100f);
+            accountSaved = account.update();
             if (!accountSaved) {
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
             }
 
-            transactionsUpdated = Transaction.increaseBalance(tdNew, accountFromIDNew, -amountFromNew);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountFromIDNew, -amountFromNew / 100f);
             if (!transactionsUpdated) {
                 System.err.println("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountFromIDNew);
@@ -317,23 +297,23 @@ public class TransactionDialogController extends Controller {
         if (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER){
             //  this part is almost identical to DEPOSIT section with few changes
             account = (Account)cbAccountTo.getSelectionModel().getSelectedItem();
-            accountToIDNew = account.getID();
+            accountToIDNew = account.getId();
             if (chbAdvanced.isSelected()){ //advanced value is set
-                amountToNew = Float.parseFloat(tfAmountTo.getText());
+                amountToNew = (int)(100 * Float.parseFloat(tfAmountTo.getText()));
             }else{
                 amountToNew = amountFromNew;
             }
 
-            balanceToNew = account.getBalanceDate(tdNew, -1) + amountToNew;
-            account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew);
+            balanceToNew = (int)(100 * account.getBalanceDate(tdNew, -1)) + amountToNew;
+            account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew / 100f);
 
-            accountSaved = account.updateDB();
+            accountSaved = account.update();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
             }
 
-            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew / 100f);
             if (!transactionsUpdated){
                 System.err.println("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountToIDNew);
@@ -351,11 +331,11 @@ public class TransactionDialogController extends Controller {
         }else{
             _params.put("account_to_id", Integer.toString(accountToIDNew));
         }
-        _params.put("amount_from", Float.toString(amountFromNew));
-        _params.put("amount_to", Float.toString(amountToNew));
+        _params.put("amount_from", Strings.formatFloatToString(amountFromNew / 100f));
+        _params.put("amount_to", Strings.formatFloatToString(amountToNew / 100f));
 
-        _params.put("balance_from", Float.toString(balanceFromNew));
-        _params.put("balance_to", Float.toString(balanceToNew));
+        _params.put("balance_from", Strings.formatFloatToString(balanceFromNew / 100f));
+        _params.put("balance_to", Strings.formatFloatToString(balanceToNew / 100f));
 
         return true;
     }
@@ -372,12 +352,14 @@ public class TransactionDialogController extends Controller {
 
         //  delete current transaction
         //  don't use DB transaction because this method is already wrapped inside DB transaction block
+        int tid = this.transaction.getID();
         if (!this.transaction.delete(false)){
             return false;
         }
 
         //  after deleting,
-        //  insert it as a new transaction
+        //  insert it as a new transaction with the same id to keep transactions in the same order
+        _params.put("id", String.valueOf(tid));
         if (!saveDataTransactionNew(_params)){
             return false;
         }
@@ -397,7 +379,7 @@ public class TransactionDialogController extends Controller {
         if (!Kman.getDB().startTransaction()) return false; //    something went wrong
 
         String tdNew = dpDate.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        int ttIDNew = ((TransactionType)cbType.getSelectionModel().getSelectedItem()).getID();
+        int ttIDNew = ((TransactionType)cbType.getSelectionModel().getSelectedItem()).getId();
         int payeeIDNew = 0;
         if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT) ||
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL)){
@@ -427,6 +409,7 @@ public class TransactionDialogController extends Controller {
         params.put("notes", taNotes.getText());
 
         //  always insert new record
+        //
         int transactionID = Kman.getDB().updateData(true, params);
 
         if (isError || !Kman.getDB().commitTransaction()){ //trying to commit changes
@@ -443,11 +426,17 @@ public class TransactionDialogController extends Controller {
         if (this.transaction == null){ //new transaction is created
             if (transactionID > 0){
                 this.transaction = new Transaction(params);
+                this.transaction.setAccountForTransaction(this.account);
+
+                //  add newly created transaction to the account(s)
+                this.transaction.addToAccounts();
             }else{ //possible DB error
                 return false;
             }
         }else{ //need to save new data to the instance
             this.transaction.setFields(params);
+            //  add edited transaction to the account(s)
+            this.transaction.addToAccounts();
         }
 
         return (transactionID > 0);
@@ -466,7 +455,7 @@ public class TransactionDialogController extends Controller {
         }
         
         if (cbAccountFrom.getSelectionModel().getSelectedItem() == null){
-            if ( (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT) || (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ){
+            if ( (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_DEPOSIT) || (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL) ){
                 this.errorMessage = "Please, select account field";
             }else{//transfer
                 this.errorMessage = "Please, select account you want to transfer money from";
@@ -475,17 +464,17 @@ public class TransactionDialogController extends Controller {
             return false;
         }
         
-        if (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_DEPOSIT){
+        if (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             if (cbPayee.getSelectionModel().getSelectedItem() == null){
                 this.errorMessage = "Please, select who you received money from";
                 return false;
             }
-        }else if (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
+        }else if (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_WITHDRAWAL){
             if (cbPayee.getSelectionModel().getSelectedItem() == null){
                 this.errorMessage = "Please, select payee field";
                 return false;
             }
-        }else if (typeSelected.getID() == TransactionType.ACCOUNT_TYPES_TRANSFER){
+        }else if (typeSelected.getId() == TransactionType.ACCOUNT_TYPES_TRANSFER){
             if (cbAccountTo.getSelectionModel().getSelectedItem() == null){
                 this.errorMessage = "Please, select account you want to transfer money to";
                 return false;
@@ -494,11 +483,14 @@ public class TransactionDialogController extends Controller {
             this.errorMessage = "Something is wrong...";
             return false;
         }
-        
-        if (tfAmountFrom.getText().trim().length() == 0){
-            tfAmountFrom.setText("0.0");
+
+        //  remove user format so later strings can be easily converted to float
+        tfAmountFrom.setText(Strings.userFormatRemove(tfAmountFrom.getText()));
+
+        if (tfAmountFrom.getText().length() == 0){
+            tfAmountFrom.setText("0.00");
         }
-        
+
         if (!tfAmountFrom.getText().matches("[0-9]+\\.*[0-9]*")){
             this.errorMessage = "Please, set the value for amount correctly";
             return false;
@@ -510,8 +502,11 @@ public class TransactionDialogController extends Controller {
         }
         
         if (chbAdvanced.isSelected()){
-            if (tfAmountTo.getText().trim().length() == 0){
-                tfAmountTo.setText("0.0");
+            //  remove user format so later strings can be easily converted to float
+            tfAmountTo.setText(Strings.userFormatRemove(tfAmountTo.getText()));
+
+            if (tfAmountTo.getText().length() == 0){
+                tfAmountTo.setText("0.00");
             }
 
             if (!tfAmountTo.getText().matches("[0-9]+\\.*[0-9]*")){
@@ -557,7 +552,7 @@ public class TransactionDialogController extends Controller {
         populateAccountsComboBox(cbAccountFrom, null);
         populatePayeesComboBox();
         
-        tfAmountFrom.setText("0.0");
-        tfAmountTo.setText("0.0");
+        tfAmountFrom.setText("0.00");
+        tfAmountTo.setText("0.00");
     }
 }

@@ -16,8 +16,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
@@ -27,11 +28,11 @@ import javafx.scene.input.MouseEvent;
  */
 public class KmanController implements Initializable {
     private TreeItem<Account> tiAccounts; //root item for all accounts
-    
+
     @FXML
     private TreeView<Account> tvNavigation;
     @FXML
-    private TreeTableView<Transaction> ttvTransactions;
+    private TableView<Transaction> tvTransactions;
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
     
@@ -96,7 +97,7 @@ public class KmanController implements Initializable {
         }
         
         Account aSelected = tiSelected.getValue();
-        if (aSelected.getID() < 1){ //root is selected
+        if (aSelected.getId() < 1){ //root is selected
             Kman.showErrorMessage("Please, select particular account first");
             return;
         }
@@ -105,61 +106,32 @@ public class KmanController implements Initializable {
         params.put("transaction", null);
         params.put("account", aSelected);
         if (Kman.showAndWaitForm("TransactionDialog.fxml", "New Transaction...", params)){
-            //re-read transactions for the current account
-            Transaction.populateTransactionsTable(ttvTransactions, aSelected);
-            //re-read accounts objects
-            Account.populateAccountsTree(tvNavigation);
+            //  transaction successfully inserted
+            //  nothing else is needed to be done here
         }
     }
     
     @FXML
     private void btnTransactionEditOnAction(ActionEvent event) {
-        TreeItem<Transaction> tiSelected = ttvTransactions.getSelectionModel().getSelectedItem();
-        if (tiSelected == null){ //nothing is selected
+        Transaction transactionSelected = tvTransactions.getSelectionModel().getSelectedItem();
+        if (transactionSelected == null){ //nothing is selected
             Kman.showErrorMessage("Please, select a transaction first");
-            return;
-        }
-        
-        Transaction transactionSelected = tiSelected.getValue();
-        if (transactionSelected.getID() < 1){ //root is selected
-            Kman.showErrorMessage("Please, select a particular transaction first");
             return;
         }
         
         java.util.HashMap<String, Transaction> params = new java.util.HashMap<>();
         params.put("object", transactionSelected);
         if (Kman.showAndWaitForm("TransactionDialog.fxml", "Edit Transaction...", params)){
-            //re-read transactions for the current account
-            //update transations tree
-            //ttvTransactions.refresh(); //this doesn't update other transactions...
-            //re-read transactions for the current account
-            TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
-            if (tiAccountSelected != null){ //nothing is selected
-                Account aSelected = tiAccountSelected.getValue();
-                if (aSelected.getID() < 1){ //root is selected
-                    Transaction.populateTransactionsTable(ttvTransactions, null);
-                }else{
-                    Transaction.populateTransactionsTable(ttvTransactions, aSelected);
-                }
-            }
             //re-read transaction note as well
-            ttvTransactionsOnSelect();
-            //re-read accounts objects
-            Account.populateAccountsTree(tvNavigation);
+            tvTransactionsOnSelect();
         }
     }
     
     @FXML
     private void btnTransactionDeleteOnAction(ActionEvent event){
-        TreeItem<Transaction> tiSelected = ttvTransactions.getSelectionModel().getSelectedItem();
-        if (tiSelected == null){ //nothing is selected
+        Transaction transactionSelected = tvTransactions.getSelectionModel().getSelectedItem();
+        if (transactionSelected == null){ //nothing is selected
             Kman.showErrorMessage("Please, select a transaction first");
-            return;
-        }
-        
-        Transaction transactionSelected = tiSelected.getValue();
-        if (transactionSelected.getID() < 1){ //root is selected
-            Kman.showErrorMessage("Please, select a particular transaction first");
             return;
         }
 
@@ -167,30 +139,26 @@ public class KmanController implements Initializable {
             return;
         }
 
+        //  find selected account
+        TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
+        if (tiAccountSelected == null) { // no account is selected
+            //  this error should never happen...
+            //  due to transactions exist for selected account only
+            Kman.showErrorMessage("Unable to delete the transaction for particular account");
+        }
+
         if (!transactionSelected.delete(true)){
             Kman.showErrorMessage("Unable to delete the transaction");
             return;
         }
-
-        TreeItem<Account> tiAccountSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
-        if (tiAccountSelected != null){ //nothing is selected
-            Account aSelected = tiAccountSelected.getValue();
-            if (aSelected.getID() < 1){ //root is selected
-                Transaction.populateTransactionsTable(ttvTransactions, null);
-            }else{
-                Transaction.populateTransactionsTable(ttvTransactions, aSelected);
-            }
-        }
         //re-read transaction note as well
-        ttvTransactionsOnSelect();
-        //update accounts tree (balance to accounts)
-        Account.populateAccountsTree(tvNavigation);
+        tvTransactionsOnSelect();
     }
     
     private void miAccountInsertEvent(ActionEvent _event){
         java.util.HashMap<String, Account> params = new java.util.HashMap<>();
         params.put("object", null);
-        
+
         if (Kman.showAndWaitForm("AccountDialog.fxml", "Add Account...", params)){
             //new account is inserted
             tiAccounts.getChildren().add(new TreeItem(params.get("object")));
@@ -202,12 +170,15 @@ public class KmanController implements Initializable {
         if (tiSelected != null){
             Account aSelected = tiSelected.getValue();
             
-            if (aSelected.getID() > 0){ //real account is selected
+            if (aSelected.getId() > 0){ //real account is selected
                 java.util.HashMap<String, Account> params = new java.util.HashMap<>();
                 params.put("object", aSelected);
                 if (Kman.showAndWaitForm("AccountDialog.fxml", "Edit Account...", params)){
-                    tiSelected.setValue(null);
-                    tiSelected.setValue(params.get("object"));
+                    //  TreeItem will be automatically updated due to listeners
+
+                    //  the silly code below not needed anymore
+//                    tiSelected.setValue(null);
+//                    tiSelected.setValue(params.get("object"));
                 }
             }
         }
@@ -222,7 +193,7 @@ public class KmanController implements Initializable {
         }
         
         Account selected = tiSelected.getValue();
-        if (selected.getID() < 1){
+        if (selected.getId() < 1){
             Kman.showErrorMessage("Please, select a particular account (root one cannot be deleted)");
             
             return;
@@ -231,13 +202,8 @@ public class KmanController implements Initializable {
         if (!Kman.showConfirmation("All transactions for the account will also be deleted.", "Are you sure?")){
             return;
         }
-        
-        java.util.HashMap<String, String> params = new java.util.HashMap<>();
-        params.put("table", "accounts");
-        params.put("where", "id = " + selected.getID());
-        
-        if (Kman.getDB().deleteData(params)){
-            selected = null;
+
+        if (selected.delete()){
             tiAccounts.getChildren().remove(tiSelected);
             //select the root node
             tvNavigation.getSelectionModel().select(tiAccounts);
@@ -254,60 +220,56 @@ public class KmanController implements Initializable {
         if (tiSelected != null){
             Account aSelected = tiSelected.getValue();
             
-            Transaction.populateTransactionsTable(ttvTransactions, aSelected);
+            Transaction.populateTransactionsTable(tvTransactions, aSelected);
+            //  update transaction note as well
+            tvTransactionsOnSelect();
         }
     }
     
     /**
-     * Called every time ttvTransactions is clicked
+     * Called every time tvTransactions is selected by mouse or keyboard
      */
-    private void ttvTransactionsOnSelect(){
-        TreeItem<Transaction> tiSelected = ttvTransactions.getSelectionModel().getSelectedItem();
-        if (tiSelected != null){
-            Transaction transactionSelected = tiSelected.getValue();
-            
+    private void tvTransactionsOnSelect(){
+        Transaction transactionSelected = tvTransactions.getSelectionModel().getSelectedItem();
+        if (transactionSelected != null){
             taTransactionNote.setText(transactionSelected.getNotes());
+        }else{
+            taTransactionNote.setText("");
         }
     }
     
-    private void createDesignForTreeTableView(){
-        final TreeItem<Transaction> root = new TreeItem<>(new Transaction("root"));
-        root.setExpanded(true);
+    private void createDesignForTableView(){
+        TableColumn<Transaction, String> tcDate = new TableColumn<>("date");
+        tcDate.setPrefWidth(100);
+        tcDate.setCellValueFactory(new PropertyValueFactory<Transaction, String>("date"));
+        tvTransactions.getColumns().add(tcDate);
         
-        TreeTableColumn<Transaction, String> ttcDate = new TreeTableColumn<>("date");
-        ttcDate.setPrefWidth(80);
-        ttcDate.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) -> new ReadOnlyStringWrapper(param.getValue().getValue().getDate()));
-        ttvTransactions.getColumns().add(ttcDate);
+        TableColumn<Transaction, String> tcType = new TableColumn<>("type");
+        tcType.setPrefWidth(80);
+        tcType.setCellValueFactory(new PropertyValueFactory<Transaction, String>("typeUserFormat"));
+        tvTransactions.getColumns().add(tcType);
         
-        TreeTableColumn<Transaction, String> ttcType = new TreeTableColumn<>("type");
-        ttcType.setPrefWidth(80);
-        ttcType.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) -> new ReadOnlyStringWrapper(param.getValue().getValue().getTypeString()));
-        ttvTransactions.getColumns().add(ttcType);
+        TableColumn<Transaction, String> tcAccount = new TableColumn<>("account");
+        tcAccount.setPrefWidth(150);
+        tcAccount.setCellValueFactory(new PropertyValueFactory<Transaction, String>("accountUserFormat"));
+        tvTransactions.getColumns().add(tcAccount);
         
-        TreeTableColumn<Transaction, String> ttcAccount = new TreeTableColumn<>("account");
-        ttcAccount.setPrefWidth(150);
-        ttcAccount.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) -> new ReadOnlyStringWrapper(param.getValue().getValue().getAccountString()));
-        ttvTransactions.getColumns().add(ttcAccount);
-        
-        TreeTableColumn<Transaction, String> ttcCategory = new TreeTableColumn<>("category");
-        ttcCategory.setPrefWidth(150);
-        ttcCategory.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) -> new ReadOnlyStringWrapper(param.getValue().getValue().getCategoryString()));
-        ttvTransactions.getColumns().add(ttcCategory);
+        TableColumn<Transaction, String> tcCategory = new TableColumn<>("category");
+        tcCategory.setPrefWidth(150);
+        tcCategory.setCellValueFactory(new PropertyValueFactory<Transaction, String>("categoryUserFormat"));
+        tvTransactions.getColumns().add(tcCategory);
 
-        TreeTableColumn<Transaction, String> ttcAmount = new TreeTableColumn<>("amount");
-        ttcAmount.setPrefWidth(150);
-        ttcAmount.setStyle("-fx-alignment: center-right;");
-        ttcAmount.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) -> new ReadOnlyStringWrapper(param.getValue().getValue().getAmountString()));
-        ttvTransactions.getColumns().add(ttcAmount);
+        TableColumn<Transaction, String> tcAmount = new TableColumn<>("amount");
+        tcAmount.setPrefWidth(150);
+        tcAmount.setStyle("-fx-alignment: center-right;");
+        tcAmount.setCellValueFactory(new PropertyValueFactory<Transaction, String>("amountUserFormat"));
+        tvTransactions.getColumns().add(tcAmount);
 
-        TreeTableColumn<Transaction, String> ttcBalance = new TreeTableColumn<>("balance");
-        ttcBalance.setPrefWidth(150);
-        ttcBalance.setStyle("-fx-alignment: center-right;");
-        ttcBalance.setCellValueFactory((TreeTableColumn.CellDataFeatures<Transaction, String> param) -> new ReadOnlyStringWrapper(param.getValue().getValue().getBalanceString()));
-        ttvTransactions.getColumns().add(ttcBalance);
-
-        ttvTransactions.setRoot(root);
-        ttvTransactions.setShowRoot(false);
+        TableColumn<Transaction, String> tcBalance = new TableColumn<>("balance");
+        tcBalance.setPrefWidth(150);
+        tcBalance.setStyle("-fx-alignment: center-right;");
+        tcBalance.setCellValueFactory(new PropertyValueFactory<Transaction, String>("balanceUserFormat"));
+        tvTransactions.getColumns().add(tcBalance);
     }
     
     private final class TreeViewCellFactory extends TreeCell<Account>{
@@ -361,8 +323,8 @@ public class KmanController implements Initializable {
             return new TreeViewCellFactory();
         });
         
-        createDesignForTreeTableView();
-        Transaction.populateTransactionsTable(ttvTransactions, null); //show all transactions
+        createDesignForTableView();
+        Transaction.populateTransactionsTable(tvTransactions, null); //show all transactions
         
         tvNavigation.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton() == MouseButton.PRIMARY){
@@ -377,11 +339,11 @@ public class KmanController implements Initializable {
             }
         });
         
-        ttvTransactions.setOnMouseClicked((MouseEvent event) ->{
+        tvTransactions.setOnMouseClicked((MouseEvent event) ->{
             if (event.getButton() == MouseButton.PRIMARY){
                 switch (event.getClickCount()){
                     case 1: //single click
-                        ttvTransactionsOnSelect();
+                        tvTransactionsOnSelect();
                         break;
                     case 2: //double click
                         btnTransactionEditOnAction(null);
@@ -389,5 +351,14 @@ public class KmanController implements Initializable {
                 }
             }
         });
-    }    
+
+        //  update note every time user use navigational keys
+        //  OnKeyPressed cannot be user because current transaction is not selected yet
+        //  and note data is taken from previous transaction
+        tvTransactions.setOnKeyReleased(event -> {
+            if (event.getCode().isNavigationKey()){
+                tvTransactionsOnSelect();
+            }
+        });
+    }
 }

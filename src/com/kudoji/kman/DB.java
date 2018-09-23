@@ -134,11 +134,14 @@ public class DB {
     }
     
     /**
-     * 
+     * Inserts or updates data into DB
+     *
      * @param _insert
      * @param _parameters
      * - "table" - table name working with
-     * - "id" - update this id only. Cannot be used with insert
+     * - "id" -
+     *      if !_insert (update) than update this id only;
+     *      if _insert than insert this id as well.
      * - "set" - used with update only
      * - "where" - used with update only
      * - "order" - used with update only
@@ -163,12 +166,13 @@ public class DB {
         
         Object paramID = _parameters.get("id");
         Object paramWhere = _parameters.get("where");
-        if ( (paramWhere == null) && (paramID == null) && (!_insert) ){ //id must be set for update statement
+        //  id or where condition must be set for update statement
+        if ( (paramWhere == null) && (paramID == null) && (!_insert) ){
             System.err.println(this.getClass().getName() + ": " + "id field or where condition is not set");
             return 0;
         }
         if (!_insert){
-            //for insert statement will keep id
+            //  keep id field for insert statement
             _parameters.remove("id");
         }
         
@@ -188,7 +192,7 @@ public class DB {
         
         Object paramSet = _parameters.get("set");
         if ( (paramSet != null) && (!_insert) ){
-            sqlText = sqlText + "" + paramSet.toString(); //keywork set is already injected earlier
+            sqlText = sqlText + "" + paramSet.toString(); //keyword set is already injected earlier
         }else{
             String sqlValues = " values (";
             if (_insert){
