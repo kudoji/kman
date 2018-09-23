@@ -28,7 +28,7 @@ import javafx.scene.input.MouseEvent;
  */
 public class KmanController implements Initializable {
     private TreeItem<Account> tiAccounts; //root item for all accounts
-    
+
     @FXML
     private TreeView<Account> tvNavigation;
     @FXML
@@ -360,5 +360,5 @@ public class KmanController implements Initializable {
                 tvTransactionsOnSelect();
             }
         });
-    }    
+    }
 }
