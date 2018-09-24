@@ -13,6 +13,7 @@ import java.util.ResourceBundle;
 
 import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -93,20 +94,11 @@ public class TransactionDialogController extends Controller {
                 cbPayee.setVisible(false);
                 cbAccountTo.setVisible(true);
                 chbAdvanced.setDisable(false);
-                populateAccountsComboBox(cbAccountTo, (Account)cbAccountFrom.getSelectionModel().getSelectedItem());
-                
+
                 break;
             default: //error
                 
                 break;
-        }
-    }
-    
-    @FXML
-    private void cbAccountFromOnAction(ActionEvent event){
-        int atIndex = cbType.getSelectionModel().getSelectedIndex();
-        if (atIndex == TransactionType.ACCOUNT_TYPES_TRANSFER){ //in case of transfer need to update to account list
-            populateAccountsComboBox(cbAccountTo, (Account)cbAccountFrom.getSelectionModel().getSelectedItem());
         }
     }
     
@@ -196,25 +188,6 @@ public class TransactionDialogController extends Controller {
         }else{
             //new element dialog
             Kman.selectItemInCombobox(cbAccountFrom, account.getId());
-        }
-    }
-    
-    /**
-     * Populates accounts combo boxes
-     *
-     * @param _combobox
-     * @param _accountToSkip don't add this account to _combobox
-     */
-    private void populateAccountsComboBox(ComboBox _combobox, Account _accountToSkip){
-        _combobox.getItems().clear();
-        
-        for (Account account: Account.getAccounts()){
-            if (_accountToSkip != null){
-                if (account.getId() == _accountToSkip.getId()){
-                    continue;
-                }
-            }
-            _combobox.getItems().add(account);
         }
     }
     
@@ -479,6 +452,11 @@ public class TransactionDialogController extends Controller {
                 this.errorMessage = "Please, select account you want to transfer money to";
                 return false;
             }
+
+            if (cbAccountFrom.getSelectionModel().getSelectedItem().equals(cbAccountTo.getSelectionModel().getSelectedItem())){
+                this.errorMessage = "Please, select different account from and account to";
+                return false;
+            }
         }else{ //there is no third account type available
             this.errorMessage = "Something is wrong...";
             return false;
@@ -548,8 +526,9 @@ public class TransactionDialogController extends Controller {
         }
         cbType.getSelectionModel().selectFirst();
         cbTypeOnAction(null); //make necessary fiels visible
-        
-        populateAccountsComboBox(cbAccountFrom, null);
+
+        cbAccountFrom.setItems(Account.getAccounts());
+        cbAccountTo.setItems(Account.getAccounts());
         populatePayeesComboBox();
         
         tfAmountFrom.setText("0.00");
