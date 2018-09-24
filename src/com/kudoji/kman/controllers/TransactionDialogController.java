@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.kudoji.kman;
+package com.kudoji.kman.controllers;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -11,9 +6,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import com.kudoji.kman.*;
+import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -106,7 +102,7 @@ public class TransactionDialogController extends Controller {
     private void btnCategoryOnAction(ActionEvent event){
         java.util.HashMap<String, Category> params = new java.util.HashMap<>(); //selected category
         //since method's parameters sent by value, collection type can be useful here
-        if (Kman.showAndWaitForm("CategoriesDialog.fxml", "Select Category...", params)){
+        if (Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Select Category...", params)){
             //value were selected
             this.category = params.get("object");
             btnCategory.setText(this.category.getFullPath());
