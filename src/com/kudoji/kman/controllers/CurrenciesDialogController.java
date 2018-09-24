@@ -1,12 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.kudoji.kman;
+package com.kudoji.kman.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import com.kudoji.kman.models.Controller;
+import com.kudoji.kman.models.Currency;
+import com.kudoji.kman.Kman;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,7 +27,7 @@ public class CurrenciesDialogController extends Controller {
 
     @FXML
     private void btnCurrencyInsertOnAction(ActionEvent event){
-        Kman.showAndWaitForm("CurrencyDialog.fxml", "Add new currency...", null);
+        Kman.showAndWaitForm("views/CurrencyDialog.fxml", "Add new currency...", null);
     }
 
     @FXML
@@ -40,7 +39,7 @@ public class CurrenciesDialogController extends Controller {
             return;
         }
 
-        Kman.showAndWaitForm("CurrencyDialog.fxml", "Edit currency...", currencySelected);
+        Kman.showAndWaitForm("views/CurrencyDialog.fxml", "Edit currency...", currencySelected);
     }
 
     @FXML

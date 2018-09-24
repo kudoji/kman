@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane alignment="CENTER" prefHeight="275.0" prefWidth="368.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.TransactionDialogController">
+<GridPane alignment="CENTER" prefHeight="275.0" prefWidth="368.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.TransactionDialogController">
    <columnConstraints>
       <ColumnConstraints hgrow="NEVER" minWidth="114.0" prefWidth="100.0" />
       <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />

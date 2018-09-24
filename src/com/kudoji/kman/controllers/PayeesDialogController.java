@@ -1,12 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.kudoji.kman;
+package com.kudoji.kman.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import com.kudoji.kman.models.Controller;
+import com.kudoji.kman.Kman;
+import com.kudoji.kman.models.Payee;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -23,7 +22,7 @@ public class PayeesDialogController extends Controller {
         
     @FXML
     private void btnPayeeInsertOnAction(ActionEvent action){
-        Kman.showAndWaitForm("PayeeDialog.fxml", "Add new payee...", null);
+        Kman.showAndWaitForm("views/PayeeDialog.fxml", "Add new payee...", null);
     }
     
     @FXML
@@ -35,7 +34,7 @@ public class PayeesDialogController extends Controller {
             return;
         }
         
-        Kman.showAndWaitForm("PayeeDialog.fxml", "Edit payee...", payeeSelected);
+        Kman.showAndWaitForm("views/PayeeDialog.fxml", "Edit payee...", payeeSelected);
     }
     
     @FXML

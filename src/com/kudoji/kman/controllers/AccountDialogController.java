@@ -1,13 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.kudoji.kman;
+package com.kudoji.kman.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.kudoji.kman.models.Account;
+import com.kudoji.kman.models.Controller;
+import com.kudoji.kman.models.Currency;
+import com.kudoji.kman.Kman;
 import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -56,7 +55,7 @@ public class AccountDialogController extends Controller {
     private void btnCurrencyOnAction(ActionEvent event){
         java.util.HashMap<String, Currency> params = new java.util.HashMap<>(); //selected category
         //since method's parameters sent by value, collection type can be useful here
-        if (Kman.showAndWaitForm("CurrenciesDialog.fxml", "Select Currency...", params)){
+        if (Kman.showAndWaitForm("views/CurrenciesDialog.fxml", "Select Currency...", params)){
             //value were selected
             this.currency = params.get("object");
             btnCurrency.setText(this.currency.getName());

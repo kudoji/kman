@@ -1,13 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.kudoji.kman;
+package com.kudoji.kman.controllers;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import com.kudoji.kman.models.Controller;
+import com.kudoji.kman.Kman;
+import com.kudoji.kman.models.MMEXImport;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
