@@ -765,5 +765,7 @@ public class Transaction {
         }
 
         _tvTransactions.setItems(_accountFilter.getTransactions());
+        //  scroll to the bottom of the list
+        _tvTransactions.scrollTo(_tvTransactions.getItems().size() - 1);
     }
 }
