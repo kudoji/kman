@@ -11,6 +11,7 @@ import com.kudoji.kman.utils.Strings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import java.math.BigDecimal;
 
 /**
  * FXML Controller class
@@ -103,12 +104,12 @@ public class AccountDialogController extends Controller {
     private boolean saveData(){
         Account tmpAcc = new Account();
         tmpAcc.setName(tfName.getText());
-        tmpAcc.setBalanceInitial(Float.parseFloat(tfBalanceInitial.getText()));
+        tmpAcc.setBalanceInitial(new BigDecimal(tfBalanceInitial.getText()));
         if (this.account == null){
             //  current balance for new account is the same
-            tmpAcc.setBalanceCurrent(Float.parseFloat(tfBalanceInitial.getText()));
+            tmpAcc.setBalanceCurrent(new BigDecimal(tfBalanceInitial.getText()));
         }else{
-            tmpAcc.setBalanceCurrent(Float.parseFloat(tfBalanceCurrent.getText()));
+            tmpAcc.setBalanceCurrent(new BigDecimal(tfBalanceCurrent.getText()));
         }
         tmpAcc.setCurrencyId(this.currency.getID());
 
@@ -142,9 +143,9 @@ public class AccountDialogController extends Controller {
         if (this.account != null){//edit account form is opened
             tfId.setText(String.valueOf(this.account.getId()));
             tfName.setText(this.account.getName());
-            tfBalanceInitial.setText(Strings.userFormat(this.account.getBalanceInitial()));
+            tfBalanceInitial.setText(Strings.userFormat(this.account.getBalanceInitial().floatValue()));
             tfBalanceInitial.setDisable(true);
-            tfBalanceCurrent.setText(Strings.userFormat(this.account.getBalanceCurrent()));
+            tfBalanceCurrent.setText(Strings.userFormat(this.account.getBalanceCurrent().floatValue()));
             tfBalanceCurrent.setDisable(true);
 
             this.currency = this.account.getCurrency();

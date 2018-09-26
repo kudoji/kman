@@ -1,5 +1,6 @@
 package com.kudoji.kman.models;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 import com.kudoji.kman.Kman;
@@ -472,7 +473,7 @@ public class Transaction {
                 }
                 //decrease accounts balance
                 account = this.getAccount(true);
-                account.increaseBalanceCurrent(-this.getAmountTo());
+                account.increaseBalanceCurrent(new BigDecimal(-this.getAmountTo()));
                 if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
@@ -493,7 +494,7 @@ public class Transaction {
                 }
                 //increase accounts balance
                 account = this.getAccount(false);
-                account.increaseBalanceCurrent(this.getAmountFrom());
+                account.increaseBalanceCurrent(new BigDecimal(this.getAmountFrom()));
                 if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
@@ -515,7 +516,7 @@ public class Transaction {
                 }
                 //increase accounts balance
                 account = this.getAccount(false);
-                account.increaseBalanceCurrent(this.getAmountFrom());
+                account.increaseBalanceCurrent(new BigDecimal(this.getAmountFrom()));
                 if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
@@ -534,7 +535,7 @@ public class Transaction {
                 }
                 //decrese accounts balance
                 account = this.getAccount(true);
-                account.increaseBalanceCurrent(-this.getAmountTo());
+                account.increaseBalanceCurrent(new BigDecimal(-this.getAmountTo()));
                 if (!account.update()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
