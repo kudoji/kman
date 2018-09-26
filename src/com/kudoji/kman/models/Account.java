@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import java.math.BigDecimal;
 
 /**
  *
@@ -21,7 +22,7 @@ import javafx.scene.control.TreeView;
  */
 public class Account {
     private IntegerProperty id, currencyId;
-    private FloatProperty balanceInitial, balanceCurrent;
+    private ObjectProperty<BigDecimal> balanceInitial, balanceCurrent;
     private StringProperty name;
     //  account's user name which depends on name and current balance
     private StringProperty userName = new SimpleStringProperty("");
@@ -45,8 +46,8 @@ public class Account {
     public Account(){
         this.id = new SimpleIntegerProperty(0);
         this.name = new SimpleStringProperty("<<accounts>>");
-        this.balanceInitial = new SimpleFloatProperty(0);
-        this.balanceCurrent = new SimpleFloatProperty(0);
+        this.balanceInitial = new SimpleObjectProperty(BigDecimal.ZERO);
+        this.balanceCurrent = new SimpleObjectProperty(BigDecimal.ZERO);
         this.currencyId = new SimpleIntegerProperty(0);
 
         this.setUserName();
@@ -62,8 +63,8 @@ public class Account {
     public Account(HashMap<String, String> _params){
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
-        this.balanceInitial = new SimpleFloatProperty(Float.parseFloat(_params.get("balance_initial")));
-        this.balanceCurrent = new SimpleFloatProperty(Float.parseFloat(_params.get("balance_current")));
+        this.balanceInitial = new SimpleObjectProperty(new BigDecimal(_params.get("balance_initial")));
+        this.balanceCurrent = new SimpleObjectProperty(new BigDecimal(_params.get("balance_current")));
         this.currencyId = new SimpleIntegerProperty(Integer.parseInt(_params.get("currencies_id")));
 
         this.setUserName();
@@ -96,33 +97,30 @@ public class Account {
         return this.name;
     }
 
-    public final float getBalanceInitial(){
+    public final BigDecimal getBalanceInitial(){
         return this.balanceInitial.get();
     }
 
-    public final void setBalanceInitial(float _value){
+    public final void setBalanceInitial(BigDecimal _value){
         this.balanceInitial.set(_value);
     }
 
-    public FloatProperty balanceInitialProperty(){
+    public ObjectProperty balanceInitialProperty(){
         return this.balanceInitial;
     }
 
-    public final float getBalanceCurrent(){
+    public final BigDecimal getBalanceCurrent(){
         return this.balanceCurrent.get();
     }
 
-    public final void setBalanceCurrent(float _value){
-        //  keep only two digits after point
-        _value = Strings.formatFloat(_value);
-
+    public final void setBalanceCurrent(BigDecimal _value){
         this.balanceCurrent.set(_value);
 
         //  update account's user name as well
         this.setUserName();
     }
 
-    public FloatProperty balanceCurrentProperty(){
+    public ObjectProperty balanceCurrentProperty(){
         return this.balanceCurrent;
     }
 
@@ -135,7 +133,7 @@ public class Account {
      */
     private final void setUserName(){
         if (this.id.get() > 0){
-            this.userName.set(this.name.get() + " (" + Strings.userFormat(this.balanceCurrent.get()) + ")");
+            this.userName.set(this.name.get() + " (" + Strings.userFormat(this.balanceCurrent.get().floatValue()) + ")");
         }else{
             this.userName.set(this.name.get()); //don't show balance for the fake account
         }
@@ -157,11 +155,8 @@ public class Account {
         return this.currencyId;
     }
 
-    public final void increaseBalanceCurrent(float _delta){
-        //  keep only two digits after point
-        _delta = Strings.formatFloat(_delta);
-
-        setBalanceCurrent(this.balanceCurrent.get() + _delta);
+    public final void increaseBalanceCurrent(BigDecimal _delta){
+        setBalanceCurrent(this.balanceCurrent.get().add(_delta));
     }
 
     public Currency getCurrency() {
@@ -184,7 +179,7 @@ public class Account {
      *
      * @return float
      */
-    public float getBalanceDate(String _date, int _tid){
+    public BigDecimal getBalanceDate(String _date, int _tid){
         if ( (LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE).equals(_date))
         && (_tid == -1) ){
             // this is the recent transaction for the account
@@ -220,12 +215,12 @@ public class Account {
             int account_to_id = Integer.parseInt(row.get("account_to_id"));
             
             if (this.id.get() == account_from_id){
-                return Float.parseFloat(row.get("balance_from"));
+                return new BigDecimal(row.get("balance_from"));
             }else if (this.id.get() == account_to_id){
-                return Float.parseFloat(row.get("balance_to"));
+                return new BigDecimal(row.get("balance_to"));
             }else{
                 //something is wrong
-                return 0;
+                return BigDecimal.ZERO;
             }
         }
     }
@@ -414,8 +409,8 @@ public class Account {
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "accounts");
         params.put("name", this.getName());
-        params.put("balance_initial", Strings.formatFloatToString(this.getBalanceInitial()));
-        params.put("balance_current", Strings.formatFloatToString(this.getBalanceCurrent()));
+        params.put("balance_initial", Strings.formatFloatToString(this.getBalanceInitial().floatValue()));
+        params.put("balance_current", Strings.formatFloatToString(this.getBalanceCurrent().floatValue()));
         params.put("currencies_id", String.valueOf(this.getCurrencyId()));
 
         if (this.getId() > 0){

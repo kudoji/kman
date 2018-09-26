@@ -1,5 +1,6 @@
 package com.kudoji.kman.controllers;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -213,7 +214,10 @@ public class TransactionDialogController extends Controller {
         boolean transactionsUpdated = false;
 
         int accountFromIDNew = 0, accountToIDNew = 0;
-        int amountFromNew = 0, amountToNew = 0, balanceFromNew = 0, balanceToNew = 0;
+        BigDecimal amountFromNew = BigDecimal.ZERO;
+        BigDecimal amountToNew = BigDecimal.ZERO;
+        BigDecimal balanceFromNew = BigDecimal.ZERO;
+        BigDecimal balanceToNew = BigDecimal.ZERO;
 
         if (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             // It is important!
@@ -221,19 +225,19 @@ public class TransactionDialogController extends Controller {
             account = (Account)cbAccountFrom.getSelectionModel().getSelectedItem();
             accountToIDNew = account.getId();
 
-            amountToNew = (int)(100 * Float.parseFloat(tfAmountFrom.getText()));
+            amountToNew = new BigDecimal(tfAmountFrom.getText());
             // new transaction, get balance for the end of transaction date
-            balanceToNew = (int)(100 * account.getBalanceDate(tdNew, -1)) + amountToNew;
+            balanceToNew = amountToNew.add(account.getBalanceDate(tdNew, -1));
 
             //  without 100f (f) it would devide without digits (.00)® after point
-            account.setBalanceCurrent((account.getBalanceCurrent() * 100 + amountToNew) / 100f);
+            account.setBalanceCurrent(amountToNew.add(account.getBalanceCurrent()));
             accountSaved = account.update();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
             }
 
-            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew / 100f);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew.floatValue());
             if (!transactionsUpdated) {
                 System.err.println("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountToIDNew);
@@ -243,18 +247,18 @@ public class TransactionDialogController extends Controller {
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_TRANSFER) ) {
             account = (Account) cbAccountFrom.getSelectionModel().getSelectedItem();
             accountFromIDNew = account.getId();
-            amountFromNew = (int)(100 * Float.parseFloat(tfAmountFrom.getText()));
+            amountFromNew = new BigDecimal(tfAmountFrom.getText());
 
-            balanceFromNew = (int)(100 * account.getBalanceDate(tdNew, -1)) - amountFromNew;
+            balanceFromNew = account.getBalanceDate(tdNew, -1).subtract(amountFromNew);
 
-            account.setBalanceCurrent(account.getBalanceCurrent() - amountFromNew / 100f);
+            account.setBalanceCurrent(account.getBalanceCurrent().subtract(amountFromNew));
             accountSaved = account.update();
             if (!accountSaved) {
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
             }
 
-            transactionsUpdated = Transaction.increaseBalance(tdNew, accountFromIDNew, -amountFromNew / 100f);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountFromIDNew, -amountFromNew.floatValue());
             if (!transactionsUpdated) {
                 System.err.println("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountFromIDNew);
@@ -268,13 +272,13 @@ public class TransactionDialogController extends Controller {
             account = (Account)cbAccountTo.getSelectionModel().getSelectedItem();
             accountToIDNew = account.getId();
             if (chbAdvanced.isSelected()){ //advanced value is set
-                amountToNew = (int)(100 * Float.parseFloat(tfAmountTo.getText()));
+                amountToNew = new BigDecimal(tfAmountTo.getText());
             }else{
                 amountToNew = amountFromNew;
             }
 
-            balanceToNew = (int)(100 * account.getBalanceDate(tdNew, -1)) + amountToNew;
-            account.setBalanceCurrent(account.getBalanceCurrent() + amountToNew / 100f);
+            balanceToNew = account.getBalanceDate(tdNew, -1).add(amountToNew);
+            account.setBalanceCurrent(account.getBalanceCurrent().add(amountToNew));
 
             accountSaved = account.update();
             if (!accountSaved){
@@ -282,7 +286,7 @@ public class TransactionDialogController extends Controller {
                 return false;
             }
 
-            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew / 100f);
+            transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew.floatValue());
             if (!transactionsUpdated){
                 System.err.println("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountToIDNew);
@@ -300,11 +304,11 @@ public class TransactionDialogController extends Controller {
         }else{
             _params.put("account_to_id", Integer.toString(accountToIDNew));
         }
-        _params.put("amount_from", Strings.formatFloatToString(amountFromNew / 100f));
-        _params.put("amount_to", Strings.formatFloatToString(amountToNew / 100f));
+        _params.put("amount_from", Strings.formatFloatToString(amountFromNew.floatValue()));
+        _params.put("amount_to", Strings.formatFloatToString(amountToNew.floatValue()));
 
-        _params.put("balance_from", Strings.formatFloatToString(balanceFromNew / 100f));
-        _params.put("balance_to", Strings.formatFloatToString(balanceToNew / 100f));
+        _params.put("balance_from", Strings.formatFloatToString(balanceFromNew.floatValue()));
+        _params.put("balance_to", Strings.formatFloatToString(balanceToNew.floatValue()));
 
         return true;
     }
