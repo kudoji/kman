@@ -486,6 +486,8 @@ public class Account {
             this.olTransactions.add(_transaction);
 
             //  need to sort list after transaction is added
+            //  it could be done using listener, but there is only one place
+            //  where transaction can be added to the list
             olTransactions.sort((transaction1, transaction2) -> {
                 LocalDate td1 = LocalDate.parse(transaction1.getDate());
                 LocalDate td2 = LocalDate.parse(transaction2.getDate());
