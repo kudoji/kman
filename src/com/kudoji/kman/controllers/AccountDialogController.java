@@ -161,5 +161,5 @@ public class AccountDialogController extends Controller {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
+    }
 }
