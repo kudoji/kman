@@ -103,6 +103,8 @@ public class TransactionDialogController extends Controller {
     private void btnCategoryOnAction(ActionEvent event){
         java.util.HashMap<String, Category> params = new java.util.HashMap<>(); //selected category
         //since method's parameters sent by value, collection type can be useful here
+        //  send current (if any) to the category form
+        params.put("object", this.category);
         if (Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Select Category...", params)){
             //value were selected
             this.category = params.get("object");
@@ -364,7 +366,7 @@ public class TransactionDialogController extends Controller {
         params.put("table", "transactions");
         params.put("date", tdNew);
         params.put("transaction_types_id", Integer.toString(ttIDNew));
-        params.put("categories_id", Integer.toString(category.getID()));
+        params.put("categories_id", Integer.toString(category.getId()));
         if (payeeIDNew == 0){
             params.put("payees_id", null); //to avoid foreign_key constrain error
         }else{

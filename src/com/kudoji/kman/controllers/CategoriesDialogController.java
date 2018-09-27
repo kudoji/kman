@@ -55,7 +55,7 @@ public class CategoriesDialogController extends Controller {
         }
         
         Category category = tiCategory.getValue();
-        if (category.getID() < 1){
+        if (category.getId() < 1){
             Kman.showErrorMessage("Please, select a particular category (root one is not editable)");
             
             return;
@@ -83,7 +83,7 @@ public class CategoriesDialogController extends Controller {
         }
         
         Category category = tiCategory.getValue();
-        if (category.getID() < 1){
+        if (category.getId() < 1){
             Kman.showErrorMessage("Please, select a particular category (root one cannot be deleted)");
             
             return;
@@ -95,7 +95,7 @@ public class CategoriesDialogController extends Controller {
         
         java.util.HashMap<String, String> params = new java.util.HashMap<>();
         params.put("table", "categories");
-        params.put("where", "id = " + category.getID());
+        params.put("where", "id = " + category.getId());
         
         if (Kman.getDB().deleteData(params)){
             category = null;
@@ -107,13 +107,20 @@ public class CategoriesDialogController extends Controller {
     @Override
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Category>)_formObject;
-        
+
+        int cid = 0;
+        if (this.formObject != null && this.formObject.get("object") != null){
+            //  need to select this category in the list
+            cid = this.formObject.get("object").getId();
+        }
+        Category.populateCategoriesTree(tvCategories, cid);
+
         tvCategories.setOnMouseClicked((MouseEvent event) -> {
             if ( (event.getButton() == MouseButton.PRIMARY) && (event.getClickCount() == 2) ){//double click
                 TreeItem<Category> tiSelected = (TreeItem<Category>)tvCategories.getSelectionModel().getSelectedItem();
                 if (tiSelected != null){
                     Category category = tiSelected.getValue();
-                    if (category.getID() > 0){//selected NOT root
+                    if (category.getId() > 0){//selected NOT root
                         if (this.formObject != null){//opened as a select form
                             this.formObject.put("object", category);
                             //mark the form as being changed
@@ -135,7 +142,6 @@ public class CategoriesDialogController extends Controller {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        Category.populateCategoriesTree(tvCategories);
-    }    
+    }
     
 }
