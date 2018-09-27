@@ -92,6 +92,13 @@ public class TransactionDialogController extends Controller {
                 cbAccountTo.setVisible(true);
                 chbAdvanced.setDisable(false);
 
+                if (this.category == null){
+                    //  this is a transfer and category is not currently selected
+                    //  get transfer category
+                    this.category = Category.getCategory(Category.CATEGORY_TRANSFER_ID);
+                    btnCategory.setText(this.category.getFullPath());
+                }
+
                 break;
             default: //error
                 

@@ -11,6 +11,8 @@ import javafx.scene.control.TreeView;
  * @author kudoji
  */
 public class Category {
+    //  id of transfer category
+    public final static int CATEGORY_TRANSFER_ID = 1;
     private int id;
     private String name, fullPath;
     private int categories_id;
