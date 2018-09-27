@@ -61,7 +61,7 @@ public class CategoryDialogController extends Controller {
         java.util.HashMap<String, String> params = new java.util.HashMap<>();
         params.put("table", "categories");
         params.put("name", tfName.getText());
-        String parentID = (Integer.toString(this.categoryParent.getID()));
+        String parentID = (Integer.toString(this.categoryParent.getId()));
         if (parentID.equals("0")){
             //to avoid "FOREIGN KEY constraint failed" sql error
             parentID = null;
@@ -69,7 +69,7 @@ public class CategoryDialogController extends Controller {
         params.put("categories_id", parentID);
         
         if (this.category != null){ //edit existed account, need to put its id to update sql query
-            params.put("id", Integer.toString(this.category.getID()));
+            params.put("id", Integer.toString(this.category.getId()));
         }
         int categoryID;
         //use insert since the account is new (this.isNew = true)
@@ -102,7 +102,7 @@ public class CategoryDialogController extends Controller {
         cbParent.getSelectionModel().select(this.categoryParent);
         cbParent.setDisable(true);
         if (this.category != null){ //edit category form
-            tfId.setText(Integer.toString(this.category.getID()));
+            tfId.setText(Integer.toString(this.category.getId()));
             tfName.setText(this.category.getName());
         }
     }

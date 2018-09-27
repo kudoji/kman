@@ -51,7 +51,7 @@ public class Category {
      * Returns category ID
      * @return 
      */
-    public int getID(){
+    public int getId(){
         return this.id;
     }
     
@@ -102,15 +102,14 @@ public class Category {
     
     /**
      * Finds parent node for particular with category ID
-     * @param _parentID
-     * @return 
+     * @return
      */
     private static TreeItem<Category> findParentRecursively(TreeItem<Category> _tiRoot, Category _category){
         TreeItem<Category> tiResult = null;
         
         int parentID = _category.getParentID();
         for (TreeItem<Category> parentNode: _tiRoot.getChildren()){
-            if (parentNode.getValue().getID() == parentID){
+            if (parentNode.getValue().getId() == parentID){
                 tiResult = parentNode;
                 
                 _category.setFullPath(tiResult.getValue().getFullPath() + ":" + _category.getFullPath());
@@ -131,9 +130,10 @@ public class Category {
     
     /**
      * Read categories from DB and populates _tvCategories TreeView
-     * @param _tvCategories 
+     * @param _tvCategories
+     * @param _idSelect select this id if more than zero
      */
-    public static void populateCategoriesTree(TreeView<Category> _tvCategories){
+    public static void populateCategoriesTree(TreeView<Category> _tvCategories, int _idSelect){
         Category cRoot = new Category();
         
         TreeItem<Category> tiRoot = new TreeItem<>(cRoot);
@@ -145,6 +145,7 @@ public class Category {
         java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
         
         int currentParentID = cRoot.getParentID();
+        TreeItem<Category> selectCategory = null;   //  select this category item in the list
         TreeItem<Category> currentItem = tiRoot;
         for (int i = 0; i < rows.size(); i++){
             Category category = new Category(rows.get(i));
@@ -166,8 +167,22 @@ public class Category {
             
             currentItem.getChildren().add(tiCategory);
             currentItem.setExpanded(true);
+            if (_idSelect > 0 && category.getId() == _idSelect){
+                //  select current category in the list
+                selectCategory = tiCategory;
+            }
         }
         
         _tvCategories.setRoot(tiRoot);
+        if (selectCategory != null){
+            //  there is a category to select
+            _tvCategories.getSelectionModel().select(selectCategory);
+            _tvCategories.scrollTo(_tvCategories.getSelectionModel().getSelectedIndex());
+        }else{
+            //  otherwise select root item
+            _tvCategories.getSelectionModel().select(tiRoot);
+        }
+        //  set focus to categories tree
+        _tvCategories.requestFocus();
     }
 }
