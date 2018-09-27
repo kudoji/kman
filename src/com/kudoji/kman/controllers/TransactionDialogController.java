@@ -142,7 +142,7 @@ public class TransactionDialogController extends Controller {
 
         if (this.transaction != null){
             //an edit form
-            tfId.setText(Integer.toString(this.transaction.getID()));
+            tfId.setText(Integer.toString(this.transaction.getId()));
             dpDate.setValue(LocalDate.parse(this.transaction.getDate()));
 
             int transactionTypeId = this.transaction.getTypeId();
@@ -325,7 +325,7 @@ public class TransactionDialogController extends Controller {
 
         //  delete current transaction
         //  don't use DB transaction because this method is already wrapped inside DB transaction block
-        int tid = this.transaction.getID();
+        int tid = this.transaction.getId();
         if (!this.transaction.delete(false)){
             return false;
         }
@@ -421,7 +421,7 @@ public class TransactionDialogController extends Controller {
             return false;
         }
         
-        TransactionType typeSelected = (TransactionType)cbType.getSelectionModel().getSelectedItem();
+        TransactionType typeSelected = cbType.getSelectionModel().getSelectedItem();
         if (typeSelected == null){
             this.errorMessage = "Please, select transaction type";
             return false;

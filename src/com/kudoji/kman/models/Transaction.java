@@ -167,7 +167,7 @@ public class Transaction {
         setBalanceUserFormat(getBalanceString());
     }
     
-    public int getID(){
+    public int getId(){
         return this.id;
     }
     
@@ -467,7 +467,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountToId());
+                            this.getId() + "' for accountID: " + this.getAccountToId());
 
                     return false;
                 }
@@ -488,7 +488,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountFromId());
+                            this.getId() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
                 }
@@ -510,7 +510,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountFromId());
+                            this.getId() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
                 }
@@ -529,7 +529,7 @@ public class Transaction {
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
-                            this.getID() + "' for accountID: " + this.getAccountToId());
+                            this.getId() + "' for accountID: " + this.getAccountToId());
 
                     return false;
                 }
@@ -551,12 +551,12 @@ public class Transaction {
         //finally, delete the transaction
         java.util.HashMap<String, String> params = new java.util.HashMap<>();
         params.put("table", "transactions");
-        params.put("where", "id = " + this.getID());
+        params.put("where", "id = " + this.getId());
 
         if (!Kman.getDB().deleteData(params)){
             if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-            System.err.println("Unable to detele transaction with id: " + this.getID());
+            System.err.println("Unable to detele transaction with id: " + this.getId());
 
             return false;
         }
@@ -745,7 +745,7 @@ public class Transaction {
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "transactions");
         params.put("set", "balance_from = balance_from + case when account_from_id in (" + account_from_id + ") then " + _delta + " else 0 end, balance_to = balance_to + case when account_to_id in (" + account_to_id + ") then " + _delta + " else 0 end");
-        params.put("where", "(account_from_id in (" + account_from_id + ") or account_to_id in (" + account_to_id + ") ) and ( (date > '" + _transaction.getDate() + "') or ( date = '" + _transaction.getDate() + "' and id > " + _transaction.getID() + " ) )");
+        params.put("where", "(account_from_id in (" + account_from_id + ") or account_to_id in (" + account_to_id + ") ) and ( (date > '" + _transaction.getDate() + "') or ( date = '" + _transaction.getDate() + "' and id > " + _transaction.getId() + " ) )");
         
         return (Kman.getDB().updateData(false, params) != 0);
     }

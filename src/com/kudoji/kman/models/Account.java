@@ -381,6 +381,8 @@ public class Account {
             transaction.setAccountForTransaction(this);
             olTransactions.add(transaction);
         }
+
+        //  all transactions are already sorted, no need to additional sort
     }
 
     /**
@@ -479,7 +481,36 @@ public class Account {
     public boolean addTransaction(Transaction _transaction){
         //  do not use getTransactions() method here because
         //  cache is going to be re-built in case it is empty
-        return this.olTransactions.add(_transaction);
+
+        if (_transaction != null){
+            this.olTransactions.add(_transaction);
+
+            //  need to sort list after transaction is added
+            olTransactions.sort((transaction1, transaction2) -> {
+                LocalDate td1 = LocalDate.parse(transaction1.getDate());
+                LocalDate td2 = LocalDate.parse(transaction2.getDate());
+                int tid1 = transaction1.getId();
+                int tid2 = transaction2.getId();
+                if (td1.isBefore(td2)){
+                    return -1;
+                }else if (td1.isAfter(td2)){
+                    return 1;
+                }else{
+                    //   td1.equals(td2)
+                    if (tid1 < tid2){
+                        return -1;
+                    }else if (td1 == td2){
+                        return 0;
+                    }else{
+                        return 1;
+                    }
+                }
+            });
+        }else{
+            return false;
+        }
+
+        return true;
     }
 
     /**
