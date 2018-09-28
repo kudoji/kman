@@ -110,6 +110,7 @@ public class Payee {
      */
     public boolean save(){
         HashMap<String, String> params = new HashMap<>();
+        params.put("table", "payees");
         params.put("name", this.getName());
         //  avoid foreign key constrain
         params.put("category_deposit", this.getCategoryDepositId() == 0 ? null: String.valueOf(this.getCategoryDepositId()));
@@ -169,6 +170,10 @@ public class Payee {
         if (_category == null || _transactionTypeId <= 0) return false;
 
         int categoryId = _category.getId();
+
+        //  the probability of this is close to 0 but anyway.
+        if (categoryId <= 0) return false;
+
         boolean saveNeeded = false;
         if (_transactionTypeId == TransactionType.ACCOUNT_TYPES_DEPOSIT){
             if (this.getCategoryDepositId() == 0){
