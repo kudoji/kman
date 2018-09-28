@@ -104,8 +104,16 @@ public class Kman extends Application {
         
         return result;
     }
-    
+
+    /**
+     * Selects item with _id in combobox
+     *
+     * @param _combobox
+     * @param _id
+     */
     public static void selectItemInCombobox(javafx.scene.control.ComboBox _combobox, int _id){
+        if (_id <= 0) return;
+
         for (Object item: _combobox.getItems()){
             if (item instanceof Currency){//looks like it's not possible to cast dynamically....
                 Currency itemClass = (Currency)item;
@@ -131,7 +139,14 @@ public class Kman extends Application {
             }else if (item instanceof Payee){
                 Payee itemClass = (Payee)item;
 
-                if (itemClass.getID() == _id){
+                if (itemClass.getId() == _id){
+                    _combobox.getSelectionModel().select(item);
+                    break;
+                }
+            }else if (item instanceof Category){
+                Category itemClass = (Category)item;
+
+                if (itemClass.getId() == _id){
                     _combobox.getSelectionModel().select(item);
                     break;
                 }

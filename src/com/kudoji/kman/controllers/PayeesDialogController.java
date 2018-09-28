@@ -52,7 +52,7 @@ public class PayeesDialogController extends Controller {
         
         java.util.HashMap<String, String> params = new java.util.HashMap<>();
         params.put("table", "payees");
-        params.put("where", "id = " + payeeSelected.getID());
+        params.put("where", "id = " + payeeSelected.getId());
         
         if (Kman.getDB().deleteData(params)){
             Payee.getPayees().remove(payeeSelected);

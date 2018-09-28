@@ -6,8 +6,10 @@ import java.util.ResourceBundle;
 import com.kudoji.kman.models.Controller;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Payee;
+import com.kudoji.kman.models.Category;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 
 /**
  * FXML Controller class
@@ -24,6 +26,9 @@ public class PayeeDialogController extends Controller {
     
     @FXML
     private javafx.scene.control.TextField tfId, tfName;
+    @FXML
+    private ComboBox<Category> cbCategoryDeposit, cbCategoryWithdrawal;
+
     private final int MAX_PAYEE_NAMELENGTH = 15;
     
     @FXML
@@ -60,11 +65,16 @@ public class PayeeDialogController extends Controller {
         java.util.HashMap<String, String> params = new java.util.HashMap<>();
         params.put("table", "payees");
         params.put("name", tfName.getText());
-        //add categories later...
-        
+        int categoryId = Category.getCategoryId(cbCategoryDeposit.getSelectionModel().getSelectedItem());
+        //  need to avoid foreign key constrain
+        params.put("category_deposit", ((categoryId != 0) ? String.valueOf(categoryId) : null));
+        categoryId = Category.getCategoryId(cbCategoryWithdrawal.getSelectionModel().getSelectedItem());
+        //  avoid foreign key constrain
+        params.put("category_withdrawal", ((categoryId != 0) ? String.valueOf(categoryId) : null));
+
         if (this.payee != null){
             //update the DB record
-            params.put("id", Integer.toString(payee.getID()));
+            params.put("id", Integer.toString(payee.getId()));
         }
         int payeeID;
         payeeID = Kman.getDB().updateData((this.payee == null), params);
@@ -93,8 +103,10 @@ public class PayeeDialogController extends Controller {
         this.payee = (Payee)_formObject;
         if (this.payee != null){
             //this is an edit form
-            tfId.setText(Integer.toString(payee.getID()));
+            tfId.setText(Integer.toString(payee.getId()));
             tfName.setText(payee.getName());
+            Kman.selectItemInCombobox(cbCategoryDeposit, this.payee.getCategoryDepositId());
+            Kman.selectItemInCombobox(cbCategoryWithdrawal, this.payee.getCategoryWithdrawalId());
         }
     }
 
@@ -104,6 +116,8 @@ public class PayeeDialogController extends Controller {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
+        cbCategoryDeposit.setItems(Category.getCategories());
+        cbCategoryWithdrawal.setItems(Category.getCategories());
     }    
     
 }

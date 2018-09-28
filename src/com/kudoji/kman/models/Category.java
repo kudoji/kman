@@ -3,6 +3,7 @@ package com.kudoji.kman.models;
 import java.util.HashMap;
 
 import com.kudoji.kman.Kman;
+import javafx.collections.FXCollections;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
@@ -11,10 +12,17 @@ import javafx.scene.control.TreeView;
  * @author kudoji
  */
 public class Category {
+    //  id of transfer category
+    public final static int CATEGORY_TRANSFER_ID = 1;
     private int id;
     private String name, fullPath;
     private int categories_id;
-    
+
+    /**
+     * Keeps information about payees which allows reduce DB usage
+     */
+    private final static javafx.collections.ObservableList<Category> categoriesCache = FXCollections.observableArrayList();
+
     public Category(){
         this.id = 0;
         this.name = "Categories";
@@ -78,10 +86,14 @@ public class Category {
     
     /**
      * Returns category object by particular _id
+     * Returns null if _id is incorrect or not found
+     *
      * @param _id
      * @return 
      */
     public static Category getCategory(int _id){
+        if (_id <= 0) return null;
+
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "categories");
         params.put("id", Integer.toString(_id));
@@ -92,6 +104,20 @@ public class Category {
             return new Category(rows.get(0));
         }else{
             return null;
+        }
+    }
+
+    /**
+     * Returns category id based on Category instance
+     *
+     * @param _category
+     * @return category id or 0 if _category is not set
+     */
+    public static int getCategoryId(Category _category){
+        if (_category == null){
+            return 0;
+        }else{
+            return _category.getId();
         }
     }
     
@@ -184,5 +210,20 @@ public class Category {
         }
         //  set focus to categories tree
         _tvCategories.requestFocus();
+    }
+
+    public static javafx.collections.ObservableList<Category> getCategories(){
+        if (Category.categoriesCache.isEmpty()){ //never filled, need to get data from DB
+            HashMap<String, String> params = new HashMap<>();
+            params.put("table", "categories");
+            params.put("order", "name asc");
+
+            java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
+            for (HashMap<String, String> row: rows){
+                Category.categoriesCache.add(new Category(row));
+            }
+        }
+
+        return Category.categoriesCache;
     }
 }

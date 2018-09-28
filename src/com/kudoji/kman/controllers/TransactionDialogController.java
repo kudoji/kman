@@ -92,13 +92,33 @@ public class TransactionDialogController extends Controller {
                 cbAccountTo.setVisible(true);
                 chbAdvanced.setDisable(false);
 
+                if (this.category == null){
+                    //  this is a transfer and category is not currently selected
+                    //  get transfer category
+                    setCategory(Category.getCategory(Category.CATEGORY_TRANSFER_ID));
+                }
+
                 break;
             default: //error
                 
                 break;
         }
     }
-    
+
+    @FXML
+    private void cbPayeeOnAction(ActionEvent event){
+        if (this.category == null){
+            //  category is not selected yet
+            Payee payee = this.cbPayee.getSelectionModel().getSelectedItem();
+            if (payee != null){
+                //  payee is selected
+                TransactionType atSelected = cbType.getSelectionModel().getSelectedItem();
+
+                setCategory(payee.getCategory(atSelected));
+            }
+        }
+    }
+
     @FXML
     private void btnCategoryOnAction(ActionEvent event){
         java.util.HashMap<String, Category> params = new java.util.HashMap<>(); //selected category
@@ -107,8 +127,7 @@ public class TransactionDialogController extends Controller {
         params.put("object", this.category);
         if (Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Select Category...", params)){
             //value were selected
-            this.category = params.get("object");
-            btnCategory.setText(this.category.getFullPath());
+            setCategory(params.get("object"));
         }
     }
     
@@ -131,7 +150,16 @@ public class TransactionDialogController extends Controller {
     private void chbAdvancedOnAction(ActionEvent event){
         tfAmountTo.setDisable(!chbAdvanced.isSelected());
     }
-    
+
+    private void setCategory(Category _category){
+        this.category = _category;
+        if (_category != null){
+            btnCategory.setText(this.category.getFullPath());
+        }else{
+            btnCategory.setText("category");
+        }
+    }
+
     /**
      * Form is opened for editing, load all fields with data from the transaction 
      * @param _formObject
@@ -181,8 +209,9 @@ public class TransactionDialogController extends Controller {
             }
             //set amount to visibility
             chbAdvancedOnAction(null);
-            this.category = Category.getCategory(this.transaction.getCategoryId());
-            btnCategory.setText(this.category.getFullPath());
+
+            setCategory(Category.getCategory(this.transaction.getCategoryId()));
+
             taNotes.setText(this.transaction.getNotes());
         }else{
             //new element dialog
@@ -190,19 +219,6 @@ public class TransactionDialogController extends Controller {
         }
     }
     
-    private void populatePayeesComboBox(){
-        cbPayee.getItems().clear();
-        
-        java.util.HashMap<String, String> params = new java.util.HashMap<>();
-        params.put("table", "payees");
-
-        ArrayList<java.util.HashMap<String, String>> rows = Kman.getDB().selectData(params);
-        for (java.util.HashMap<String, String> row: rows){
-            Payee pItem = new Payee(row);
-            cbPayee.getItems().add(pItem);
-        }
-    }
-
     /**
      *  Auxiliary method for additional calculations and committing necessary changes
      *  Used in case of new transaction
@@ -354,12 +370,14 @@ public class TransactionDialogController extends Controller {
         if (!Kman.getDB().startTransaction()) return false; //    something went wrong
 
         String tdNew = dpDate.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        int ttIDNew = ((TransactionType)cbType.getSelectionModel().getSelectedItem()).getId();
+        int ttIDNew = cbType.getSelectionModel().getSelectedItem().getId();
         int payeeIDNew = 0;
         if (    (ttIDNew == TransactionType.ACCOUNT_TYPES_DEPOSIT) ||
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL)){
-            Payee payee = (Payee)cbPayee.getSelectionModel().getSelectedItem();
-            payeeIDNew = payee.getID();
+            Payee payee = cbPayee.getSelectionModel().getSelectedItem();
+            //  set category for payee
+            payee.setCategory(this.category, ttIDNew);
+            payeeIDNew = payee.getId();
         }
 
         java.util.HashMap<String, String> params = new java.util.HashMap<>();
@@ -527,12 +545,12 @@ public class TransactionDialogController extends Controller {
             cbType.getItems().add(tt);
         }
         cbType.getSelectionModel().selectFirst();
-        cbTypeOnAction(null); //make necessary fiels visible
+        cbTypeOnAction(null); //make necessary fields visible
 
         cbAccountFrom.setItems(Account.getAccounts());
         cbAccountTo.setItems(Account.getAccounts());
-        populatePayeesComboBox();
-        
+        cbPayee.setItems(Payee.getPayees());
+
         tfAmountFrom.setText("0.00");
         tfAmountTo.setText("0.00");
     }
