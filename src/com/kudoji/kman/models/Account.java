@@ -420,17 +420,17 @@ public class Account {
             params.put("id", String.valueOf(this.getId()));
         }
 
-        int accountID;
+        int accountId;
         //use insert since the account is new (this.isNew = true)
         //use update since the account is existed (this.isNew = false)
-        accountID = Kman.getDB().updateData(this.getId() == 0, params);
+        accountId = Kman.getDB().updateData(this.getId() == 0, params);
 
-        if (accountID > 0){
+        if (accountId > 0){
             //  successfully inserted
             if (this.getId() == 0){
                 //  this is a new account
 
-                this.setId(accountID);
+                this.setId(accountId);
 
                 Account.getAccounts().add(this);
             }else{
