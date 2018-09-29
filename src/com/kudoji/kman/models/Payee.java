@@ -123,8 +123,8 @@ public class Payee {
         if (Payee.payeesCache.isEmpty()){ //never filled, need to get data from DB
             HashMap<String, String> params = new HashMap<>();
             params.put("table", "payees");
-            //  order by usage frequency and name
-            params.put("order", "usage_freq asc, name asc");
+            //  order by usage frequency (more frequent items come first) and name
+            params.put("order", "usage_freq desc, name asc");
             
             java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
             for (HashMap<String, String> row: rows){
