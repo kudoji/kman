@@ -709,11 +709,11 @@ public class DB {
                 sqlText = "create table accounts\n" +
                 "(\n" +
                 "       id integer primary key,\n" +
-		"	name text not null,\n" +
-		"	balance_initial real,\n" +
-		"	balance_current real,\n" +
-		"	currencies_id integer not null,\n" +
-		"	foreign key(currencies_id) references currencies(id) on delete cascade\n" + 
+                "	name text not null,\n" +
+                "	balance_initial real,\n" +
+                "	balance_current real,\n" +
+                "	currencies_id integer not null,\n" +
+                "	foreign key(currencies_id) references currencies(id) on delete cascade\n" +
                 ");";
                 sqlStatement.execute(sqlText);
          
@@ -725,11 +725,12 @@ public class DB {
                 sqlText = "create table payees\n" +
                 "(\n" +
                 "       id integer primary key,\n" +
-		"	name text not null,\n" +
+		        "	name text not null,\n" +
                 "	category_deposit int,\n" +
                 "	category_withdrawal int,\n" +
-                "       foreign key(category_deposit) references categories(id) on delete set null,\n" +
-                "       foreign key(category_withdrawal) references categories(id) on delete set null\n" +
+                "	usage_freq int default 0,\n" +
+                "   foreign key(category_deposit) references categories(id) on delete set null,\n" +
+                "   foreign key(category_withdrawal) references categories(id) on delete set null\n" +
                 ");";
                 sqlStatement.execute(sqlText);
          
@@ -740,10 +741,10 @@ public class DB {
                 
                 sqlText = "create table categories\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
-		"	name text not null,\n" +
-                "       categories_id integer,\n" +
-                "       foreign key(categories_id) references categories(id) on delete cascade\n" +
+                "   id integer primary key,\n" +
+		        "	name text not null,\n" +
+                "   categories_id integer,\n" +
+                "   foreign key(categories_id) references categories(id) on delete cascade\n" +
                 ");";
                 sqlStatement.execute(sqlText);
          
@@ -754,8 +755,8 @@ public class DB {
                 
                 sqlText = "create table transaction_types\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
-		"	name text not null\n" +
+                "   id integer primary key,\n" +
+		        "	name text not null\n" +
                 ");";
                 sqlStatement.execute(sqlText);
          
@@ -766,8 +767,8 @@ public class DB {
                 
                 sqlText = "create table transactions\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
-		"	date text not null,\n" +
+                "   id integer primary key,\n" +
+		        "	date text not null,\n" +
                 "	transaction_types_id integer not null,\n" +
                 "	categories_id integer not null,\n" +
                 "	payees_id integer,\n" + //can be null in case of transfer

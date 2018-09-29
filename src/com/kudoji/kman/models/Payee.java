@@ -18,6 +18,7 @@ public class Payee {
     private StringProperty name;
     private IntegerProperty categoryDepositId;
     private IntegerProperty categoryWithdrawalId;
+    private int usageFreq; //   keeps usage frequency
     
     /**
      * Keeps information about payees which allows reduce DB usage
@@ -29,6 +30,7 @@ public class Payee {
         this.name = new SimpleStringProperty(_params.get("name"));
         this.categoryDepositId = new SimpleIntegerProperty(Integer.parseInt(_params.get("category_deposit")));
         this.categoryWithdrawalId = new SimpleIntegerProperty(Integer.parseInt(_params.get("category_withdrawal")));
+        this.usageFreq = Integer.parseInt(_params.get("usage_freq"));
     }
     
     public void setFields(HashMap<String, String> _params){
@@ -39,6 +41,7 @@ public class Payee {
         this.categoryDepositId.set(categoryId == null ? 0 : Integer.parseInt(categoryId));
         categoryId = _params.get("category_withdrawal");
         this.categoryWithdrawalId.set(categoryId == null ? 0 : Integer.parseInt(categoryId));
+        this.usageFreq = Integer.parseInt(_params.get("usage_freq"));
     }
 
     public int getId(){
@@ -69,6 +72,39 @@ public class Payee {
         return this.categoryWithdrawalId.get();
     }
 
+    public int getUsageFreq(){
+        return this.usageFreq;
+    }
+
+    public void setUsageFreq(int _value){
+        if (_value < 0 || _value > Integer.MAX_VALUE) return;
+
+        this.usageFreq = _value;
+    }
+
+    /**
+     * increment current usage frequency by _delta
+     *
+     * @param _delta
+     * @return true than value changed, false otherwise
+     */
+    public boolean incUsageFreq(int _delta){
+        if (_delta < 0){
+            if (this.usageFreq == Integer.MIN_VALUE){
+                return false;
+            }
+        }else if (_delta == 0){
+            return false;
+        }else{
+            if (this.usageFreq == Integer.MAX_VALUE){
+                return false;
+            }
+        }
+
+        this.usageFreq += _delta;
+        return true;
+    }
+
     public static Payee getPayee(int _id){
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "payees");
@@ -87,7 +123,8 @@ public class Payee {
         if (Payee.payeesCache.isEmpty()){ //never filled, need to get data from DB
             HashMap<String, String> params = new HashMap<>();
             params.put("table", "payees");
-            params.put("order", "name asc");
+            //  order by usage frequency (more frequent items come first) and name
+            params.put("order", "usage_freq desc, name asc");
             
             java.util.ArrayList<HashMap<String, String>> rows = Kman.getDB().selectData(params);
             for (HashMap<String, String> row: rows){
@@ -115,6 +152,7 @@ public class Payee {
         //  avoid foreign key constrain
         params.put("category_deposit", this.getCategoryDepositId() == 0 ? null: String.valueOf(this.getCategoryDepositId()));
         params.put("category_withdrawal", this.getCategoryWithdrawalId() == 0 ? null: String.valueOf(this.getCategoryWithdrawalId()));
+        params.put("usage_freq", String.valueOf(this.getUsageFreq()));
 
         if (this.getId() > 0){
             //  existed payee
@@ -145,18 +183,18 @@ public class Payee {
     /**
      * Sets for payee category based on transaction type
      * Category will be set if payee's one is empty
-     * Method saves data to DB
      *
      * @param _category
      * @param _type
+     * @param _saveDB Method saves data to DB
      * @return
      */
-    public boolean setCategory(Category _category, TransactionType _type){
+    public boolean setCategory(Category _category, TransactionType _type, boolean _saveDB){
         if (_category == null || _type == null) return false;
 
         int transactionTypeId = _type.getId();
 
-        return setCategory(_category, transactionTypeId);
+        return setCategory(_category, transactionTypeId, _saveDB);
     }
 
     /**
@@ -164,9 +202,10 @@ public class Payee {
      *
      * @param _category
      * @param _transactionTypeId
+     * @param _saveDB save cnahges to DB or not
      * @return
      */
-    public boolean setCategory(Category _category, int _transactionTypeId){
+    public boolean setCategory(Category _category, int _transactionTypeId, boolean _saveDB){
         if (_category == null || _transactionTypeId <= 0) return false;
 
         int categoryId = _category.getId();
@@ -189,7 +228,7 @@ public class Payee {
             }
         }
 
-        if (saveNeeded){
+        if (_saveDB && saveNeeded){
             return this.save();
         }
 
