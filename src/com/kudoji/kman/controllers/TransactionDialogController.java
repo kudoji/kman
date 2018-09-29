@@ -376,7 +376,11 @@ public class TransactionDialogController extends Controller {
                 (ttIDNew == TransactionType.ACCOUNT_TYPES_WITHDRAWAL)){
             Payee payee = cbPayee.getSelectionModel().getSelectedItem();
             //  set category for payee
-            payee.setCategory(this.category, ttIDNew);
+            payee.setCategory(this.category, ttIDNew, false);
+            //  increment payee usage
+            payee.incUsageFreq(1);
+            //  save changes to DB
+            payee.save();
             payeeIDNew = payee.getId();
         }
 
