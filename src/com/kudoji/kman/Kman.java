@@ -13,6 +13,7 @@ import javafx.stage.Stage;
  * @author kudoji
  */
 public class Kman extends Application {
+    public final static String KMAN_VERSION = "0.5.3";
     private static DB kmanDB;
     
     public Kman(){
