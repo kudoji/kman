@@ -1,0 +1,19 @@
+{
+    "platform": "mac",
+    "jdk": "jre/jre-8u181-macosx-x64.zip",
+    "executable": "kman",
+    "classpath": [
+        "kman.jar"
+    ],
+    "removelibs": [
+        "kman.jar"
+    ],
+    "mainclass": "com.kudoji.kman.Kman",
+    "vmargs": [
+    	"Xmx1G"
+    ],
+    "resources": [
+    ],
+    "minimizejre": "soft",
+    "output": "out/kman.app"
+}
