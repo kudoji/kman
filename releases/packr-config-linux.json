@@ -1,0 +1,19 @@
+{
+    "platform": "linux64",
+    "jdk": "jre/jre-8u181-linux-x64.zip",
+    "executable": "kman",
+    "classpath": [
+        "kman/kman-0.5.3.jar"
+    ],
+    "removelibs": [
+        "kman/kman-0.5.3.jar"
+    ],
+    "mainclass": "com.kudoji.kman.Kman",
+    "vmargs": [
+        "Xmx1G"
+    ],
+    "resources": [
+    ],
+    "minimizejre": "soft",
+    "output": "out/kman-0.5.3-linux-x64"
+}

@@ -1,10 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.kudoji.kman;
 
+import com.kudoji.kman.models.*;
+import com.kudoji.kman.utils.DB;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,6 +13,7 @@ import javafx.stage.Stage;
  * @author kudoji
  */
 public class Kman extends Application {
+    public final static String KMAN_VERSION = "0.5.3";
     private static DB kmanDB;
     
     public Kman(){
@@ -107,8 +105,16 @@ public class Kman extends Application {
         
         return result;
     }
-    
+
+    /**
+     * Selects item with _id in combobox
+     *
+     * @param _combobox
+     * @param _id
+     */
     public static void selectItemInCombobox(javafx.scene.control.ComboBox _combobox, int _id){
+        if (_id <= 0) return;
+
         for (Object item: _combobox.getItems()){
             if (item instanceof Currency){//looks like it's not possible to cast dynamically....
                 Currency itemClass = (Currency)item;
@@ -134,7 +140,14 @@ public class Kman extends Application {
             }else if (item instanceof Payee){
                 Payee itemClass = (Payee)item;
 
-                if (itemClass.getID() == _id){
+                if (itemClass.getId() == _id){
+                    _combobox.getSelectionModel().select(item);
+                    break;
+                }
+            }else if (item instanceof Category){
+                Category itemClass = (Category)item;
+
+                if (itemClass.getId() == _id){
                     _combobox.getSelectionModel().select(item);
                     break;
                 }
@@ -144,7 +157,7 @@ public class Kman extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("Kman.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("views/Kman.fxml"));
         
         Scene scene = new Scene(root);
         
