@@ -1,4 +1,4 @@
-package com.kudoji.kman.models;
+package com.kudoji.kman.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -78,7 +78,5 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
 }
