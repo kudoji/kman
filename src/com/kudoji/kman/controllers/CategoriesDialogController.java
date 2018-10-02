@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.kudoji.kman.models.Category;
-import com.kudoji.kman.models.Controller;
 import com.kudoji.kman.Kman;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

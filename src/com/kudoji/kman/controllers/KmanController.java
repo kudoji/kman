@@ -82,8 +82,7 @@ public class KmanController implements Initializable {
     
     @FXML
     private void miAboutOnAction(ActionEvent event){
-        System.gc();
-        System.out.println("trying gc...");
+        Kman.showAndWaitForm("views/AboutDialog.fxml", "About kman", null);
     }
     
     @FXML

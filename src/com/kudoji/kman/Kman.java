@@ -1,5 +1,6 @@
 package com.kudoji.kman;
 
+import com.kudoji.kman.controllers.Controller;
 import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.DB;
 import javafx.application.Application;
@@ -13,7 +14,10 @@ import javafx.stage.Stage;
  * @author kudoji
  */
 public class Kman extends Application {
+    //  current app version
     public final static String KMAN_VERSION = "0.5.3";
+    //  github repository url
+    public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
     private static DB kmanDB;
     
     public Kman(){

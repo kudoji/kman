@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.kudoji.kman.models.Account;
-import com.kudoji.kman.models.Controller;
 import com.kudoji.kman.models.Currency;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.utils.Strings;
