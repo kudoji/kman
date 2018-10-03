@@ -3,6 +3,7 @@ package com.kudoji.kman;
 import com.kudoji.kman.controllers.Controller;
 import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.DB;
+import com.kudoji.kman.utils.Settings;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,6 +20,8 @@ public class Kman extends Application {
     //  github repository url
     public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
     private static DB kmanDB;
+    //  save settings
+    private Settings settings;
     
     public Kman(){
         kmanDB = new DB("kudoji.kmd");
@@ -169,6 +172,14 @@ public class Kman extends Application {
         stage.setScene(scene);
         stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
         stage.show();
+
+        settings = new Settings(stage);
+        settings.readSettings();
+    }
+
+    @Override
+    public void stop() throws Exception{
+        settings.saveSettings();
     }
 
     /**
