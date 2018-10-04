@@ -1,9 +1,11 @@
 package com.kudoji.kman.utils;
 
+import com.kudoji.kman.Kman;
 import javafx.stage.Stage;
 import java.util.prefs.*;
 
 public class Settings {
+    private final static String KMAN_DB_NAME = "kmanDBName";
     private final static String WINDOW_SAVE_NAME = "saveWindowPosition";
     private final static String WINDOW_X_NAME = "windowsX";
     private final static String WINDOW_Y_NAME = "windowsY";
@@ -20,9 +22,16 @@ public class Settings {
         this.stage = stage;
     }
 
+    /**
+     * Returns DB name
+     * @return
+     */
+    public String getDBName(){
+        return this.prefs.get(KMAN_DB_NAME, Kman.KMAN_DB_NAME_DEFAULT);
+    }
+
     public void readSettings(){
-        this.saveWindowPosition = this.prefs.getBoolean(WINDOW_SAVE_NAME, false);
-//        this.saveWindowPosition = false;
+        this.saveWindowPosition = this.prefs.getBoolean(WINDOW_SAVE_NAME, true);
         if (this.saveWindowPosition){
             this.stage.setX(this.prefs.getDouble(WINDOW_X_NAME, this.stage.getX()));
             this.stage.setY(this.prefs.getDouble(WINDOW_Y_NAME, this.stage.getY()));
@@ -39,5 +48,8 @@ public class Settings {
             this.prefs.putDouble(WINDOW_WIDTH_NAME, this.stage.getWidth());
             this.prefs.putDouble(WINDOW_HEIGHT_NAME, this.stage.getHeight());
         }
+
+        //  save current DB name to open app with
+        this.prefs.put(KMAN_DB_NAME, Kman.getDB().getFile());
     }
 }

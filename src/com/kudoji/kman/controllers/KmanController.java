@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -63,8 +64,8 @@ public class KmanController implements Initializable {
                 Kman.getDB().connect(fSelected.getPath());
                 Kman.getDB().createAllTables(true);
 
-                tiAccounts = Account.populateAccountsTree(tvNavigation);
-                tvNavigation.getSelectionModel().select(tiAccounts);
+                clearAppScreen();
+                Kman.setWindowTitle();
             }catch (IOException e){
                 Kman.showErrorMessage("Cannot create file: " + fSelected.getPath());
             }
@@ -85,8 +86,8 @@ public class KmanController implements Initializable {
                 Kman.showErrorMessage("Cannot open file: " + fSelected.getPath());
             }
 
-            tiAccounts = Account.populateAccountsTree(tvNavigation);
-            tvNavigation.getSelectionModel().select(tiAccounts);
+            clearAppScreen();
+            Kman.setWindowTitle();
         }
     }
 
@@ -105,8 +106,8 @@ public class KmanController implements Initializable {
                 Kman.getDB().close();
                 Kman.getDB().connect(fSelected.getPath());
 
-                tiAccounts = Account.populateAccountsTree(tvNavigation);
-                tvNavigation.getSelectionModel().select(tiAccounts);
+                clearAppScreen();
+                Kman.setWindowTitle();
             }catch (IOException e){
                 Kman.showErrorMessage("Cannot create file: " + fSelected.getPath());
             }
@@ -115,7 +116,8 @@ public class KmanController implements Initializable {
 
     @FXML
     private void miExitOnAction(ActionEvent event){
-        System.exit(0);
+        //  System.exit(0); is very hard which causes skipping Application.stop() method
+        Platform.exit();
     }
     
     @FXML
@@ -388,7 +390,16 @@ public class KmanController implements Initializable {
             }
         }
     }
-    
+
+    /**
+     * Does all necessary operations for clearing app's screen
+     */
+    private void clearAppScreen(){
+        tiAccounts = Account.populateAccountsTree(tvNavigation);
+        tvNavigation.getSelectionModel().select(tiAccounts);
+        tvTransactions.getItems().clear();
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
