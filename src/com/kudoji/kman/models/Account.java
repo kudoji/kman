@@ -246,9 +246,12 @@ public class Account {
             _tvAccounts.setRoot(tiRoot);
             _tvAccounts.setShowRoot(false);
         }else{
-            tiAccounts = (TreeItem<Account>)_tvAccounts.getRoot().getChildren().get(0);
+            tiAccounts = _tvAccounts.getRoot().getChildren().get(0);
             tiAccounts.getChildren().clear();
         }
+
+        //  force to re-create accounts cache in case of using new DB
+        Account.clearAccountsCache();
 
         for (Account account: Account.getAccounts()){
             tiAccounts.getChildren().add(addTreeItem(account));
@@ -303,6 +306,11 @@ public class Account {
             }
 //            System.out.println(java.time.LocalDateTime.now());
         }
+    }
+
+    public static void clearAccountsCache(){
+        hmAccountsList.clear();
+        olAccountsList.clear();
     }
 
     /**
