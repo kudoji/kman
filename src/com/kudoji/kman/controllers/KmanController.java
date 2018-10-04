@@ -335,6 +335,13 @@ public class KmanController implements Initializable {
                 }
             }
         });
+
+        //  update transactions any time user pressed navigation key
+        tvNavigation.setOnKeyReleased(event -> {
+            if (event.getCode().isNavigationKey()){
+                tvNavigationOnSelect();
+            }
+        });
         
         tvTransactions.setOnMouseClicked((MouseEvent event) ->{
             if (event.getButton() == MouseButton.PRIMARY){
