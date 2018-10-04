@@ -186,6 +186,9 @@ public class Kman extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
+        app.setDockIconImage(new javax.swing.ImageIcon(Kman.class.getResource("/icon.png")).getImage());
+        
         launch(args);
     }
 }
