@@ -1,11 +1,15 @@
 package com.kudoji.kman.controllers;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -19,6 +23,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 
 /**
  *
@@ -34,10 +39,85 @@ public class KmanController implements Initializable {
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
     
-    //menu actions
+    //  menu actions
+    @FXML
+    private void miNewDatabase(ActionEvent event){
+        FileChooser fcKman = new FileChooser();
+        fcKman.setTitle("Choose database file to create...");
+        fcKman.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("kman database", "*.kmd")
+        );
+        java.io.File fSelected = fcKman.showSaveDialog(null);
+        if (fSelected != null){
+            if (fSelected.exists()){
+                //  user selected file which is already existed
+                if (!fSelected.delete()){
+                    Kman.showErrorMessage("Cannot re-write file: " + fSelected.getPath());
+                    return;
+                }
+            }
+
+            try{
+                fSelected.createNewFile();
+
+                Kman.getDB().close();
+                Kman.getDB().connect(fSelected.getPath());
+                Kman.getDB().createAllTables(true);
+
+                clearAppScreen();
+                Kman.setWindowTitle();
+            }catch (IOException e){
+                Kman.showErrorMessage("Cannot create file: " + fSelected.getPath());
+            }
+        }
+    }
+
+    @FXML
+    private void miOpenDatabase(ActionEvent event){
+        FileChooser fcKman = new FileChooser();
+        fcKman.setTitle("Choose database file to open...");
+        fcKman.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("kman database", "*.kmd")
+        );
+        java.io.File fSelected = fcKman.showOpenDialog(null);
+        if (fSelected != null && fSelected.exists()){
+            Kman.getDB().close();
+            if (!Kman.getDB().connect(fSelected.getPath())){
+                Kman.showErrorMessage("Cannot open file: " + fSelected.getPath());
+            }
+
+            clearAppScreen();
+            Kman.setWindowTitle();
+        }
+    }
+
+    @FXML
+    private void miSaveDatabaseAs(ActionEvent event){
+        FileChooser fcKman = new FileChooser();
+        fcKman.setTitle("Save database file as...");
+        fcKman.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("kman database", "*.kmd")
+        );
+        java.io.File fSelected = fcKman.showSaveDialog(null);
+        if (fSelected != null){
+            try{
+                Files.copy(java.nio.file.Paths.get(Kman.getDB().getFile()), fSelected.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                Kman.getDB().close();
+                Kman.getDB().connect(fSelected.getPath());
+
+                clearAppScreen();
+                Kman.setWindowTitle();
+            }catch (IOException e){
+                Kman.showErrorMessage("Cannot create file: " + fSelected.getPath());
+            }
+        }
+    }
+
     @FXML
     private void miExitOnAction(ActionEvent event){
-        System.exit(0);
+        //  System.exit(0); is very hard which causes skipping Application.stop() method
+        Platform.exit();
     }
     
     @FXML
@@ -310,7 +390,16 @@ public class KmanController implements Initializable {
             }
         }
     }
-    
+
+    /**
+     * Does all necessary operations for clearing app's screen
+     */
+    private void clearAppScreen(){
+        tiAccounts = Account.populateAccountsTree(tvNavigation);
+        tvNavigation.getSelectionModel().select(tiAccounts);
+        tvTransactions.getItems().clear();
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO

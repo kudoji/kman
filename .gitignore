@@ -1,8 +1,8 @@
 #materials for the project
 materials/
 
-#default db
-kudoji.kmd
+#kman db file(s)
+*.kmd
 
 #fossil db
 *.fossil

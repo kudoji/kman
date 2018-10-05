@@ -15,19 +15,19 @@ import javafx.stage.Stage;
  * @author kudoji
  */
 public class Kman extends Application {
+    public final static String KMAN_NAME = "kman";
+    public final static String KMAN_DB_NAME_DEFAULT = "kman.kmd";
     //  current app version
     public final static String KMAN_VERSION = "0.5.3";
     //  github repository url
     public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
+
     private static DB kmanDB;
+    private static Stage kmanStage;
     //  save settings
     private Settings settings;
-    
+
     public Kman(){
-        kmanDB = new DB("kudoji.kmd");
-        kmanDB.setDebugMode(true);
-        kmanDB.connect();
-        kmanDB.createAllTables(true);
     }
     
     public static DB getDB(){
@@ -161,20 +161,30 @@ public class Kman extends Application {
             }
         }
     }
-    
+
+    public static void setWindowTitle(){
+        Kman.kmanStage.setTitle(KMAN_NAME + " [" + Kman.getDB().getFile() + "]");
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("views/Kman.fxml"));
-        
-        Scene scene = new Scene(root);
-        
-        stage.setTitle("kman");
-        stage.setScene(scene);
-        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
-        stage.show();
+        Kman.kmanStage = stage;
 
         settings = new Settings(stage);
         settings.readSettings();
+
+        kmanDB = new DB(settings.getDBName());
+        kmanDB.setDebugMode(true);
+        kmanDB.connect();
+        kmanDB.createAllTables(true);
+
+        Parent root = FXMLLoader.load(getClass().getResource("views/Kman.fxml"));
+        Scene scene = new Scene(root);
+
+        setWindowTitle();
+        stage.setScene(scene);
+        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
+        stage.show();
     }
 
     @Override
@@ -188,7 +198,7 @@ public class Kman extends Application {
     public static void main(String[] args) {
         com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
         app.setDockIconImage(new javax.swing.ImageIcon(Kman.class.getResource("/icon.png")).getImage());
-        
+
         launch(args);
     }
 }
