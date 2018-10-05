@@ -12,14 +12,6 @@ materials/
 *.iml
 out/
 
-#ant specific folders
-build/
-dist/
-#net beans specific folders
-nbproject/*
-!nbproject/project.properties
-!nbproject/project.xml
-
 # Compiled class file
 *.class
 
