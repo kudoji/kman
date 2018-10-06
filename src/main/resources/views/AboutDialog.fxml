@@ -47,7 +47,7 @@
             <Font name="System Bold" size="17.0" />
          </font>
       </Text>
-      <TextArea editable="false" prefHeight="86.0" prefWidth="352.0" text="kman is a friendly, money management software.&#10;It's free and open source.&#10;&#10;Written by kudoji." wrapText="true" GridPane.columnSpan="2" GridPane.rowIndex="3" GridPane.rowSpan="3" />
+      <TextArea editable="false" prefHeight="86.0" prefWidth="352.0" text="kman is a friendly money management software for Windows, Linux and Mac OS X.&#10;It's free and open source.&#10;&#10;Written by kudoji." wrapText="true" GridPane.columnSpan="2" GridPane.rowIndex="3" GridPane.rowSpan="3" />
       <FlowPane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Source code is available on" />

@@ -40,6 +40,6 @@ public class AboutDialogController extends Controller {
         hlGitHub.setTooltip(new Tooltip(Kman.KMAN_GH_URL));
         //  remove border for visited link
         hlGitHub.setBorder(Border.EMPTY);
-        iLogo.setImage(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
+        iLogo.setImage(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/images/icon.png")));
     }
 }

@@ -1,5 +1,7 @@
 #materials for the project
 materials/
+releases/
+!releases/packr-config-*.json
 
 #kman db file(s)
 *.kmd
@@ -7,10 +9,12 @@ materials/
 #fossil db
 *.fossil
 
+#maven
+target/
+
 #idea folders
 .idea
 *.iml
-out/
 
 # Compiled class file
 *.class

@@ -26,7 +26,7 @@ public class CurrenciesDialogController extends Controller {
 
     @FXML
     private void btnCurrencyInsertOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/CurrencyDialog.fxml", "Add new currency...", null);
+        Kman.showAndWaitForm("/views/CurrencyDialog.fxml", "Add new currency...", null);
     }
 
     @FXML
@@ -38,7 +38,7 @@ public class CurrenciesDialogController extends Controller {
             return;
         }
 
-        Kman.showAndWaitForm("views/CurrencyDialog.fxml", "Edit currency...", currencySelected);
+        Kman.showAndWaitForm("/views/CurrencyDialog.fxml", "Edit currency...", currencySelected);
     }
 
     @FXML

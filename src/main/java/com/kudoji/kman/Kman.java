@@ -178,12 +178,12 @@ public class Kman extends Application {
         kmanDB.connect();
         kmanDB.createAllTables(true);
 
-        Parent root = FXMLLoader.load(getClass().getResource("views/Kman.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/views/Kman.fxml"));
         Scene scene = new Scene(root);
 
         setWindowTitle();
         stage.setScene(scene);
-        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
+        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/images/icon.png")));
         stage.show();
     }
 
@@ -197,7 +197,7 @@ public class Kman extends Application {
      */
     public static void main(String[] args) {
         com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
-        app.setDockIconImage(new javax.swing.ImageIcon(Kman.class.getResource("/icon.png")).getImage());
+        app.setDockIconImage(new javax.swing.ImageIcon(Kman.class.getResource("/images/icon.png")).getImage());
 
         launch(args);
     }
