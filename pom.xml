@@ -113,6 +113,89 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <!-- creates standalone images -->
+                        <!-- mvn antrun:run@standalone -->
+                        <id>standalone</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="making standalone files">
+                                <!-- if one task failed next one wouldn't be executed -->
+                                
+                                <!-- cleans directory for the current release -->
+                                <delete failonerror="true" dir="${project.basedir}/releases/out/${project.build.finalName}" />
+                                <copy failonerror="true" file="${project.build.directory}/${project.build.finalName}.${project.packaging}"
+                                      todir="${project.basedir}/releases/${project.artifactId}"
+                                      overwrite="true" />
+
+                                <!-- creating MacOS X standalone package -->
+                                <java failonerror="true" dir="${project.basedir}/releases/" jar="${project.basedir}/releases/packr.jar" fork="true">
+                                    <arg value="--classpath" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--removelibs" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--output" />
+                                    <arg value="out/${project.build.finalName}/${project.artifactId}.app" />
+                                    <arg value="packr-config-mac.json" />
+                                </java>
+                                <!-- pack image to tar.bz2 -->
+                                <!-- tar task doesn't preserve permissions -->
+                                <exec failonerror="true" executable="tar" dir="${project.basedir}/releases/out/${project.build.finalName}">
+                                    <arg value="-cpyf" />
+                                    <arg value="${project.build.finalName}-macos-x64.tar.bz2" />
+                                    <arg value="${project.artifactId}.app/." />
+                                </exec>
+                                <!-- /creating MacOS X standalone package -->
+
+                                <!-- creating Linux64 standalone package -->
+                                <java failonerror="true" dir="${project.basedir}/releases/" jar="${project.basedir}/releases/packr.jar" fork="true">
+                                    <arg value="--classpath" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--removelibs" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--output" />
+                                    <arg value="out/${project.build.finalName}/${project.build.finalName}-linux-x64" />
+                                    <arg value="packr-config-linux.json" />
+                                </java>
+                                <!-- pack image to tar.bz2 -->
+                                <!-- tar task doesn't preserve permissions -->
+                                <exec failonerror="true" executable="tar" dir="${project.basedir}/releases/out/${project.build.finalName}">
+                                    <arg value="-cpyf" />
+                                    <arg value="${project.build.finalName}-linux-x64.tar.bz2" />
+                                    <arg value="${project.build.finalName}-linux-x64/." />
+                                </exec>
+                                <!-- /creating Linux64 standalone package -->
+
+                                <!-- creating Windows64 standalone package -->
+                                <java failonerror="true" dir="${project.basedir}/releases/" jar="${project.basedir}/releases/packr.jar" fork="true">
+                                    <arg value="--classpath" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--removelibs" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--output" />
+                                    <arg value="out/${project.build.finalName}/${project.build.finalName}-windows-x64" />
+                                    <arg value="packr-config-windows.json" />
+                                </java>
+                                <!-- pack image to tar.bz2 -->
+                                <!-- tar task doesn't preserve permissions -->
+                                <exec failonerror="true" executable="tar" dir="${project.basedir}/releases/out/${project.build.finalName}">
+                                    <arg value="-cpyf" />
+                                    <arg value="${project.build.finalName}-windows-x64.tar.bz2" />
+                                    <arg value="${project.build.finalName}-windows-x64/." />
+                                </exec>
+                                <!-- /creating Windows64 standalone package -->
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

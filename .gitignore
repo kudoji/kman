@@ -1,7 +1,6 @@
 #materials for the project
 materials/
-releases/
-!releases/packr-config-*.json
+releases/out
 
 #kman db file(s)
 *.kmd
