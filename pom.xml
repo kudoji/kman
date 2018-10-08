@@ -128,7 +128,7 @@
                         <configuration>
                             <target name="making standalone files">
                                 <!-- if one task failed next one wouldn't be executed -->
-                                
+
                                 <!-- cleans directory for the current release -->
                                 <delete failonerror="true" dir="${project.basedir}/releases/out/${project.build.finalName}" />
                                 <copy failonerror="true" file="${project.build.directory}/${project.build.finalName}.${project.packaging}"
