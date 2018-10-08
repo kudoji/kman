@@ -13,16 +13,11 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 /**
@@ -32,6 +27,8 @@ import javafx.stage.FileChooser;
 public class KmanController implements Initializable {
     private TreeItem<Account> tiAccounts; //root item for all accounts
 
+    @FXML private VBox vbMenu;
+    @FXML private MenuBar mbApplication;
     @FXML
     private TreeView<Account> tvNavigation;
     @FXML
@@ -402,7 +399,13 @@ public class KmanController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        //  check whether is it Mac OS X or not
+        if (System.getProperty("os.name").toLowerCase().contains("mac")){
+            //  it is, use global menu
+            mbApplication.setUseSystemMenuBar(true);
+            //  hide the container the menu is
+            vbMenu.setMaxHeight(0);
+        }
         tiAccounts = Account.populateAccountsTree(tvNavigation);
         tvNavigation.getSelectionModel().select(tiAccounts);
         tvNavigation.setCellFactory((TreeView<Account> param) -> {
