@@ -55,7 +55,7 @@ public class AccountDialogController extends Controller {
     private void btnCurrencyOnAction(ActionEvent event){
         java.util.HashMap<String, Currency> params = new java.util.HashMap<>(); //selected category
         //since method's parameters sent by value, collection type can be useful here
-        if (Kman.showAndWaitForm("views/CurrenciesDialog.fxml", "Select Currency...", params)){
+        if (Kman.showAndWaitForm("/views/CurrenciesDialog.fxml", "Select Currency...", params)){
             //value were selected
             this.currency = params.get("object");
             btnCurrency.setText(this.currency.getName());

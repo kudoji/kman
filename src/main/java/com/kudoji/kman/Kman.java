@@ -18,7 +18,7 @@ public class Kman extends Application {
     public final static String KMAN_NAME = "kman";
     public final static String KMAN_DB_NAME_DEFAULT = "kman.kmd";
     //  current app version
-    public final static String KMAN_VERSION = "0.5.3";
+    public final static String KMAN_VERSION = "0.5.5-SNAPSHOT";
     //  github repository url
     public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
 
@@ -178,12 +178,12 @@ public class Kman extends Application {
         kmanDB.connect();
         kmanDB.createAllTables(true);
 
-        Parent root = FXMLLoader.load(getClass().getResource("views/Kman.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/views/Kman.fxml"));
         Scene scene = new Scene(root);
 
         setWindowTitle();
         stage.setScene(scene);
-        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
+        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/images/icon.png")));
         stage.show();
     }
 
@@ -196,9 +196,6 @@ public class Kman extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
-        app.setDockIconImage(new javax.swing.ImageIcon(Kman.class.getResource("/icon.png")).getImage());
-
         launch(args);
     }
 }

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.kudoji.kman</groupId>
+    <artifactId>kman</artifactId>
+    <version>0.5.5-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>kman</name>
+    <description>Friendly money management software for Windows, Linux and Mac OS X</description>
+    <url>https://github.com/kudoji/kman</url>
+
+    <developers>
+        <developer>
+            <id>kudoji</id>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/kudoji/kman</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <system>fossil</system>
+        <url>http://127.0.0.1:8080</url>
+    </issueManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.21.0</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- see
+            http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging
+             -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <fork>true</fork>
+                    <compilerArgs>
+                        <arg>-Xlint:unchecked</arg>
+                    </compilerArgs>
+                    <showWarnings>true</showWarnings>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.kudoji.kman.Kman</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.kudoji.kman.Kman</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <!-- creates standalone images -->
+                        <!-- mvn antrun:run@standalone -->
+                        <id>standalone</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="making standalone files">
+                                <!-- if one task failed next one wouldn't be executed -->
+
+                                <!-- cleans directory for the current release -->
+                                <delete failonerror="true" dir="${project.basedir}/releases/out/${project.build.finalName}" />
+                                <copy failonerror="true" file="${project.build.directory}/${project.build.finalName}.${project.packaging}"
+                                      todir="${project.basedir}/releases/${project.artifactId}"
+                                      overwrite="true" />
+
+                                <!-- creating MacOS X standalone package -->
+                                <java failonerror="true" dir="${project.basedir}/releases/" jar="${project.basedir}/releases/packr.jar" fork="true">
+                                    <arg value="--classpath" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--removelibs" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--output" />
+                                    <arg value="out/${project.build.finalName}/${project.artifactId}.app" />
+                                    <arg value="packr-config-mac.json" />
+                                </java>
+                                <!-- pack image to tar.bz2 -->
+                                <!-- tar task doesn't preserve permissions -->
+                                <exec failonerror="true" executable="tar" dir="${project.basedir}/releases/out/${project.build.finalName}">
+                                    <arg value="-cpyf" />
+                                    <arg value="${project.build.finalName}-macos-x64.tar.bz2" />
+                                    <arg value="${project.artifactId}.app/." />
+                                </exec>
+                                <!-- /creating MacOS X standalone package -->
+
+                                <!-- creating Linux64 standalone package -->
+                                <java failonerror="true" dir="${project.basedir}/releases/" jar="${project.basedir}/releases/packr.jar" fork="true">
+                                    <arg value="--classpath" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--removelibs" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--output" />
+                                    <arg value="out/${project.build.finalName}/${project.build.finalName}-linux-x64" />
+                                    <arg value="packr-config-linux.json" />
+                                </java>
+                                <!-- pack image to tar.bz2 -->
+                                <!-- tar task doesn't preserve permissions -->
+                                <exec failonerror="true" executable="tar" dir="${project.basedir}/releases/out/${project.build.finalName}">
+                                    <arg value="-cpyf" />
+                                    <arg value="${project.build.finalName}-linux-x64.tar.bz2" />
+                                    <arg value="${project.build.finalName}-linux-x64/." />
+                                </exec>
+                                <!-- /creating Linux64 standalone package -->
+
+                                <!-- creating Windows64 standalone package -->
+                                <java failonerror="true" dir="${project.basedir}/releases/" jar="${project.basedir}/releases/packr.jar" fork="true">
+                                    <arg value="--classpath" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--removelibs" />
+                                    <arg value="${project.artifactId}/${project.build.finalName}.${project.packaging}" />
+                                    <arg value="--output" />
+                                    <arg value="out/${project.build.finalName}/${project.build.finalName}-windows-x64" />
+                                    <arg value="packr-config-windows.json" />
+                                </java>
+                                <!-- pack image to tar.bz2 -->
+                                <!-- tar task doesn't preserve permissions -->
+                                <exec failonerror="true" executable="tar" dir="${project.basedir}/releases/out/${project.build.finalName}">
+                                    <arg value="-cpyf" />
+                                    <arg value="${project.build.finalName}-windows-x64.tar.bz2" />
+                                    <arg value="${project.build.finalName}-windows-x64/." />
+                                </exec>
+                                <!-- /creating Windows64 standalone package -->
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

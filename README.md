@@ -1,6 +1,6 @@
 # kman
 
-kman is a friendly, money management software.
+kman is a friendly money management software for Windows, Linux and Mac OS X.
 It's free and open source.
 
 kman is built on Java and uses:

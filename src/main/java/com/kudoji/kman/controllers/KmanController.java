@@ -137,17 +137,17 @@ public class KmanController implements Initializable {
     
     @FXML
     private void miCurrenciesManageOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/CurrenciesDialog.fxml", "Manage currencies", null);
+        Kman.showAndWaitForm("/views/CurrenciesDialog.fxml", "Manage currencies", null);
     }
     
     @FXML
     private void miManageCategoriesOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Manage Categories", null);
+        Kman.showAndWaitForm("/views/CategoriesDialog.fxml", "Manage Categories", null);
     }
     
     @FXML
     private void miPayeesManageOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/PayeesDialog.fxml", "Manage Payees", null);
+        Kman.showAndWaitForm("/views/PayeesDialog.fxml", "Manage Payees", null);
     }
     
     @FXML
@@ -156,13 +156,13 @@ public class KmanController implements Initializable {
             //currencies will be kept...
             //categories will be kept...
             //transaction_types will be kept...
-            Kman.showAndWaitForm("views/MMEXImportDialog.fxml", "mmex import", null);
+            Kman.showAndWaitForm("/views/MMEXImportDialog.fxml", "mmex import", null);
         }
     }
     
     @FXML
     private void miAboutOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/AboutDialog.fxml", "About kman", null);
+        Kman.showAndWaitForm("/views/AboutDialog.fxml", "About kman", null);
     }
     
     @FXML
@@ -182,7 +182,7 @@ public class KmanController implements Initializable {
         java.util.HashMap<String, Object> params = new java.util.HashMap<>();
         params.put("transaction", null);
         params.put("account", aSelected);
-        if (Kman.showAndWaitForm("views/TransactionDialog.fxml", "New Transaction...", params)){
+        if (Kman.showAndWaitForm("/views/TransactionDialog.fxml", "New Transaction...", params)){
             //  transaction successfully inserted
             //  nothing else is needed to be done here
         }
@@ -198,7 +198,7 @@ public class KmanController implements Initializable {
         
         java.util.HashMap<String, Transaction> params = new java.util.HashMap<>();
         params.put("object", transactionSelected);
-        if (Kman.showAndWaitForm("views/TransactionDialog.fxml", "Edit Transaction...", params)){
+        if (Kman.showAndWaitForm("/views/TransactionDialog.fxml", "Edit Transaction...", params)){
             //re-read transaction note as well
             tvTransactionsOnSelect();
         }
@@ -236,7 +236,7 @@ public class KmanController implements Initializable {
         java.util.HashMap<String, Account> params = new java.util.HashMap<>();
         params.put("object", null);
 
-        if (Kman.showAndWaitForm("views/AccountDialog.fxml", "Add Account...", params)){
+        if (Kman.showAndWaitForm("/views/AccountDialog.fxml", "Add Account...", params)){
             //new account is inserted
             tiAccounts.getChildren().add(new TreeItem(params.get("object")));
         }
@@ -250,7 +250,7 @@ public class KmanController implements Initializable {
             if (aSelected.getId() > 0){ //real account is selected
                 java.util.HashMap<String, Account> params = new java.util.HashMap<>();
                 params.put("object", aSelected);
-                if (Kman.showAndWaitForm("views/AccountDialog.fxml", "Edit Account...", params)){
+                if (Kman.showAndWaitForm("/views/AccountDialog.fxml", "Edit Account...", params)){
                     //  TreeItem will be automatically updated due to listeners
 
                     //  the silly code below not needed anymore

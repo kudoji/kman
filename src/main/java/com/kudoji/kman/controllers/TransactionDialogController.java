@@ -124,7 +124,7 @@ public class TransactionDialogController extends Controller {
         //since method's parameters sent by value, collection type can be useful here
         //  send current (if any) to the category form
         params.put("object", this.category);
-        if (Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Select Category...", params)){
+        if (Kman.showAndWaitForm("/views/CategoriesDialog.fxml", "Select Category...", params)){
             //value were selected
             setCategory(params.get("object"));
         }
