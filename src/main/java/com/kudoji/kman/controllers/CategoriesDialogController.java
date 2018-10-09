@@ -40,7 +40,7 @@ public class CategoriesDialogController extends Controller {
             //form changed which means in this case that new category is created
             //new pategory can be retreived from formObject
             //parent is still the same (it cannot be changed in the CategotyDialog form
-            tiParent.getChildren().add(new TreeItem(params.get("object")));
+            tiParent.getChildren().add(new TreeItem<>(params.get("object")));
         }
     }
     
@@ -102,7 +102,8 @@ public class CategoriesDialogController extends Controller {
         }
         
     }
-    
+
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Category>)_formObject;

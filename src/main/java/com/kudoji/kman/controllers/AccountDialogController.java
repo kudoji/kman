@@ -134,6 +134,7 @@ public class AccountDialogController extends Controller {
      * load visible fields with data from Account class
      * @param _formObject 
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Account>)_formObject;
