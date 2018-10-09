@@ -186,6 +186,7 @@ public class CurrenciesDialogController extends Controller {
         tvCurrencies.setItems(dataFiltered);
     }   
 
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         if (_formObject != null){

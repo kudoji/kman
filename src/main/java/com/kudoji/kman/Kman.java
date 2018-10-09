@@ -119,6 +119,7 @@ public class Kman extends Application {
      * @param _combobox
      * @param _id
      */
+    @SuppressWarnings("unchecked")
     public static void selectItemInCombobox(javafx.scene.control.ComboBox _combobox, int _id){
         if (_id <= 0) return;
 

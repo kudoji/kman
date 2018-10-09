@@ -235,7 +235,7 @@ public class KmanController implements Initializable {
 
         if (Kman.showAndWaitForm("/views/AccountDialog.fxml", "Add Account...", params)){
             //new account is inserted
-            tiAccounts.getChildren().add(new TreeItem(params.get("object")));
+            tiAccounts.getChildren().add(new TreeItem<>(params.get("object")));
         }
     }
     

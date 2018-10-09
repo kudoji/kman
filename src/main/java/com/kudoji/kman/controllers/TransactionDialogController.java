@@ -163,6 +163,7 @@ public class TransactionDialogController extends Controller {
      * Form is opened for editing, load all fields with data from the transaction 
      * @param _formObject
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Object>)_formObject;

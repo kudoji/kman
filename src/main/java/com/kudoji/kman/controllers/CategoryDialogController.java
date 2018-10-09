@@ -88,7 +88,8 @@ public class CategoryDialogController extends Controller {
         
         return (categoryID > 0);
     }
-    
+
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         //in this case _formObject is a hashmap
