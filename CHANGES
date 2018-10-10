@@ -1,4 +1,20 @@
-[0.5.3]
+[0.5.5]
+ * test release standalone images (#e085e40bcf)
+ * incorrect window size on Linux (#6e139263e9)
+ * add changes file (#638e1de25d)
+ * no icon on MacOS (#70e4867a1e)
+ * ability to chose DB file (#8363a5efcd)
+ * use system menu bar in Mac OS X (#86e1f4355c)
+ * add settings dialog (#c62d6e7fe5)
+ * java: unchecked cast (#52285a06f6)
+ * integrate maven (#73a324ec1b)
+ * mention packr in README.md (#6d62253790)
+ * update transactions list on key event on accounts list (#66c707182e)
+ * cache transactions (#50db85493a)
+ * save settings somewhere (#56e10dc944)
+ * about dialog (#577ff82255)
+
+ [0.5.3]
  * integrate packr (#9534456861)
  * optimize TransactionDialog (#64f9a3ca29)
  * order payee and category by frequency of use? (#8cdfcb1ded)
