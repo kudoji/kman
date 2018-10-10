@@ -25,13 +25,17 @@ public class Kman extends Application {
     private static DB kmanDB;
     private static Stage kmanStage;
     //  save settings
-    private Settings settings;
+    private static Settings settings;
 
     public Kman(){
     }
     
     public static DB getDB(){
         return Kman.kmanDB;
+    }
+
+    public static Settings getSettings(){
+        return Kman.settings;
     }
     
     /**

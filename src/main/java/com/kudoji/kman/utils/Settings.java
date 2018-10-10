@@ -52,4 +52,11 @@ public class Settings {
         //  save current DB name to open app with
         this.prefs.put(KMAN_DB_NAME, Kman.getDB().getFile());
     }
+
+    public Boolean getSaveWindowPosition(){
+        return saveWindowPosition;
+    }
+    public void setSaveWindowPosition(Boolean _flag){
+        saveWindowPosition = _flag;
+    }
 }

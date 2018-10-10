@@ -112,6 +112,11 @@ public class KmanController implements Initializable {
     }
 
     @FXML
+    private void miPreferencesOnAction(ActionEvent event){
+        Kman.showAndWaitForm("/views/PreferencesDialog.fxml", "kman preferences", null);
+    }
+
+    @FXML
     private void miExitOnAction(ActionEvent event){
         //  System.exit(0); is very hard which causes skipping Application.stop() method
         Platform.exit();
