@@ -39,7 +39,7 @@
                         </MenuItem>
                         <MenuItem mnemonicParsing="false" onAction="#miSaveDatabaseAs" text="Save database As..." />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Preferences">
+                        <MenuItem mnemonicParsing="false" onAction="#miPreferencesOnAction" text="Preferences">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                            </accelerator></MenuItem>
