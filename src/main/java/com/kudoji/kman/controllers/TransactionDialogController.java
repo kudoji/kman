@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import com.kudoji.kman.*;
@@ -125,7 +124,7 @@ public class TransactionDialogController extends Controller {
         //since method's parameters sent by value, collection type can be useful here
         //  send current (if any) to the category form
         params.put("object", this.category);
-        if (Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Select Category...", params)){
+        if (Kman.showAndWaitForm("/views/CategoriesDialog.fxml", "Select Category...", params)){
             //value were selected
             setCategory(params.get("object"));
         }
@@ -164,6 +163,7 @@ public class TransactionDialogController extends Controller {
      * Form is opened for editing, load all fields with data from the transaction 
      * @param _formObject
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Object>)_formObject;

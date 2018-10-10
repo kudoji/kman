@@ -46,8 +46,8 @@ public class Account {
     public Account(){
         this.id = new SimpleIntegerProperty(0);
         this.name = new SimpleStringProperty("<<accounts>>");
-        this.balanceInitial = new SimpleObjectProperty(BigDecimal.ZERO);
-        this.balanceCurrent = new SimpleObjectProperty(BigDecimal.ZERO);
+        this.balanceInitial = new SimpleObjectProperty<>(BigDecimal.ZERO);
+        this.balanceCurrent = new SimpleObjectProperty<>(BigDecimal.ZERO);
         this.currencyId = new SimpleIntegerProperty(0);
 
         this.setUserName();
@@ -63,8 +63,8 @@ public class Account {
     public Account(HashMap<String, String> _params){
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
-        this.balanceInitial = new SimpleObjectProperty(new BigDecimal(_params.get("balance_initial")));
-        this.balanceCurrent = new SimpleObjectProperty(new BigDecimal(_params.get("balance_current")));
+        this.balanceInitial = new SimpleObjectProperty<>(new BigDecimal(_params.get("balance_initial")));
+        this.balanceCurrent = new SimpleObjectProperty<>(new BigDecimal(_params.get("balance_current")));
         this.currencyId = new SimpleIntegerProperty(Integer.parseInt(_params.get("currencies_id")));
 
         this.setUserName();
@@ -230,7 +230,7 @@ public class Account {
      * @param _tvAccounts 
      * @return root item for other accounts 
      */
-    public static TreeItem populateAccountsTree(TreeView<Account> _tvAccounts){
+    public static TreeItem<Account> populateAccountsTree(TreeView<Account> _tvAccounts){
         TreeItem<Account> tiAccounts; //root item for other accounts
         
         if (_tvAccounts.getRoot() == null){ //tree view is empty
@@ -246,9 +246,12 @@ public class Account {
             _tvAccounts.setRoot(tiRoot);
             _tvAccounts.setShowRoot(false);
         }else{
-            tiAccounts = (TreeItem<Account>)_tvAccounts.getRoot().getChildren().get(0);
+            tiAccounts = _tvAccounts.getRoot().getChildren().get(0);
             tiAccounts.getChildren().clear();
         }
+
+        //  force to re-create accounts cache in case of using new DB
+        Account.clearAccountsCache();
 
         for (Account account: Account.getAccounts()){
             tiAccounts.getChildren().add(addTreeItem(account));
@@ -303,6 +306,11 @@ public class Account {
             }
 //            System.out.println(java.time.LocalDateTime.now());
         }
+    }
+
+    public static void clearAccountsCache(){
+        hmAccountsList.clear();
+        olAccountsList.clear();
     }
 
     /**

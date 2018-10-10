@@ -3,7 +3,6 @@ package com.kudoji.kman.controllers;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.kudoji.kman.models.Controller;
 import com.kudoji.kman.models.Currency;
 import com.kudoji.kman.Kman;
 import javafx.collections.transformation.FilteredList;
@@ -27,7 +26,7 @@ public class CurrenciesDialogController extends Controller {
 
     @FXML
     private void btnCurrencyInsertOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/CurrencyDialog.fxml", "Add new currency...", null);
+        Kman.showAndWaitForm("/views/CurrencyDialog.fxml", "Add new currency...", null);
     }
 
     @FXML
@@ -39,7 +38,7 @@ public class CurrenciesDialogController extends Controller {
             return;
         }
 
-        Kman.showAndWaitForm("views/CurrencyDialog.fxml", "Edit currency...", currencySelected);
+        Kman.showAndWaitForm("/views/CurrencyDialog.fxml", "Edit currency...", currencySelected);
     }
 
     @FXML
@@ -187,6 +186,7 @@ public class CurrenciesDialogController extends Controller {
         tvCurrencies.setItems(dataFiltered);
     }   
 
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         if (_formObject != null){

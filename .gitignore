@@ -1,24 +1,19 @@
 #materials for the project
 materials/
+releases/out
 
-#default db
-kudoji.kmd
+#kman db file(s)
+*.kmd
 
 #fossil db
 *.fossil
 
+#maven
+target/
+
 #idea folders
 .idea
 *.iml
-out/
-
-#ant specific folders
-build/
-dist/
-#net beans specific folders
-nbproject/*
-!nbproject/project.properties
-!nbproject/project.xml
 
 # Compiled class file
 *.class

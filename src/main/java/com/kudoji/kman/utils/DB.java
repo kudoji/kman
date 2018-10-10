@@ -53,6 +53,27 @@ public class DB {
         
         return result;
     }
+
+    /**
+     * Establish connection to a new file
+     * @param _file
+     * @return
+     */
+    public boolean connect(String _file){
+        this.dbFile = _file;
+        this.dbUrl = "jdbc:sqlite:" + dbFile;
+
+        return connect();
+    }
+
+    /**
+     * Returns current db file
+     *
+     * @return
+     */
+    public String getFile(){
+        return this.dbFile;
+    }
     
     public boolean close(){
         boolean result = true;

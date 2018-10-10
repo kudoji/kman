@@ -1,24 +1,24 @@
 package com.kudoji.kman.controllers;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
 /**
  *
@@ -27,6 +27,8 @@ import javafx.scene.input.MouseEvent;
 public class KmanController implements Initializable {
     private TreeItem<Account> tiAccounts; //root item for all accounts
 
+    @FXML private VBox vbMenu;
+    @FXML private MenuBar mbApplication;
     @FXML
     private TreeView<Account> tvNavigation;
     @FXML
@@ -34,10 +36,90 @@ public class KmanController implements Initializable {
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
     
-    //menu actions
+    //  menu actions
+    @FXML
+    private void miNewDatabase(ActionEvent event){
+        FileChooser fcKman = new FileChooser();
+        fcKman.setTitle("Choose database file to create...");
+        fcKman.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("kman database", "*.kmd")
+        );
+        java.io.File fSelected = fcKman.showSaveDialog(null);
+        if (fSelected != null){
+            if (fSelected.exists()){
+                //  user selected file which is already existed
+                if (!fSelected.delete()){
+                    Kman.showErrorMessage("Cannot re-write file: " + fSelected.getPath());
+                    return;
+                }
+            }
+
+            try{
+                fSelected.createNewFile();
+
+                Kman.getDB().close();
+                Kman.getDB().connect(fSelected.getPath());
+                Kman.getDB().createAllTables(true);
+
+                clearAppScreen();
+                Kman.setWindowTitle();
+            }catch (IOException e){
+                Kman.showErrorMessage("Cannot create file: " + fSelected.getPath());
+            }
+        }
+    }
+
+    @FXML
+    private void miOpenDatabase(ActionEvent event){
+        FileChooser fcKman = new FileChooser();
+        fcKman.setTitle("Choose database file to open...");
+        fcKman.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("kman database", "*.kmd")
+        );
+        java.io.File fSelected = fcKman.showOpenDialog(null);
+        if (fSelected != null && fSelected.exists()){
+            Kman.getDB().close();
+            if (!Kman.getDB().connect(fSelected.getPath())){
+                Kman.showErrorMessage("Cannot open file: " + fSelected.getPath());
+            }
+
+            clearAppScreen();
+            Kman.setWindowTitle();
+        }
+    }
+
+    @FXML
+    private void miSaveDatabaseAs(ActionEvent event){
+        FileChooser fcKman = new FileChooser();
+        fcKman.setTitle("Save database file as...");
+        fcKman.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("kman database", "*.kmd")
+        );
+        java.io.File fSelected = fcKman.showSaveDialog(null);
+        if (fSelected != null){
+            try{
+                Files.copy(java.nio.file.Paths.get(Kman.getDB().getFile()), fSelected.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                Kman.getDB().close();
+                Kman.getDB().connect(fSelected.getPath());
+
+                clearAppScreen();
+                Kman.setWindowTitle();
+            }catch (IOException e){
+                Kman.showErrorMessage("Cannot create file: " + fSelected.getPath());
+            }
+        }
+    }
+
+    @FXML
+    private void miPreferencesOnAction(ActionEvent event){
+        Kman.showAndWaitForm("/views/PreferencesDialog.fxml", "kman preferences", null);
+    }
+
     @FXML
     private void miExitOnAction(ActionEvent event){
-        System.exit(0);
+        //  System.exit(0); is very hard which causes skipping Application.stop() method
+        Platform.exit();
     }
     
     @FXML
@@ -57,17 +139,17 @@ public class KmanController implements Initializable {
     
     @FXML
     private void miCurrenciesManageOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/CurrenciesDialog.fxml", "Manage currencies", null);
+        Kman.showAndWaitForm("/views/CurrenciesDialog.fxml", "Manage currencies", null);
     }
     
     @FXML
     private void miManageCategoriesOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/CategoriesDialog.fxml", "Manage Categories", null);
+        Kman.showAndWaitForm("/views/CategoriesDialog.fxml", "Manage Categories", null);
     }
     
     @FXML
     private void miPayeesManageOnAction(ActionEvent event){
-        Kman.showAndWaitForm("views/PayeesDialog.fxml", "Manage Payees", null);
+        Kman.showAndWaitForm("/views/PayeesDialog.fxml", "Manage Payees", null);
     }
     
     @FXML
@@ -76,14 +158,13 @@ public class KmanController implements Initializable {
             //currencies will be kept...
             //categories will be kept...
             //transaction_types will be kept...
-            Kman.showAndWaitForm("views/MMEXImportDialog.fxml", "mmex import", null);
+            Kman.showAndWaitForm("/views/MMEXImportDialog.fxml", "mmex import", null);
         }
     }
     
     @FXML
     private void miAboutOnAction(ActionEvent event){
-        System.gc();
-        System.out.println("trying gc...");
+        Kman.showAndWaitForm("/views/AboutDialog.fxml", "About kman", null);
     }
     
     @FXML
@@ -103,7 +184,7 @@ public class KmanController implements Initializable {
         java.util.HashMap<String, Object> params = new java.util.HashMap<>();
         params.put("transaction", null);
         params.put("account", aSelected);
-        if (Kman.showAndWaitForm("views/TransactionDialog.fxml", "New Transaction...", params)){
+        if (Kman.showAndWaitForm("/views/TransactionDialog.fxml", "New Transaction...", params)){
             //  transaction successfully inserted
             //  nothing else is needed to be done here
         }
@@ -119,7 +200,7 @@ public class KmanController implements Initializable {
         
         java.util.HashMap<String, Transaction> params = new java.util.HashMap<>();
         params.put("object", transactionSelected);
-        if (Kman.showAndWaitForm("views/TransactionDialog.fxml", "Edit Transaction...", params)){
+        if (Kman.showAndWaitForm("/views/TransactionDialog.fxml", "Edit Transaction...", params)){
             //re-read transaction note as well
             tvTransactionsOnSelect();
         }
@@ -157,9 +238,9 @@ public class KmanController implements Initializable {
         java.util.HashMap<String, Account> params = new java.util.HashMap<>();
         params.put("object", null);
 
-        if (Kman.showAndWaitForm("views/AccountDialog.fxml", "Add Account...", params)){
+        if (Kman.showAndWaitForm("/views/AccountDialog.fxml", "Add Account...", params)){
             //new account is inserted
-            tiAccounts.getChildren().add(new TreeItem(params.get("object")));
+            tiAccounts.getChildren().add(new TreeItem<>(params.get("object")));
         }
     }
     
@@ -171,7 +252,7 @@ public class KmanController implements Initializable {
             if (aSelected.getId() > 0){ //real account is selected
                 java.util.HashMap<String, Account> params = new java.util.HashMap<>();
                 params.put("object", aSelected);
-                if (Kman.showAndWaitForm("views/AccountDialog.fxml", "Edit Account...", params)){
+                if (Kman.showAndWaitForm("/views/AccountDialog.fxml", "Edit Account...", params)){
                     //  TreeItem will be automatically updated due to listeners
 
                     //  the silly code below not needed anymore
@@ -311,10 +392,25 @@ public class KmanController implements Initializable {
             }
         }
     }
-    
+
+    /**
+     * Does all necessary operations for clearing app's screen
+     */
+    private void clearAppScreen(){
+        tiAccounts = Account.populateAccountsTree(tvNavigation);
+        tvNavigation.getSelectionModel().select(tiAccounts);
+        tvTransactions.getItems().clear();
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        //  check whether is it Mac OS X or not
+        if (System.getProperty("os.name").toLowerCase().contains("mac")){
+            //  it is, use global menu
+            mbApplication.setUseSystemMenuBar(true);
+            //  hide the container the menu is
+            vbMenu.setMaxHeight(0);
+        }
         tiAccounts = Account.populateAccountsTree(tvNavigation);
         tvNavigation.getSelectionModel().select(tiAccounts);
         tvNavigation.setCellFactory((TreeView<Account> param) -> {
@@ -334,6 +430,13 @@ public class KmanController implements Initializable {
                         editAccountEvent(null); //double click
                         break;
                 }
+            }
+        });
+
+        //  update transactions any time user pressed navigation key
+        tvNavigation.setOnKeyReleased(event -> {
+            if (event.getCode().isNavigationKey()){
+                tvNavigationOnSelect();
             }
         });
         

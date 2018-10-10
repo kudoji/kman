@@ -1,7 +1,9 @@
 package com.kudoji.kman;
 
+import com.kudoji.kman.controllers.Controller;
 import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.DB;
+import com.kudoji.kman.utils.Settings;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,18 +15,27 @@ import javafx.stage.Stage;
  * @author kudoji
  */
 public class Kman extends Application {
-    public final static String KMAN_VERSION = "0.5.3";
+    public final static String KMAN_NAME = "kman";
+    public final static String KMAN_DB_NAME_DEFAULT = "kman.kmd";
+    //  current app version
+    public final static String KMAN_VERSION = "0.5.5";
+    //  github repository url
+    public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
+
     private static DB kmanDB;
-    
+    private static Stage kmanStage;
+    //  save settings
+    private static Settings settings;
+
     public Kman(){
-        kmanDB = new DB("kudoji.kmd");
-        kmanDB.setDebugMode(true);
-        kmanDB.connect();
-        kmanDB.createAllTables(true);
     }
     
     public static DB getDB(){
         return Kman.kmanDB;
+    }
+
+    public static Settings getSettings(){
+        return Kman.settings;
     }
     
     /**
@@ -112,6 +123,7 @@ public class Kman extends Application {
      * @param _combobox
      * @param _id
      */
+    @SuppressWarnings("unchecked")
     public static void selectItemInCombobox(javafx.scene.control.ComboBox _combobox, int _id){
         if (_id <= 0) return;
 
@@ -154,17 +166,35 @@ public class Kman extends Application {
             }
         }
     }
-    
+
+    public static void setWindowTitle(){
+        Kman.kmanStage.setTitle(KMAN_NAME + " [" + Kman.getDB().getFile() + "]");
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("views/Kman.fxml"));
-        
+        Kman.kmanStage = stage;
+
+        settings = new Settings(stage);
+        settings.readSettings();
+
+        kmanDB = new DB(settings.getDBName());
+        kmanDB.setDebugMode(true);
+        kmanDB.connect();
+        kmanDB.createAllTables(true);
+
+        Parent root = FXMLLoader.load(getClass().getResource("/views/Kman.fxml"));
         Scene scene = new Scene(root);
-        
-        stage.setTitle("kman");
+
+        setWindowTitle();
         stage.setScene(scene);
-        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/icon.png")));
+        stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/images/icon.png")));
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception{
+        settings.saveSettings();
     }
 
     /**

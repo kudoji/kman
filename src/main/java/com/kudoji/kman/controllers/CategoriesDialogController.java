@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.kudoji.kman.models.Category;
-import com.kudoji.kman.models.Controller;
 import com.kudoji.kman.Kman;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -37,11 +36,11 @@ public class CategoriesDialogController extends Controller {
         }
         params.put("object", null);
         
-        if (Kman.showAndWaitForm("views/CategoryDialog.fxml", "Add category...", params)){
+        if (Kman.showAndWaitForm("/views/CategoryDialog.fxml", "Add category...", params)){
             //form changed which means in this case that new category is created
             //new pategory can be retreived from formObject
             //parent is still the same (it cannot be changed in the CategotyDialog form
-            tiParent.getChildren().add(new TreeItem(params.get("object")));
+            tiParent.getChildren().add(new TreeItem<>(params.get("object")));
         }
     }
     
@@ -65,7 +64,7 @@ public class CategoriesDialogController extends Controller {
         params.put("parent", tiCategory.getParent().getValue());
         params.put("object", category);
 
-        if (Kman.showAndWaitForm("views/CategoryDialog.fxml", "Edit category...", params)){
+        if (Kman.showAndWaitForm("/views/CategoryDialog.fxml", "Edit category...", params)){
             //category is updated, let's force TreeItem to be updated also
             //dirty trick, I know...
             tiCategory.setValue(null);
@@ -103,7 +102,8 @@ public class CategoriesDialogController extends Controller {
         }
         
     }
-    
+
+    @SuppressWarnings("unchecked")
     @Override
     public void setFormObject(Object _formObject){
         this.formObject = (java.util.HashMap<String, Category>)_formObject;
