@@ -76,9 +76,9 @@ import sys
 import collections
 
 files_to_check = collections.OrderedDict([
-	("./VERSION1", ""), # empty value means replace whole file (delete file and put new content)
-	("./pom1.xml", r'(?<=<artifactId>kman</artifactId>\n\s{4}<version>)(\d\.\d\.{0,1}\d*(-SNAPSHOT){0,1})(?=</version>)'),
-	("./src/main/java/com/kudoji/kman/Kman1.java", r'(?<=public final static String KMAN_VERSION = ")(\d\.\d\.{0,1}\d*(-SNAPSHOT){0,1})(?=";)')
+	("./VERSION", ""), # empty value means replace whole file (delete file and put new content)
+	("./pom.xml", r'(?<=<artifactId>kman</artifactId>\n\s{4}<version>)(\d\.\d\.{0,1}\d*(-SNAPSHOT){0,1})(?=</version>)'),
+	("./src/main/java/com/kudoji/kman/Kman.java", r'(?<=public final static String KMAN_VERSION = ")(\d\.\d\.{0,1}\d*(-SNAPSHOT){0,1})(?=";)')
 ])
 
 
