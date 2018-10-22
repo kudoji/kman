@@ -1,15 +1,11 @@
 package com.kudoji.kman.utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.lang.String.format;
 
 /**
  *
@@ -117,23 +113,26 @@ public class DB {
             String col_name = rsmd.getColumnName(i);
             
             switch (rsmd.getColumnType(i)) {
-                case java.sql.Types.INTEGER:
+                case Types.INTEGER:
                     result.put(col_name, Integer.toString(_rs.getInt(i)));
                     break;
-                case java.sql.Types.VARCHAR:
+                case Types.VARCHAR:
                     if (_rs.getString(i) == null){ //can return null if value in DB is null
                         result.put(col_name, "");
                     }else{
                         result.put(col_name, _rs.getString(i));
                     }
                     break;
-                case java.sql.Types.REAL:
+                case Types.FLOAT:
                     result.put(col_name, Float.toString(_rs.getFloat(i)));
                     break;
-                case java.sql.Types.BLOB:
+                case Types.REAL:
+                    result.put(col_name, Float.toString(_rs.getFloat(i)));
+                    break;
+                case Types.BLOB:
                     result.put(col_name, new String(_rs.getBlob(i).getBytes(1l, (int) _rs.getBlob(i).length())) );
                     break;
-                case java.sql.Types.NUMERIC:
+                case Types.NUMERIC:
                     if (_rs.getBigDecimal(i) == null){
                         result.put(col_name, "");
                     }else{
@@ -141,7 +140,7 @@ public class DB {
                     }
                     break;
                 default:
-                    System.out.println(rsmd.getColumnType(i));
+                    System.err.println(format("Error in DB.convertRS2Dic(%d)", rsmd.getColumnType(i)));
                     break;
             }
         }
@@ -284,6 +283,7 @@ public class DB {
     
     /**
      * Executes raw sql sentence
+     *
      * @param _sqlText sql sentence
      * @return 
      */
@@ -330,7 +330,7 @@ public class DB {
         
         return true;
     }
-    
+
     /**
      * Selects data from a table
      * 
@@ -395,7 +395,35 @@ public class DB {
         
         return result;
     }
-    
+
+    /**
+     * Runs select sql statement
+     *
+     * @param sql - sql query
+     *
+     * @return Array of HashMaps where each HashMap is a table row
+     */
+    public ArrayList<HashMap<String, String>> selectData(String sql){
+        ArrayList<HashMap<String, String>> result = new ArrayList<>();
+
+        try
+                (
+                        Statement st = this.dbConnection.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                )
+        {
+            while (rs.next()){
+                HashMap<String, String> row = convertRS2Dic(rs);
+
+                result.add(row);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public boolean startTransaction(){
         boolean result = true;
         try{
@@ -714,11 +742,11 @@ public class DB {
                 
                 sqlText = "create table currencies\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
-                "       name text not null unique,\n" +
-                "       code text not null unique collate nocase,\n" + //make the column case-insensitive
-                "       starts_with_code integer check(starts_with_code in (0,1)),\n" +
-                "       rate real\n" +
+                "   id integer primary key,\n" +
+                "   name text not null unique,\n" +
+                "   code text not null unique collate nocase,\n" + //make the column case-insensitive
+                "   starts_with_code integer check(starts_with_code in (0,1)),\n" +
+                "   rate real\n" +
                 ");";
                 sqlStatement.execute(sqlText);
                 
@@ -729,7 +757,7 @@ public class DB {
                 
                 sqlText = "create table accounts\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
+                "   id integer primary key,\n" +
                 "	name text not null,\n" +
                 "	balance_initial real,\n" +
                 "	balance_current real,\n" +
@@ -745,7 +773,7 @@ public class DB {
                 
                 sqlText = "create table payees\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
+                "   id integer primary key,\n" +
 		        "	name text not null,\n" +
                 "	category_deposit int,\n" +
                 "	category_withdrawal int,\n" +
