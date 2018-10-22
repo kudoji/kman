@@ -7,6 +7,7 @@ import com.kudoji.kman.Kman;
 import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import com.kudoji.kman.enums.AccountTake;
 
 /**
  *
@@ -35,23 +36,6 @@ public class Transaction {
     private float balance_to;
     private String notes;
 
-    /**
-     * What account to take into consideration
-     */
-    public static enum AccountTake {
-        /**
-         * take account_to
-         */
-        TO,
-        /**
-         * take account_from
-         */
-        FROM,
-        /**
-         * take both account_to and account_from
-         */
-        BOTH
-    }
     /**
      * Keeps payee for the transaction
      */
@@ -463,7 +447,7 @@ public class Transaction {
         switch (this.getTypeId()){
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
                 //increase all transactions after the current one
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
+                if (!Transaction.increaseBalance(this, AccountTake.TO, -this.getAmountTo())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
@@ -484,7 +468,7 @@ public class Transaction {
 
                 break;
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.FROM, this.getAmountFrom())){
+                if (!Transaction.increaseBalance(this, AccountTake.FROM, this.getAmountFrom())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
@@ -506,7 +490,7 @@ public class Transaction {
                 break;
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
                 //in case of transfer, transaction touches both accounts
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.FROM, this.getAmountFrom())){
+                if (!Transaction.increaseBalance(this, AccountTake.FROM, this.getAmountFrom())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +
@@ -525,7 +509,7 @@ public class Transaction {
                     return false;
                 }
 
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
+                if (!Transaction.increaseBalance(this, AccountTake.TO, -this.getAmountTo())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to update transactions' balance after '" +

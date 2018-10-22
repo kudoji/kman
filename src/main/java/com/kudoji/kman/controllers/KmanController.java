@@ -6,17 +6,23 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 
+import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
+import com.kudoji.kman.reports.Report;
+import com.kudoji.kman.reports.StatsReport;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -35,6 +41,23 @@ public class KmanController implements Initializable {
     private TableView<Transaction> tvTransactions;
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
+
+    //**************************************  reports tab  **************************************//
+    @FXML
+    private Tab tabReports;
+    @FXML
+    private ComboBox<ReportPeriod> cbReportsPeriod;
+    @FXML
+    private DatePicker dpReportsFrom;
+    @FXML
+    private DatePicker dpReportsTo;
+    /**
+     * Container for statistics report
+     */
+    @FXML
+    private AnchorPane apStats;
+    //**************************************  /reports tab  **************************************//
+
     
     //  menu actions
     @FXML
@@ -401,6 +424,79 @@ public class KmanController implements Initializable {
         tvNavigation.getSelectionModel().select(tiAccounts);
         tvTransactions.getItems().clear();
     }
+
+    //**************************************  reports tab  **************************************//
+    @FXML
+    private void tabReportsOnSelectionChanged(javafx.event.Event value){
+        if (tabReports.isSelected()){
+            //  reports tab is selected
+            if (cbReportsPeriod.getItems().isEmpty()){
+                cbReportsPeriod.setItems(FXCollections.observableArrayList(ReportPeriod.values()));
+                cbReportsPeriod.getSelectionModel().select(ReportPeriod.THISMONTH);
+            }
+        }
+    }
+
+    @FXML
+    private void cbReportsPeriodOnAction(ActionEvent event){
+        if (cbReportsPeriod.getItems().isEmpty()){
+            return;
+        }
+
+        java.util.HashMap<String, java.time.LocalDate> period = cbReportsPeriod.getSelectionModel().getSelectedItem().getPeriod();
+
+        EventHandler<ActionEvent> onAction = dpReportsFrom.getOnAction();
+        //  avoid calling dpReportsFromOnAction event
+        dpReportsFrom.setOnAction(null);
+        dpReportsFrom.setValue(period.get("start"));
+        dpReportsFrom.setOnAction(onAction);
+
+        onAction = dpReportsTo.getOnAction();
+        //  avoid calling dpReportsToOnAction event
+        dpReportsTo.setOnAction(null);
+        dpReportsTo.setValue(period.get("end"));
+        dpReportsTo.setOnAction(onAction);
+    }
+
+    @FXML
+    private void dpReportsFromOnAction(ActionEvent event){
+        EventHandler<ActionEvent> onAction = cbReportsPeriod.getOnAction();
+        //  avoid calling cbReportsPeriodOnAction() event when date is changing
+        cbReportsPeriod.setOnAction(null);
+
+        cbReportsPeriod.getSelectionModel().select(ReportPeriod.CUSTOM);
+
+        cbReportsPeriod.setOnAction(onAction);
+    }
+
+    @FXML
+    private void dpReportsToOnAction(ActionEvent event){
+        EventHandler<ActionEvent> onAction = cbReportsPeriod.getOnAction();
+        //  avoid calling cbReportsPeriodOnAction() event when date is changing
+        cbReportsPeriod.setOnAction(null);
+
+        cbReportsPeriod.getSelectionModel().select(ReportPeriod.CUSTOM);
+
+        cbReportsPeriod.setOnAction(onAction);
+    }
+
+    @FXML
+    private void btnReportsGenerateOnAction(ActionEvent event){
+        if (tabReports.isSelected()){
+            //  generate statistics
+            StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
+
+            TreeTableView<Report> ttvContent = new TreeTableView<>();
+            apStats.getChildren().add(ttvContent);
+            AnchorPane.setTopAnchor(ttvContent, 0.0);
+            AnchorPane.setBottomAnchor(ttvContent, 0.0);
+            AnchorPane.setLeftAnchor(ttvContent, 0.0);
+            AnchorPane.setRightAnchor(ttvContent, 0.0);
+
+            sr.generate(ttvContent);
+        }
+    }
+    //**************************************  /reports tab  **************************************//
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
