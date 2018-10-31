@@ -1,6 +1,7 @@
 package com.kudoji.kman;
 
 import com.kudoji.kman.controllers.Controller;
+import com.kudoji.kman.controllers.KmanController;
 import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.DB;
 import com.kudoji.kman.utils.Settings;
@@ -183,13 +184,18 @@ public class Kman extends Application {
         kmanDB.connect();
         kmanDB.createAllTables(true);
 
-        Parent root = FXMLLoader.load(getClass().getResource("/views/Kman.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Kman.fxml"));
+        Parent root = loader.load();
+        KmanController kmanController = loader.getController();
         Scene scene = new Scene(root);
 
         setWindowTitle();
         stage.setScene(scene);
         stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/images/icon.png")));
         stage.show();
+
+        //  have to apply divider position after form is shown...
+        kmanController.setDividerPosition(settings.getWindowDividerPosition());
     }
 
     @Override
