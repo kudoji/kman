@@ -20,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -33,6 +34,8 @@ import javafx.stage.FileChooser;
 public class KmanController implements Initializable {
     private TreeItem<Account> tiAccounts; //root item for all accounts
 
+    @FXML
+    private SplitPane spMainContainer;
     @FXML private VBox vbMenu;
     @FXML private MenuBar mbApplication;
     @FXML
@@ -557,5 +560,13 @@ public class KmanController implements Initializable {
                 tvTransactionsOnSelect();
             }
         });
+
+        spMainContainer.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+            Kman.getSettings().setWindowDividerPosition(newValue.doubleValue());
+        });
+    }
+
+    public void setDividerPosition(double position){
+        spMainContainer.setDividerPosition(0, position);
     }
 }
