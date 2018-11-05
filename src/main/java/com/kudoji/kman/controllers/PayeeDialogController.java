@@ -74,6 +74,9 @@ public class PayeeDialogController extends Controller {
         if (this.payee != null){
             //update the DB record
             params.put("id", Integer.toString(payee.getId()));
+            params.put("usage_freq", String.valueOf(this.payee.getUsageFreq()));
+        }else{
+            params.put("usage_freq", String.valueOf(0));
         }
         int payeeID;
         payeeID = Kman.getDB().updateData((this.payee == null), params);
