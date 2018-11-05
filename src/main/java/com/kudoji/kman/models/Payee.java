@@ -28,8 +28,12 @@ public class Payee {
     public Payee(HashMap<String, String> _params){
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
-        this.categoryDepositId = new SimpleIntegerProperty(Integer.parseInt(_params.get("category_deposit")));
-        this.categoryWithdrawalId = new SimpleIntegerProperty(Integer.parseInt(_params.get("category_withdrawal")));
+
+        String categoryId = _params.get("category_deposit");
+        this.categoryDepositId = new SimpleIntegerProperty(categoryId == null ? 0 : Integer.parseInt(categoryId));
+        categoryId = _params.get("category_withdrawal");
+        this.categoryWithdrawalId = new SimpleIntegerProperty(categoryId == null? 0 : Integer.parseInt(categoryId));
+
         this.usageFreq = Integer.parseInt(_params.get("usage_freq"));
     }
     
