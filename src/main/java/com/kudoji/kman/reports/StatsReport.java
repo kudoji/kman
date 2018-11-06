@@ -5,7 +5,6 @@ import com.kudoji.kman.models.Account;
 import com.kudoji.kman.models.TransactionType;
 import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.geometry.Insets;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
@@ -44,29 +43,25 @@ public class StatsReport {
         this.endDate = endDate.format(DateTimeFormatter.ofPattern(dateFormat));
     }
 
-    private void addAccounts(int currencyId, int transactionType, String startDate, String endDate){
-        String sql = "";
-    }
-
-    public void generate(TreeTableView<Report> treeTableView){
-        TreeItem<Report> ttvRoot;
+    public void generate(TreeTableView<ReportRow> treeTableView){
+        TreeItem<ReportRow> ttvRoot;
         if (treeTableView.getRoot() != null){
             treeTableView.getRoot().getChildren().clear();
             ttvRoot = treeTableView.getRoot();
         }else{
             //  root is not set thus, columns are too
-            ttvRoot = new TreeItem<>(new Report("Report", ""));
+            ttvRoot = new TreeItem<>(new ReportRow("Report", ""));
 
-            TreeTableColumn<Report, String> ttcParameter = new TreeTableColumn<>("Parameter");
+            TreeTableColumn<ReportRow, String> ttcParameter = new TreeTableColumn<>("Parameter");
             ttcParameter.setPrefWidth(450);
-            ttcParameter.setCellValueFactory((TreeTableColumn.CellDataFeatures<Report, String> param) ->
+            ttcParameter.setCellValueFactory((TreeTableColumn.CellDataFeatures<ReportRow, String> param) ->
                     new ReadOnlyStringWrapper(param.getValue().getValue().getParameter()));
 
-            TreeTableColumn<Report, String> ttcValue = new TreeTableColumn<>("Value");
+            TreeTableColumn<ReportRow, String> ttcValue = new TreeTableColumn<>("Value");
             ttcValue.setPrefWidth(150);
             ttcValue.setResizable(false);
             ttcValue.setStyle("-fx-alignment: center-right;");
-            ttcValue.setCellValueFactory((TreeTableColumn.CellDataFeatures<Report, String> param) ->
+            ttcValue.setCellValueFactory((TreeTableColumn.CellDataFeatures<ReportRow, String> param) ->
                     new ReadOnlyStringWrapper(param.getValue().getValue().getValue()));
 
             treeTableView.setRoot(ttvRoot);
@@ -78,21 +73,21 @@ public class StatsReport {
         LocalDate date = LocalDate.parse(startDate, DateTimeFormatter.ofPattern(dateFormat));
         date = date.minusDays(1);
         String dateString = date.format(DateTimeFormatter.ofPattern(dateFormat));
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("Total balance on " + startDate + ":", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("Total balance on " + startDate + ":", "")));
         addTotalBalanceOnEndOfTheDay(dateString, ttvRoot);
         //  add empty space between rows
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("", "")));
 
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("Total balance on " + endDate + ":", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("Total balance on " + endDate + ":", "")));
         addTotalBalanceOnEndOfTheDay(endDate, ttvRoot);
         //  add empty space between rows
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("", "")));
 
         String sql = format("select sum(amount_to) as amount, c.name as currency, c.id as currency_id from transactions as t inner join accounts as a on t.account_to_id = a.id inner join currencies as c on a.currencies_id = c.id where t.transaction_types_id = %d and (date between '%s' and '%s') group by currency;", TransactionType.ACCOUNT_TYPES_DEPOSIT, this.startDate, this.endDate);
         List<HashMap<String, String>> rows = Kman.getDB().selectData(sql);
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("Total income:", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("Total income:", "")));
         for (HashMap<String, String> row: rows){
-            ttvRoot.getChildren().add(new TreeItem<>(new Report(format("\t - %s:", row.get("currency")), Strings.userFormat(Float.parseFloat(row.get("amount"))))));
+            ttvRoot.getChildren().add(new TreeItem<>(new ReportRow(format("\t - %s:", row.get("currency")), Strings.userFormat(Float.parseFloat(row.get("amount"))))));
 
             addRowsToTreeNode(getRowsPerAccount(Integer.parseInt(row.get("currency_id")), true),
                     ttvRoot,
@@ -109,13 +104,13 @@ public class StatsReport {
         }
 
         //  add empty space between rows
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("", "")));
         sql = format("select sum(amount_from) as amount, c.name as currency, c.id as currency_id from transactions as t inner join accounts as a on t.account_from_id = a.id inner join currencies as c on a.currencies_id = c.id where t.transaction_types_id = %d and (date between '%s' and '%s') group by currency;", TransactionType.ACCOUNT_TYPES_WITHDRAWAL, this.startDate, this.endDate);
         rows = Kman.getDB().selectData(sql);
 
-        ttvRoot.getChildren().add(new TreeItem<>(new Report("Total expenses:", "")));
+        ttvRoot.getChildren().add(new TreeItem<>(new ReportRow("Total expenses:", "")));
         for (HashMap<String, String> row: rows){
-            ttvRoot.getChildren().add(new TreeItem<>(new Report(format("\t - %s:", row.get("currency")), Strings.userFormat(Float.parseFloat(row.get("amount"))))));
+            ttvRoot.getChildren().add(new TreeItem<>(new ReportRow(format("\t - %s:", row.get("currency")), Strings.userFormat(Float.parseFloat(row.get("amount"))))));
 
             addRowsToTreeNode(getRowsPerAccount(Integer.parseInt(row.get("currency_id")), false),
                     ttvRoot,
@@ -203,16 +198,16 @@ public class StatsReport {
      * @param nodeName name of node that will be created
      * @param prefix will be added to text
      */
-    private void addRowsToTreeNode(List<HashMap<String, String>> rows, TreeItem<Report> treeNode, String nodeName, String prefix){
+    private void addRowsToTreeNode(List<HashMap<String, String>> rows, TreeItem<ReportRow> treeNode, String nodeName, String prefix){
         if (!rows.isEmpty()){
-            TreeItem<Report> ttvInnerRoot;
+            TreeItem<ReportRow> ttvInnerRoot;
 
-            ttvInnerRoot = new TreeItem<>(new Report(nodeName, ""));
+            ttvInnerRoot = new TreeItem<>(new ReportRow(nodeName, ""));
             ttvInnerRoot.setExpanded(false);
             for (HashMap<String, String> innerRow: rows){
                 ttvInnerRoot.getChildren().add(
                         new TreeItem<>(
-                                new Report(prefix + innerRow.get("parameter"), Strings.userFormat(Float.parseFloat(innerRow.get("value"))))
+                                new ReportRow(prefix + innerRow.get("parameter"), Strings.userFormat(Float.parseFloat(innerRow.get("value"))))
                         )
                 );
             }
@@ -228,7 +223,7 @@ public class StatsReport {
      * @param date
      * @param treeNode
      */
-    private void addTotalBalanceOnEndOfTheDay(String date, TreeItem<Report> treeNode){
+    private void addTotalBalanceOnEndOfTheDay(String date, TreeItem<ReportRow> treeNode){
         //  keeps balance per currency
         Map<String, BigDecimal> currencies = new HashMap<>();
         String currencyName = "";
@@ -248,7 +243,7 @@ public class StatsReport {
         for (Map.Entry<String, BigDecimal> currency: currencies.entrySet()){
             treeNode.getChildren().add(
                     new TreeItem<>(
-                            new Report(
+                            new ReportRow(
                                     "\t" + currency.getKey() + ":",
                                     Strings.userFormat(currency.getValue().floatValue())
                             )

@@ -10,7 +10,7 @@ import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
-import com.kudoji.kman.reports.Report;
+import com.kudoji.kman.reports.ReportRow;
 import com.kudoji.kman.reports.StatsReport;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -20,7 +20,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -492,7 +491,7 @@ public class KmanController implements Initializable {
                 //  generate statistics
                 StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
 
-                TreeTableView<Report> ttvContent = new TreeTableView<>();
+                TreeTableView<ReportRow> ttvContent = new TreeTableView<>();
                 apStats.getChildren().add(ttvContent);
                 AnchorPane.setTopAnchor(ttvContent, 0.0);
                 AnchorPane.setBottomAnchor(ttvContent, 0.0);

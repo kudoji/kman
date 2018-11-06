@@ -3,13 +3,13 @@ package com.kudoji.kman.reports;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
- * Report object to put data into TreeTableView
+ * ReportRow object to put data into TreeTableView
  */
-public class Report {
+public class ReportRow {
     private SimpleStringProperty parameter;
     private SimpleStringProperty value;
 
-    public Report(String parameter, String value){
+    public ReportRow(String parameter, String value){
         this.parameter = new SimpleStringProperty(parameter);
         this.value = new SimpleStringProperty(value);
     }
