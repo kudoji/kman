@@ -46,7 +46,7 @@ public class KmanController implements Initializable {
 
     //**************************************  reports tab  **************************************//
     @FXML
-    private Tab tabReports, tabStats;
+    private Tab tabReports, tabStats, tabAccounts;
     @FXML
     private ComboBox<ReportPeriod> cbReportsPeriod;
     @FXML
@@ -57,7 +57,13 @@ public class KmanController implements Initializable {
      * Container for statistics report
      */
     @FXML
-    private AnchorPane apStats;
+    private AnchorPane apReportsStats;
+    @FXML
+    private CheckBox cbxReportsAccountFilter;
+    @FXML
+    private ComboBox<Account> cbReportsAccounts;
+    @FXML
+    private TreeTableView<ReportRow> ttvReportsAccounts;
     //**************************************  /reports tab  **************************************//
 
     
@@ -436,6 +442,10 @@ public class KmanController implements Initializable {
                 cbReportsPeriod.setItems(FXCollections.observableArrayList(ReportPeriod.values()));
                 cbReportsPeriod.getSelectionModel().select(ReportPeriod.THISMONTH);
             }
+
+            if (cbReportsAccounts.getItems().isEmpty()){
+                cbReportsAccounts.setItems(Account.getAccounts());
+            }
         }
     }
 
@@ -492,13 +502,15 @@ public class KmanController implements Initializable {
                 StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
 
                 TreeTableView<ReportRow> ttvContent = new TreeTableView<>();
-                apStats.getChildren().add(ttvContent);
+                apReportsStats.getChildren().add(ttvContent);
                 AnchorPane.setTopAnchor(ttvContent, 0.0);
                 AnchorPane.setBottomAnchor(ttvContent, 0.0);
                 AnchorPane.setLeftAnchor(ttvContent, 0.0);
                 AnchorPane.setRightAnchor(ttvContent, 0.0);
 
                 sr.generate(ttvContent);
+            } else if (tabAccounts.isSelected()) {
+
             }
         }
     }
