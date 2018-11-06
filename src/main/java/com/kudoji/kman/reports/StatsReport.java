@@ -1,6 +1,7 @@
 package com.kudoji.kman.reports;
 
 import com.kudoji.kman.Kman;
+import com.kudoji.kman.models.Account;
 import com.kudoji.kman.models.TransactionType;
 import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -9,10 +10,12 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -72,6 +75,19 @@ public class StatsReport {
             ttvRoot.setExpanded(true);
         }
 
+        LocalDate date = LocalDate.parse(startDate, DateTimeFormatter.ofPattern(dateFormat));
+        date = date.minusDays(1);
+        String dateString = date.format(DateTimeFormatter.ofPattern(dateFormat));
+        ttvRoot.getChildren().add(new TreeItem<>(new Report("Total balance on " + startDate + ":", "")));
+        addTotalBalanceOnEndOfTheDay(dateString, ttvRoot);
+        //  add empty space between rows
+        ttvRoot.getChildren().add(new TreeItem<>(new Report("", "")));
+
+        ttvRoot.getChildren().add(new TreeItem<>(new Report("Total balance on " + endDate + ":", "")));
+        addTotalBalanceOnEndOfTheDay(endDate, ttvRoot);
+        //  add empty space between rows
+        ttvRoot.getChildren().add(new TreeItem<>(new Report("", "")));
+
         String sql = format("select sum(amount_to) as amount, c.name as currency, c.id as currency_id from transactions as t inner join accounts as a on t.account_to_id = a.id inner join currencies as c on a.currencies_id = c.id where t.transaction_types_id = %d and (date between '%s' and '%s') group by currency;", TransactionType.ACCOUNT_TYPES_DEPOSIT, this.startDate, this.endDate);
         List<HashMap<String, String>> rows = Kman.getDB().selectData(sql);
         ttvRoot.getChildren().add(new TreeItem<>(new Report("Total income:", "")));
@@ -92,6 +108,7 @@ public class StatsReport {
                     "\t\t\t");
         }
 
+        //  add empty space between rows
         ttvRoot.getChildren().add(new TreeItem<>(new Report("", "")));
         sql = format("select sum(amount_from) as amount, c.name as currency, c.id as currency_id from transactions as t inner join accounts as a on t.account_from_id = a.id inner join currencies as c on a.currencies_id = c.id where t.transaction_types_id = %d and (date between '%s' and '%s') group by currency;", TransactionType.ACCOUNT_TYPES_WITHDRAWAL, this.startDate, this.endDate);
         rows = Kman.getDB().selectData(sql);
@@ -203,5 +220,39 @@ public class StatsReport {
             treeNode.getChildren().add(ttvInnerRoot);
         }
 
+    }
+
+    /**
+     * Adds total balances per each currency for the end of the day of the date
+     *
+     * @param date
+     * @param treeNode
+     */
+    private void addTotalBalanceOnEndOfTheDay(String date, TreeItem<Report> treeNode){
+        //  keeps balance per currency
+        Map<String, BigDecimal> currencies = new HashMap<>();
+        String currencyName = "";
+        BigDecimal balance = null;
+
+        List<Account> accounts = Account.getAccounts();
+        for (Account account: accounts){
+            currencyName = account.getCurrency().getName();
+            balance = currencies.get(currencyName);
+            if (balance != null){
+                currencies.put(currencyName, balance.add(account.getBalanceDate(date, -1)));
+            }else{
+                currencies.put(currencyName, account.getBalanceDate(date, -1));
+            }
+        }
+
+        for (Map.Entry<String, BigDecimal> currency: currencies.entrySet()){
+            treeNode.getChildren().add(
+                    new TreeItem<>(
+                            new Report(
+                                    "\t" + currency.getKey() + ":",
+                                    Strings.userFormat(currency.getValue().floatValue())
+                            )
+                    ));
+        }
     }
 }

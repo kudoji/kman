@@ -162,7 +162,7 @@
                      <children>
                         <TabPane layoutX="64.0" layoutY="44.0" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                           <tabs>
-                            <Tab closable="false" text="stats">
+                            <Tab fx:id="tabStats" closable="false" text="stats">
                               <content>
                                 <AnchorPane fx:id="apStats" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                               </content>
