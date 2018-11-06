@@ -47,7 +47,7 @@ public class KmanController implements Initializable {
 
     //**************************************  reports tab  **************************************//
     @FXML
-    private Tab tabReports;
+    private Tab tabReports, tabStats;
     @FXML
     private ComboBox<ReportPeriod> cbReportsPeriod;
     @FXML
@@ -485,18 +485,22 @@ public class KmanController implements Initializable {
 
     @FXML
     private void btnReportsGenerateOnAction(ActionEvent event){
+        //  is reports tab selected?
         if (tabReports.isSelected()){
-            //  generate statistics
-            StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
+            //  is stats tab selected
+            if (tabStats.isSelected()){
+                //  generate statistics
+                StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
 
-            TreeTableView<Report> ttvContent = new TreeTableView<>();
-            apStats.getChildren().add(ttvContent);
-            AnchorPane.setTopAnchor(ttvContent, 0.0);
-            AnchorPane.setBottomAnchor(ttvContent, 0.0);
-            AnchorPane.setLeftAnchor(ttvContent, 0.0);
-            AnchorPane.setRightAnchor(ttvContent, 0.0);
+                TreeTableView<Report> ttvContent = new TreeTableView<>();
+                apStats.getChildren().add(ttvContent);
+                AnchorPane.setTopAnchor(ttvContent, 0.0);
+                AnchorPane.setBottomAnchor(ttvContent, 0.0);
+                AnchorPane.setLeftAnchor(ttvContent, 0.0);
+                AnchorPane.setRightAnchor(ttvContent, 0.0);
 
-            sr.generate(ttvContent);
+                sr.generate(ttvContent);
+            }
         }
     }
     //**************************************  /reports tab  **************************************//
