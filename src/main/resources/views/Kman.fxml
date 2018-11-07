@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -15,6 +16,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -164,12 +166,25 @@
                           <tabs>
                             <Tab fx:id="tabStats" closable="false" text="stats">
                               <content>
-                                <AnchorPane fx:id="apStats" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                <AnchorPane fx:id="apReportsStats" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                               </content>
                             </Tab>
-                            <Tab text="accounts">
+                            <Tab fx:id="tabAccounts" text="accounts">
                               <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <HBox layoutX="14.0" layoutY="14.0" maxHeight="28.0" minHeight="28.0" prefHeight="28.0" prefWidth="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                             <children>
+                                                <CheckBox fx:id="cbxReportsAccountFilter" maxHeight="26.0" minHeight="26.0" mnemonicParsing="false" prefHeight="26.0" text="Filter by account:" />
+                                                <ComboBox fx:id="cbReportsAccounts" prefHeight="26.0" prefWidth="225.0">
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" />
+                                                   </HBox.margin>
+                                                </ComboBox>
+                                             </children>
+                                          </HBox>
+                                          <TreeTableView fx:id="ttvReportsAccounts" layoutX="31.0" layoutY="67.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
+                                       </children></AnchorPane>
                               </content>
                             </Tab>
                               <Tab text="payees">

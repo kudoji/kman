@@ -10,7 +10,8 @@ import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
-import com.kudoji.kman.reports.Report;
+import com.kudoji.kman.reports.AccountsReport;
+import com.kudoji.kman.reports.ReportRow;
 import com.kudoji.kman.reports.StatsReport;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -20,7 +21,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -47,7 +47,7 @@ public class KmanController implements Initializable {
 
     //**************************************  reports tab  **************************************//
     @FXML
-    private Tab tabReports, tabStats;
+    private Tab tabReports, tabStats, tabAccounts;
     @FXML
     private ComboBox<ReportPeriod> cbReportsPeriod;
     @FXML
@@ -58,7 +58,13 @@ public class KmanController implements Initializable {
      * Container for statistics report
      */
     @FXML
-    private AnchorPane apStats;
+    private AnchorPane apReportsStats;
+    @FXML
+    private CheckBox cbxReportsAccountFilter;
+    @FXML
+    private ComboBox<Account> cbReportsAccounts;
+    @FXML
+    private TreeTableView<ReportRow> ttvReportsAccounts;
     //**************************************  /reports tab  **************************************//
 
     
@@ -437,6 +443,13 @@ public class KmanController implements Initializable {
                 cbReportsPeriod.setItems(FXCollections.observableArrayList(ReportPeriod.values()));
                 cbReportsPeriod.getSelectionModel().select(ReportPeriod.THISMONTH);
             }
+
+            if (cbReportsAccounts.getItems().isEmpty()){
+                cbReportsAccounts.setItems(Account.getAccounts());
+                //  select first value to make sure that ComboBox has selected value
+                if (cbReportsAccounts.getItems().size() > 0)
+                    cbReportsAccounts.getSelectionModel().select(0);
+            }
         }
     }
 
@@ -492,14 +505,23 @@ public class KmanController implements Initializable {
                 //  generate statistics
                 StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
 
-                TreeTableView<Report> ttvContent = new TreeTableView<>();
-                apStats.getChildren().add(ttvContent);
+                TreeTableView<ReportRow> ttvContent = new TreeTableView<>();
+                apReportsStats.getChildren().add(ttvContent);
                 AnchorPane.setTopAnchor(ttvContent, 0.0);
                 AnchorPane.setBottomAnchor(ttvContent, 0.0);
                 AnchorPane.setLeftAnchor(ttvContent, 0.0);
                 AnchorPane.setRightAnchor(ttvContent, 0.0);
 
                 sr.generate(ttvContent);
+            } else if (tabAccounts.isSelected()) {
+                //  generate accounts report
+                AccountsReport ar = new AccountsReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsAccountFilter.isSelected() ? cbReportsAccounts.getValue() : null
+                );
+
+                ar.generate(ttvReportsAccounts);
             }
         }
     }
