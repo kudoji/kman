@@ -10,6 +10,7 @@ import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Transaction;
+import com.kudoji.kman.reports.AccountsReport;
 import com.kudoji.kman.reports.ReportRow;
 import com.kudoji.kman.reports.StatsReport;
 import javafx.application.Platform;
@@ -445,6 +446,9 @@ public class KmanController implements Initializable {
 
             if (cbReportsAccounts.getItems().isEmpty()){
                 cbReportsAccounts.setItems(Account.getAccounts());
+                //  select first value to make sure that ComboBox has selected value
+                if (cbReportsAccounts.getItems().size() > 0)
+                    cbReportsAccounts.getSelectionModel().select(0);
             }
         }
     }
@@ -510,7 +514,14 @@ public class KmanController implements Initializable {
 
                 sr.generate(ttvContent);
             } else if (tabAccounts.isSelected()) {
+                //  generate accounts report
+                AccountsReport ar = new AccountsReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsAccountFilter.isSelected() ? cbReportsAccounts.getValue() : null
+                );
 
+                ar.generate(ttvReportsAccounts);
             }
         }
     }
