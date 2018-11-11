@@ -9,8 +9,10 @@ import java.util.ResourceBundle;
 import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
+import com.kudoji.kman.models.Payee;
 import com.kudoji.kman.models.Transaction;
 import com.kudoji.kman.reports.AccountsReport;
+import com.kudoji.kman.reports.PayeesReport;
 import com.kudoji.kman.reports.ReportRow;
 import com.kudoji.kman.reports.StatsReport;
 import javafx.application.Platform;
@@ -47,7 +49,7 @@ public class KmanController implements Initializable {
 
     //**************************************  reports tab  **************************************//
     @FXML
-    private Tab tabReports, tabStats, tabAccounts;
+    private Tab tabReports, tabStats, tabAccounts, tabPayees;
     @FXML
     private ComboBox<ReportPeriod> cbReportsPeriod;
     @FXML
@@ -60,11 +62,13 @@ public class KmanController implements Initializable {
     @FXML
     private AnchorPane apReportsStats;
     @FXML
-    private CheckBox cbxReportsAccountFilter;
+    private CheckBox cbxReportsAccountFilter, cbxReportsPayeeFilter;
     @FXML
     private ComboBox<Account> cbReportsAccounts;
     @FXML
-    private TreeTableView<ReportRow> ttvReportsAccounts;
+    private ComboBox<Payee> cbReportsPayees;
+    @FXML
+    private TreeTableView<ReportRow> ttvReportsAccounts, ttvReportsPayees;
     //**************************************  /reports tab  **************************************//
 
     
@@ -450,6 +454,13 @@ public class KmanController implements Initializable {
                 if (cbReportsAccounts.getItems().size() > 0)
                     cbReportsAccounts.getSelectionModel().select(0);
             }
+
+            if (cbReportsPayees.getItems().isEmpty()){
+                cbReportsPayees.setItems(Payee.getPayees());
+                //  select first value to make sure that ComboBox has selected value
+                if (cbReportsPayees.getItems().size() > 0)
+                    cbReportsPayees.getSelectionModel().select(0);
+            }
         }
     }
 
@@ -505,7 +516,7 @@ public class KmanController implements Initializable {
                 //  generate statistics
                 StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
 
-                TreeTableView<ReportRow> ttvContent = new TreeTableView<>();
+                final TreeTableView<ReportRow> ttvContent = new TreeTableView<>();
                 apReportsStats.getChildren().add(ttvContent);
                 AnchorPane.setTopAnchor(ttvContent, 0.0);
                 AnchorPane.setBottomAnchor(ttvContent, 0.0);
@@ -522,6 +533,15 @@ public class KmanController implements Initializable {
                 );
 
                 ar.generate(ttvReportsAccounts);
+            }else if (tabPayees.isSelected()){
+                //  generate payees report
+                PayeesReport payeesReport = new PayeesReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsPayeeFilter.isSelected() ? cbReportsPayees.getValue() : null
+                );
+
+                payeesReport.generate(ttvReportsPayees);
             }
         }
     }
