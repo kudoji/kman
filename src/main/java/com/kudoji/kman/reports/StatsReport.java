@@ -1,20 +1,15 @@
 package com.kudoji.kman.reports;
 
 import com.kudoji.kman.Kman;
-import com.kudoji.kman.models.Account;
 import com.kudoji.kman.models.TransactionType;
 import com.kudoji.kman.utils.Strings;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -58,7 +53,7 @@ public class StatsReport extends Report{
                     ttvRoot,
                     "\t\taccounts",
                     "\t\t\t");
-            addRowsToTreeNode(getRowsPerPayeeForCurrencyId(Integer.parseInt(row.get("currency_id")), true),
+            addRowsToTreeNode(getRowsPerPayeeForCurrencyId(Integer.parseInt(row.get("currency_id")), null, true),
                     ttvRoot,
                     "\t\tpayees",
                     "\t\t\t");
@@ -83,7 +78,7 @@ public class StatsReport extends Report{
                     ttvRoot,
                     "\t\taccounts",
                     "\t\t\t");
-            addRowsToTreeNode(getRowsPerPayeeForCurrencyId(Integer.parseInt(row.get("currency_id")), false),
+            addRowsToTreeNode(getRowsPerPayeeForCurrencyId(Integer.parseInt(row.get("currency_id")), null, false),
                     ttvRoot,
                     "\t\tpayees",
                     "\t\t\t");

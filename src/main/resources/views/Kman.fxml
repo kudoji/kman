@@ -187,9 +187,22 @@
                                        </children></AnchorPane>
                               </content>
                             </Tab>
-                              <Tab text="payees">
+                              <Tab fx:id="tabPayees" text="payees">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <HBox maxHeight="28.0" minHeight="28.0" prefHeight="28.0" prefWidth="200.0" AnchorPane.bottomAnchor="344.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                             <children>
+                                                <CheckBox fx:id="cbxReportsPayeeFilter" maxHeight="26.0" minHeight="26.0" mnemonicParsing="false" prefHeight="26.0" text="Filter by payee:" />
+                                                <ComboBox fx:id="cbReportsPayees" prefHeight="26.0" prefWidth="225.0">
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" />
+                                                   </HBox.margin>
+                                                </ComboBox>
+                                             </children>
+                                          </HBox>
+                                          <TreeTableView fx:id="ttvReportsPayees" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
+                                       </children></AnchorPane>
                                  </content>
                               </Tab>
                               <Tab text="categories">
