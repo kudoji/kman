@@ -22,7 +22,7 @@ public class AccountsReport extends Report {
     }
 
     public AccountsReport(LocalDate startDate, LocalDate endDate){
-        super(startDate, endDate);
+        this(startDate, endDate, null);
     }
 
     public AccountsReport(LocalDate startDate, LocalDate endDate, Account filter){
