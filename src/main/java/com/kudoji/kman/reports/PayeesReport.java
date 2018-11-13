@@ -21,7 +21,7 @@ public class PayeesReport extends Report {
     }
 
     public PayeesReport(LocalDate startDate, LocalDate endDate) {
-        super(startDate, endDate);
+        this(startDate, endDate, null);
     }
 
     public PayeesReport(LocalDate startDate, LocalDate endDate, Payee filter) {
