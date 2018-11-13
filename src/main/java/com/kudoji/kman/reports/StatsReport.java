@@ -57,7 +57,7 @@ public class StatsReport extends Report{
                     ttvRoot,
                     "\t\tpayees",
                     "\t\t\t");
-            addRowsToTreeNode(getRowsPerCategoryForCurrencyId(Integer.parseInt(row.get("currency_id")), true),
+            addRowsToTreeNode(getRowsPerCategoryForCurrencyId(Integer.parseInt(row.get("currency_id")), null, true),
                     ttvRoot,
                     "\t\tcategories",
                     "\t\t\t");
@@ -82,7 +82,7 @@ public class StatsReport extends Report{
                     ttvRoot,
                     "\t\tpayees",
                     "\t\t\t");
-            addRowsToTreeNode(getRowsPerCategoryForCurrencyId(Integer.parseInt(row.get("currency_id")), false),
+            addRowsToTreeNode(getRowsPerCategoryForCurrencyId(Integer.parseInt(row.get("currency_id")), null, false),
                     ttvRoot,
                     "\t\tcategories",
                     "\t\t\t");

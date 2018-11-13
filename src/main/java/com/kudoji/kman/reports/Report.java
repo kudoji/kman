@@ -2,6 +2,7 @@ package com.kudoji.kman.reports;
 
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.models.Account;
+import com.kudoji.kman.models.Category;
 import com.kudoji.kman.models.Payee;
 import com.kudoji.kman.models.TransactionType;
 import com.kudoji.kman.utils.Strings;
@@ -229,16 +230,25 @@ public class Report {
      * Returns DB rows per each category for particular currency id
      *
      * @param currencyId take transaction records for the selected currency only
+     * @param categoryFilter null or value date to be filtered on
      * @param isDeposit true - return records for deposit, false for withdrawal
      *
      * @return DB records
      */
-    List<HashMap<String, String>> getRowsPerCategoryForCurrencyId(int currencyId, boolean isDeposit){
+    List<HashMap<String, String>> getRowsPerCategoryForCurrencyId(int currencyId, Category categoryFilter, boolean isDeposit){
         String sql = "";
         if (isDeposit){
-            sql = format("select sum(amount_to) as value, c.name as parameter from transactions as t inner join accounts as a on t.account_to_id = a.id inner join categories as c on c.id = t.categories_id where a.currencies_id = %d and t.transaction_types_id = %d and (date between '%s' and '%s') group by parameter order by value desc;", currencyId, TransactionType.ACCOUNT_TYPES_DEPOSIT, this.startDate, this.endDate);
+            if (categoryFilter == null){
+                sql = format("select sum(amount_to) as value, c.name as parameter from transactions as t inner join accounts as a on t.account_to_id = a.id inner join categories as c on c.id = t.categories_id where a.currencies_id = %d and t.transaction_types_id = %d and (date between '%s' and '%s') group by parameter order by value desc;", currencyId, TransactionType.ACCOUNT_TYPES_DEPOSIT, this.startDate, this.endDate);
+            }else{
+                sql = format("select sum(amount_to) as value, c.name as parameter from transactions as t inner join accounts as a on t.account_to_id = a.id inner join categories as c on c.id = t.categories_id where a.currencies_id = %d and t.transaction_types_id = %d and (date between '%s' and '%s') and c.id = %d group by parameter order by value desc;", currencyId, TransactionType.ACCOUNT_TYPES_DEPOSIT, this.startDate, this.endDate, categoryFilter.getId());
+            }
         }else{
-            sql = format("select sum(amount_from) as value, c.name as parameter from transactions as t inner join accounts as a on t.account_from_id = a.id inner join categories as c on c.id = t.categories_id where a.currencies_id = %d and t.transaction_types_id = %d and (date between '%s' and '%s') group by parameter order by value desc;", currencyId, TransactionType.ACCOUNT_TYPES_WITHDRAWAL, this.startDate, this.endDate);
+            if (categoryFilter == null){
+                sql = format("select sum(amount_from) as value, c.name as parameter from transactions as t inner join accounts as a on t.account_from_id = a.id inner join categories as c on c.id = t.categories_id where a.currencies_id = %d and t.transaction_types_id = %d and (date between '%s' and '%s') group by parameter order by value desc;", currencyId, TransactionType.ACCOUNT_TYPES_WITHDRAWAL, this.startDate, this.endDate);
+            }else{
+                sql = format("select sum(amount_from) as value, c.name as parameter from transactions as t inner join accounts as a on t.account_from_id = a.id inner join categories as c on c.id = t.categories_id where a.currencies_id = %d and t.transaction_types_id = %d and (date between '%s' and '%s') and c.id = %d group by parameter order by value desc;", currencyId, TransactionType.ACCOUNT_TYPES_WITHDRAWAL, this.startDate, this.endDate, categoryFilter.getId());
+            }
         }
 
 //        System.out.println("sql: " + sql);

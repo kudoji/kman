@@ -9,12 +9,10 @@ import java.util.ResourceBundle;
 import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
+import com.kudoji.kman.models.Category;
 import com.kudoji.kman.models.Payee;
 import com.kudoji.kman.models.Transaction;
-import com.kudoji.kman.reports.AccountsReport;
-import com.kudoji.kman.reports.PayeesReport;
-import com.kudoji.kman.reports.ReportRow;
-import com.kudoji.kman.reports.StatsReport;
+import com.kudoji.kman.reports.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -49,7 +47,7 @@ public class KmanController implements Initializable {
 
     //**************************************  reports tab  **************************************//
     @FXML
-    private Tab tabReports, tabStats, tabAccounts, tabPayees;
+    private Tab tabReports, tabStats, tabAccounts, tabPayees, tabCategories;
     @FXML
     private ComboBox<ReportPeriod> cbReportsPeriod;
     @FXML
@@ -62,13 +60,15 @@ public class KmanController implements Initializable {
     @FXML
     private AnchorPane apReportsStats;
     @FXML
-    private CheckBox cbxReportsAccountFilter, cbxReportsPayeeFilter;
+    private CheckBox cbxReportsAccountFilter, cbxReportsPayeeFilter, cbxReportsCategoryFilter;
     @FXML
     private ComboBox<Account> cbReportsAccounts;
     @FXML
     private ComboBox<Payee> cbReportsPayees;
     @FXML
-    private TreeTableView<ReportRow> ttvReportsAccounts, ttvReportsPayees;
+    private ComboBox<Category> cbReportsCategories;
+    @FXML
+    private TreeTableView<ReportRow> ttvReportsAccounts, ttvReportsPayees, ttvReportsCategories;
     //**************************************  /reports tab  **************************************//
 
     
@@ -461,6 +461,13 @@ public class KmanController implements Initializable {
                 if (cbReportsPayees.getItems().size() > 0)
                     cbReportsPayees.getSelectionModel().select(0);
             }
+
+            if (cbReportsCategories.getItems().isEmpty()){
+                cbReportsCategories.setItems(Category.getCategories());
+                //  select first value to make sure that ComboBox has a selected value
+                if (cbReportsCategories.getItems().size() > 0)
+                    cbReportsCategories.getSelectionModel().select(0);
+            }
         }
     }
 
@@ -524,7 +531,7 @@ public class KmanController implements Initializable {
                 AnchorPane.setRightAnchor(ttvContent, 0.0);
 
                 sr.generate(ttvContent);
-            } else if (tabAccounts.isSelected()) {
+            }else if (tabAccounts.isSelected()) {
                 //  generate accounts report
                 AccountsReport ar = new AccountsReport(
                         dpReportsFrom.getValue(),
@@ -542,6 +549,15 @@ public class KmanController implements Initializable {
                 );
 
                 payeesReport.generate(ttvReportsPayees);
+            }else if (tabCategories.isSelected()){
+                //  generate categories report
+                CaterogiesReport caterogiesReport = new CaterogiesReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsCategoryFilter.isSelected() ? cbReportsCategories.getValue() : null
+                );
+
+                caterogiesReport.generate(ttvReportsCategories);
             }
         }
     }
