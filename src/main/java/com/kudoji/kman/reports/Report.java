@@ -20,7 +20,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-public class Report {
+public abstract class Report {
     //  format for dates
     final String dateFormat = "yyyy-MM-dd";
     //  LocalDate converted to String using dateFormat
@@ -92,9 +92,7 @@ public class Report {
         return ttvRoot;
     }
 
-    public void generate(TreeTableView<ReportRow> treeTableView){
-
-    }
+    public abstract void generate(TreeTableView<ReportRow> treeTableView);
 
     /**
      * Adds total balances per each currency for the end of the day of the date
