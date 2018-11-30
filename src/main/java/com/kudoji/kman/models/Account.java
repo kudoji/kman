@@ -438,7 +438,7 @@ public class Account {
      *
      * @return
      */
-    public boolean update(){
+    public boolean save(){
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "accounts");
         params.put("name", this.getName());
