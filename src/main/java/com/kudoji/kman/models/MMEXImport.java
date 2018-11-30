@@ -34,6 +34,8 @@ public class MMEXImport {
      * @param _allData inserts all data from mmex if true, otherwise takes data which needed for transactions only
      */
     public MMEXImport(String _file, boolean _allData){
+        if (_file == null) throw new IllegalArgumentException();
+
         dbMMEX = new DB(_file);
         if (!dbMMEX.connect()){
             this.isError = true;

@@ -26,6 +26,8 @@ public class Payee {
     private final static javafx.collections.ObservableList<Payee> payeesCache = FXCollections.observableArrayList();
     
     public Payee(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
 
@@ -38,6 +40,8 @@ public class Payee {
     }
     
     public void setFields(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
 //        this.id = new SimpleIntegerProperty((int)_params.get("id"));
         this.name.set(_params.get("name"));
         //for categories
@@ -57,6 +61,8 @@ public class Payee {
     }
     
     public void setName(String _name){
+        if (_name == null) throw new IllegalArgumentException();
+
         this.name.set(_name);
     }
     

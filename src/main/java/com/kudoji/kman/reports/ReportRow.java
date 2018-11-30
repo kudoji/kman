@@ -10,6 +10,8 @@ public class ReportRow {
     private SimpleStringProperty value;
 
     public ReportRow(String parameter, String value){
+        if (parameter == null || value == null) throw new IllegalArgumentException();
+
         this.parameter = new SimpleStringProperty(parameter);
         this.value = new SimpleStringProperty(value);
     }

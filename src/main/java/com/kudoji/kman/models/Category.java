@@ -31,6 +31,8 @@ public class Category {
     }
     
     public Category(int _id, String _name){
+        if (_id <= 0 || _name == null) throw new IllegalArgumentException();
+
         this.id = _id;
         this.name = _name;
         this.fullPath = this.name;
@@ -38,6 +40,8 @@ public class Category {
     }
     
     public Category(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = Integer.parseInt(_params.get("id"));
         this.name = _params.get("name");
         this.fullPath = this.name;
@@ -47,6 +51,8 @@ public class Category {
     }
     
     public void setFields(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
 //        this.id = Integer.parseInt(_params.get("id"));
         this.name = _params.get("name");
         this.fullPath = this.name;

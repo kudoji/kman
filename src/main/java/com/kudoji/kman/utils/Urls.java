@@ -6,6 +6,8 @@ public class Urls {
      * @param _url
      */
     public static void openUrl(String _url){
+        if (_url == null) throw new IllegalArgumentException();
+
         Runtime rt = Runtime.getRuntime();
 
         //  check for OS first

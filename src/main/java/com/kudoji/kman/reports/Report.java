@@ -32,11 +32,15 @@ public abstract class Report {
     }
 
     public Report(LocalDate startDate, LocalDate endDate){
+        if (startDate == null || endDate == null) throw new IllegalArgumentException();
+
         this.startDate = startDate.format(DateTimeFormatter.ofPattern(dateFormat));
         this.endDate = endDate.format(DateTimeFormatter.ofPattern(dateFormat));
     }
 
     public void setStartDate(LocalDate startDate){
+        if (startDate == null) throw new IllegalArgumentException();
+
         this.startDate = startDate.format(DateTimeFormatter.ofPattern(dateFormat));
     }
 
@@ -45,6 +49,8 @@ public abstract class Report {
     }
 
     public void setEndDate(LocalDate endDate){
+        if (endDate == null) throw new IllegalArgumentException();
+
         this.endDate = endDate.format(DateTimeFormatter.ofPattern(dateFormat));
     }
 

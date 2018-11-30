@@ -18,6 +18,8 @@ public class DB {
     private boolean debug = false;
     
     public DB(String _dbFile) {
+        if (_dbFile == null) throw new IllegalArgumentException();
+
         dbFile = _dbFile;
         dbUrl = "jdbc:sqlite:" + dbFile;
     }
@@ -56,6 +58,8 @@ public class DB {
      * @return
      */
     public boolean connect(String _file){
+        if (_file == null) throw new IllegalArgumentException();
+
         this.dbFile = _file;
         this.dbUrl = "jdbc:sqlite:" + dbFile;
 

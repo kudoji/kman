@@ -60,6 +60,8 @@ public class Transaction {
     private Category category = null;
     
     public Transaction(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = Integer.parseInt(_params.get("id"));
         this.date = new SimpleStringProperty(_params.get("date"));
 
@@ -120,6 +122,8 @@ public class Transaction {
      * @param _params 
      */
     public void setFields(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
 //        this.id = (int)_params.get("id");
         setDate(_params.get("date"));
         setTypeId(Integer.parseInt(_params.get("transaction_types_id")));
@@ -160,6 +164,8 @@ public class Transaction {
     }
 
     public final void setDate(String _date){
+        if (_date == null) throw new IllegalArgumentException();
+
         this.date.set(_date);
     }
 
