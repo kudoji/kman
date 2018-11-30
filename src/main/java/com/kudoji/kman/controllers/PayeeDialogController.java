@@ -29,7 +29,17 @@ public class PayeeDialogController extends Controller {
     private ComboBox<Category> cbCategoryDeposit, cbCategoryWithdrawal;
 
     private final int MAX_PAYEE_NAMELENGTH = 15;
-    
+
+    @FXML
+    private void btnCategoryDepositClearOnAction(ActionEvent event){
+        cbCategoryDeposit.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    private void btnCategoryWithdrawalClearOnAction(ActionEvent event){
+        cbCategoryWithdrawal.getSelectionModel().clearSelection();
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent event){
         if (!validateFields()){
