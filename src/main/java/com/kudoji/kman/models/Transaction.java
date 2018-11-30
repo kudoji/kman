@@ -464,7 +464,7 @@ public class Transaction {
                 //decrease accounts balance
                 account = this.getAccount(true);
                 account.increaseBalanceCurrent(new BigDecimal(-this.getAmountTo()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -485,7 +485,7 @@ public class Transaction {
                 //increase accounts balance
                 account = this.getAccount(false);
                 account.increaseBalanceCurrent(new BigDecimal(this.getAmountFrom()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -507,7 +507,7 @@ public class Transaction {
                 //increase accounts balance
                 account = this.getAccount(false);
                 account.increaseBalanceCurrent(new BigDecimal(this.getAmountFrom()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");
@@ -526,7 +526,7 @@ public class Transaction {
                 //decrese accounts balance
                 account = this.getAccount(true);
                 account.increaseBalanceCurrent(new BigDecimal(-this.getAmountTo()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
                     System.err.println("Unable to save current balance for " + account + " account");

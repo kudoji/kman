@@ -249,7 +249,7 @@ public class TransactionDialogController extends Controller {
 
             //  without 100f (f) it would devide without digits (.00)® after point
             account.setBalanceCurrent(amountToNew.add(account.getBalanceCurrent()));
-            accountSaved = account.update();
+            accountSaved = account.save();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
@@ -270,7 +270,7 @@ public class TransactionDialogController extends Controller {
             balanceFromNew = account.getBalanceDate(tdNew, -1).subtract(amountFromNew);
 
             account.setBalanceCurrent(account.getBalanceCurrent().subtract(amountFromNew));
-            accountSaved = account.update();
+            accountSaved = account.save();
             if (!accountSaved) {
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;
@@ -298,7 +298,7 @@ public class TransactionDialogController extends Controller {
             balanceToNew = account.getBalanceDate(tdNew, -1).add(amountToNew);
             account.setBalanceCurrent(account.getBalanceCurrent().add(amountToNew));
 
-            accountSaved = account.update();
+            accountSaved = account.save();
             if (!accountSaved){
                 System.err.println("Unable to save current balance for " + account + " account");
                 return false;

@@ -112,11 +112,11 @@ public class AccountDialogController extends Controller {
         }
         tmpAcc.setCurrencyId(this.currency.getID());
 
-        if (this.account != null){ //edit existed account, need to put its id to update sql query
+        if (this.account != null){ //edit existed account, need to put its id to save sql query
             tmpAcc.setId(this.account.getId());
         }
 
-        if (tmpAcc.update()){
+        if (tmpAcc.save()){
             //  account is updated
             if (this.account == null){
                 this.account = tmpAcc;
