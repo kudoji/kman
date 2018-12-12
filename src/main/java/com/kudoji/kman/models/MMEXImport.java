@@ -39,8 +39,8 @@ public class MMEXImport {
     public MMEXImport(String _file, boolean _allData){
         if (_file == null) throw new IllegalArgumentException();
 
-        dbMMEX = new DB(_file);
-        if (!dbMMEX.connect()){
+        dbMMEX = DB.getInstance();
+        if (!dbMMEX.connect(_file)){
             this.isError = true;
             Kman.showErrorMessage("Cannot connect to mmex database (" + _file + ")");
         }else{
