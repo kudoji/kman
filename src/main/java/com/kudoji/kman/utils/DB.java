@@ -4,6 +4,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
@@ -15,21 +17,23 @@ public class DB {
     private Connection dbConnection = null;
     private String dbFile = null;
     private String dbUrl = null;
-    private boolean debug = false;
+    private final static Logger log = Logger.getLogger(DB.class.getName());
     
     public DB(String _dbFile) {
         if (_dbFile == null) throw new IllegalArgumentException();
 
         dbFile = _dbFile;
         dbUrl = "jdbc:sqlite:" + dbFile;
+
+        log.setLevel(Level.ALL);
     }
     
     public Connection getConnection(){
         return this.dbConnection;
     }
     
-    public void setDebugMode(boolean _debug){
-        this.debug = _debug;
+    public void setLogLevel(Level level){
+        log.setLevel(level);
     }
     
     public boolean connect(){
@@ -38,14 +42,10 @@ public class DB {
             dbConnection = DriverManager.getConnection(dbUrl);
             //force using koreign key constrain
             dbConnection.createStatement().execute("PRAGMA foreign_keys = ON;");
-            if (debug){
-                System.out.println("sqlite connected");
-            }
+            log.info("sqlite connected");
             result = true;
         }catch (SQLException e){
-            if (debug){
-                System.out.println(e.getMessage());
-            }
+            log.log(Level.SEVERE, e.getMessage(), e);
             result = false;
         }
         
@@ -84,9 +84,7 @@ public class DB {
             }
         }catch (SQLException ex){
             result = false;
-            if (debug){
-                System.out.println(ex.getMessage());
-            }
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
         
         return result;
@@ -144,7 +142,7 @@ public class DB {
                     }
                     break;
                 default:
-                    System.err.println(format("Error in DB.convertRS2Dic(%d)", rsmd.getColumnType(i)));
+                    log.severe(format("Error in DB.convertRS2Dic(%d)", rsmd.getColumnType(i)));
                     break;
             }
         }
@@ -172,7 +170,7 @@ public class DB {
         String sqlText = "";
         Object param = _parameters.get("table");
         if (param == null){ //table is not set
-            System.err.println(this.getClass().getName() + ": " + "table is not set");
+            log.warning("table is not set");
             return 0;
         }
 
@@ -187,7 +185,7 @@ public class DB {
         Object paramWhere = _parameters.get("where");
         //  id or where condition must be set for update statement
         if ( (paramWhere == null) && (paramID == null) && (!_insert) ){
-            System.err.println(this.getClass().getName() + ": " + "id field or where condition is not set");
+            log.warning("id field or where condition is not set");
             return 0;
         }
         if (!_insert){
@@ -199,13 +197,13 @@ public class DB {
         
         Object paramOrder = _parameters.get("order");
         if ( (paramOrder != null) && (_insert) ){
-            System.err.println(this.getClass().getName() + ": " + "order by cannot be used with insert");
+            log.warning("order by cannot be used with insert");
             return 0;
         }
         _parameters.remove("order");
 
         if (_parameters.isEmpty()){ //no fields to update/insert
-            System.err.println(this.getClass().getName() + ": " + "no fields are set for update/insert");
+            log.warning("no fields are set for update/insert");
             return 0;
         }
         
@@ -274,7 +272,7 @@ public class DB {
                 }
             }
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             return 0;
         }
         
@@ -298,7 +296,7 @@ public class DB {
         ){
             statement.execute(_sqlText);
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
         
@@ -309,14 +307,14 @@ public class DB {
         String sqlText = "delete from ";
         Object param = _params.get("table");
         if (param == null){ //table is not set
-            System.err.println(this.getClass().getName() + ": " + "table is not set");
+            log.warning("table is not set");
             return false;
         }
         sqlText += param.toString();
         
         param = _params.get("where");
         if (param == null){ //table is not set
-            System.err.println(this.getClass().getName() + ": " + "where condition is not set");
+            log.warning("where condition is not set");
             return false;
         }
         
@@ -328,7 +326,7 @@ public class DB {
         ){
             statement.execute(sqlText);
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
         
@@ -355,7 +353,7 @@ public class DB {
         String sqlText = "select * from ";
         Object param = _parameters.get("table");
         if (param == null){
-            System.err.println(this.getClass().getName() + ": " + " table is not set");
+            log.warning("table is not set");
         }else{
             sqlText = sqlText + param.toString();
         }
@@ -394,7 +392,7 @@ public class DB {
                 result.add(row);
             }
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
         }
         
         return result;
@@ -422,7 +420,7 @@ public class DB {
                 result.add(row);
             }
         }catch (SQLException e){
-            e.printStackTrace();
+            log.log(Level.WARNING, e.getMessage(), e);
         }
 
         return result;
@@ -434,7 +432,8 @@ public class DB {
             this.dbConnection.setAutoCommit(false);
         }catch (SQLException e){
             result = false;
-            System.err.println(e.getClass() + ": " + e.getMessage() + " (couldn't start transaction)");
+
+            log.log(Level.WARNING, e.getMessage() + " (couldn't start transaction)", e);
         }
         
         return result;
@@ -446,7 +445,8 @@ public class DB {
             this.dbConnection.rollback();
         }catch (SQLException e){
             result = false;
-            System.err.println(e.getClass() + ": " + e.getMessage() + " (couldn't start transaction)");
+
+            log.log(Level.WARNING, e.getMessage() + " couldn't rollback transaction)", e);
         }
         
         return result;
@@ -458,7 +458,8 @@ public class DB {
             this.dbConnection.commit();
         }catch (SQLException e){
             result = false;
-            System.err.println(e.getClass() + ": " + e.getMessage() + " (couldn't start transaction)");
+
+            log.log(Level.WARNING, e.getMessage() + " (couldn't commit transaction)", e);
         }
         
         return result;
@@ -850,9 +851,8 @@ public class DB {
             sqlStatement.close();
         }catch (SQLException e){
             result = false;
-            if (this.debug){
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            }
+
+            log.log(Level.WARNING, e.getMessage(), e);
         }
         
         return result;
