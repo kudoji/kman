@@ -184,9 +184,9 @@ public class Kman extends Application {
         settings = new Settings(stage);
         settings.readSettings();
 
-        kmanDB = new DB(settings.getDBName());
+        kmanDB = DB.getInstance();
         kmanDB.setLogLevel(Level.ALL);
-        kmanDB.connect();
+        kmanDB.connect(settings.getDBName());
         kmanDB.createAllTables(true);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Kman.fxml"));
