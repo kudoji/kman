@@ -2,6 +2,8 @@ package com.kudoji.kman.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.kudoji.kman.models.Currency;
 import com.kudoji.kman.Kman;
@@ -18,6 +20,8 @@ import javax.xml.soap.Node;
  * @author kudoji
  */
 public class CurrenciesDialogController extends Controller {
+    private static final Logger log = Logger.getLogger(CurrenciesDialogController.class.getName());
+
     @FXML private javafx.scene.control.TextField tfFilter;
     @FXML private javafx.scene.control.TableView<Currency> tvCurrencies;
     @FXML private javafx.scene.control.TableColumn<Currency, String> tcName;
@@ -93,12 +97,12 @@ public class CurrenciesDialogController extends Controller {
                         }
                         currenciesData.put(code, Float.parseFloat(rate));
                     }catch (NumberFormatException ne){
-                        System.err.println("Cannot load currency: " + code + ", rate: " + rate);
+                        log.log(Level.WARNING, ne.getMessage() + " (Cannot load currency: " + code + ", rate: " + rate + ")", ne);
                     }
                 }
             }
         }catch (Exception e){
-            System.err.println(e.getClass() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
         }
         
         if (currenciesData.isEmpty()){

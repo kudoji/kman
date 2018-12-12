@@ -6,12 +6,15 @@ import com.kudoji.kman.utils.Strings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  *
  * @author kudoji
  */
 public class MMEXImport {
+    private static final Logger log = Logger.getLogger(MMEXImport.class.getName());
+
     private enum TableType {payees, accounts};
     
     /**
@@ -80,12 +83,12 @@ public class MMEXImport {
             
             if (!insertRecord(TableType.accounts)){
                 this.isError = true;
-                System.err.println("Couldn't insert accounts");
+                log.warning("Couldn't insert accounts");
                 return;
             }
             if (!insertRecord(TableType.payees)){
                 this.isError = true;
-                System.err.println("Couldn't insert payees");
+                log.warning("Couldn't insert payees");
                 return;
             }
         }//otherwise, only used by transactions data will e transferred 
@@ -97,9 +100,9 @@ public class MMEXImport {
         
         ArrayList<HashMap<String, String>> rows = this.dbMMEX.selectData(params);
         for (HashMap<String, String> row: rows){
-            System.out.println("tid: " + row.get("TRANSID"));
+            log.info("tid: " + row.get("TRANSID"));
             if (!insertTransaction(row)){
-                System.err.println("Cannot move transaction with ID = " + row.get("TRANSID"));
+                log.warning("Cannot move transaction with ID = " + row.get("TRANSID"));
                 this.isError = true;
                 
                 break;
@@ -112,7 +115,7 @@ public class MMEXImport {
             Kman.getDB().commitTransaction();
         }else{
             Kman.getDB().rollbackTransaction();
-            System.err.println("Error happened during import process...");
+            log.warning("Error happened during import process...");
         }
     }
 
@@ -125,7 +128,7 @@ public class MMEXImport {
             params.put("balance_current", account.getValue().toString());
             
             if (Kman.getDB().updateData(false, params) != 1){
-                System.out.println("Couldn't update account's balance. ID: " + account.getKey());
+                log.warning("Couldn't update account's balance. ID: " + account.getKey());
                 this.isError = true;
                 
                 return;
@@ -389,21 +392,21 @@ public class MMEXImport {
         if (!this.insertAllData){ //records might not be created yet
             if (payee_id > 0){
                 if (!insertRecord(payee_id, TableType.payees)){
-                    System.err.println("Payee with id = " + payee_id + " cannot be created");
+                    log.warning("Payee with id = " + payee_id + " cannot be created");
                     return false;
                 }
             }
 
             if (account_to_id > 0){
                 if (!insertRecord(account_to_id, TableType.accounts)){
-                    System.err.println("Account with id = " + account_to_id + " cannot be created");
+                    log.warning("Account with id = " + account_to_id + " cannot be created");
                     return false;
                 }
             }
 
             if (account_from_id > 0){
                 if (!insertRecord(account_from_id, TableType.accounts)){
-                    System.err.println("Account with id = " + account_from_id + " cannot be created");
+                    log.warning("Account with id = " + account_from_id + " cannot be created");
                     return false;
                 }
             }
@@ -453,10 +456,10 @@ public class MMEXImport {
         
         params.put("notes", notes);
         
-        if (_row.get("TRANSID").equals("313")){
-            System.out.println(_row);
-            System.out.println(params);
-        }
+//        if (_row.get("TRANSID").equals("313")){
+//            System.out.println(_row);
+//            System.out.println(params);
+//        }
         
         return (Kman.getDB().updateData(true, params) > 0);
     }

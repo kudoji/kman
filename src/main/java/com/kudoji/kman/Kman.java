@@ -11,6 +11,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author kudoji
@@ -22,6 +25,8 @@ public class Kman extends Application {
     public final static String KMAN_VERSION = "0.9-SNAPSHOT";
     //  github repository url
     public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
+
+    private static final Logger log = Logger.getLogger(Kman.class.getName());
 
     private static DB kmanDB;
     private static Stage kmanStage;
@@ -111,7 +116,7 @@ public class Kman extends Application {
             
             result = controller.isChanged();
         }catch (Exception e){
-            System.err.println(e.getClass() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             result = false;
         }
         
@@ -180,7 +185,7 @@ public class Kman extends Application {
         settings.readSettings();
 
         kmanDB = new DB(settings.getDBName());
-        kmanDB.setDebugMode(true);
+        kmanDB.setLogLevel(Level.ALL);
         kmanDB.connect();
         kmanDB.createAllTables(true);
 

@@ -2,6 +2,7 @@ package com.kudoji.kman.models;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.utils.Strings;
@@ -58,6 +59,8 @@ public class Transaction {
      * Keeps category for the transaction
      */
     private Category category = null;
+
+    private static final Logger log = Logger.getLogger(Transaction.class.getName());
     
     public Transaction(HashMap<String, String> _params){
         if (_params == null) throw new IllegalArgumentException();
@@ -456,7 +459,7 @@ public class Transaction {
                 if (!Transaction.increaseBalance(this, AccountTake.TO, -this.getAmountTo())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountToId());
 
                     return false;
@@ -467,7 +470,7 @@ public class Transaction {
                 if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
@@ -477,7 +480,7 @@ public class Transaction {
                 if (!Transaction.increaseBalance(this, AccountTake.FROM, this.getAmountFrom())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
@@ -488,7 +491,7 @@ public class Transaction {
                 if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
@@ -499,7 +502,7 @@ public class Transaction {
                 if (!Transaction.increaseBalance(this, AccountTake.FROM, this.getAmountFrom())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
@@ -510,7 +513,7 @@ public class Transaction {
                 if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
@@ -518,7 +521,7 @@ public class Transaction {
                 if (!Transaction.increaseBalance(this, AccountTake.TO, -this.getAmountTo())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountToId());
 
                     return false;
@@ -529,7 +532,7 @@ public class Transaction {
                 if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
@@ -546,7 +549,7 @@ public class Transaction {
         if (!Kman.getDB().deleteData(params)){
             if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-            System.err.println("Unable to detele transaction with id: " + this.getId());
+            log.warning("Unable to detele transaction with id: " + this.getId());
 
             return false;
         }
@@ -554,7 +557,7 @@ public class Transaction {
         if (_useDBTransaction){
             if (!Kman.getDB().commitTransaction()){
                 Kman.getDB().rollbackTransaction();
-                System.err.println("Unable to commit SQL transaction");
+                log.warning("Unable to commit SQL transaction");
                 return false;
             }
         }
