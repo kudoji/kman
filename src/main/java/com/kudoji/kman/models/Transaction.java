@@ -711,22 +711,22 @@ public class Transaction {
             return false;
         }else switch (_accountTake) {
             case FROM:
-                // for withdrawal
+                //  for withdrawal
                 account_from_id = String.valueOf(_transaction.getAccountFromId());
                 account_to_id = account_from_id;
                 break;
             case TO:
-                // for deposit
+                //  for deposit
                 account_from_id = String.valueOf(_transaction.getAccountToId());
                 account_to_id = account_from_id;
                 break;
             case BOTH:
-                // for transfer
+                //  for transfer
                 account_from_id = String.valueOf(_transaction.getAccountToId()) + ", " + String.valueOf(_transaction.getAccountToId());
                 account_to_id = account_from_id;
                 break;
             default:
-                //somethin is wrong
+                //  something is wrong
                 return false;
         }
 

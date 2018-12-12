@@ -413,7 +413,7 @@ public class Account {
             olTransactions.add(transaction);
         }
 
-        //  all transactions are already sorted, no need to additional sort
+        //  all transactions are already sorted, no need for additional sort
     }
 
     /**
