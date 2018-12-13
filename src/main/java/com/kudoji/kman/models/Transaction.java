@@ -1,6 +1,7 @@
 package com.kudoji.kman.models;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -649,6 +650,16 @@ public class Transaction {
         return true;
     }
 
+    public static Transaction getTransaction(int id, Account account){
+        for (Transaction transaction: account.getTransactions()){
+            if (transaction.getId() == id){
+                return transaction;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Increases transactions' balance for the _accountID after particular _dateAfter (excluding it)
      * Make sense of using this method with NEW transaction ONLY
@@ -678,7 +689,20 @@ public class Transaction {
         // need to change transactions after its date only
         params.put("where", "(account_from_id = " + _accountID + " or account_to_id = " + _accountID + ") and date > '" + _dateAfter + "'");
 
-        return (Kman.getDB().updateData(false, params) != 0);
+        boolean result = (Kman.getDB().updateData(false, params) != 0);
+
+        //  all updated transactions need to re-read data from DB
+        params.clear();
+        params.put("table", "transactions");
+        params.put("where", "(account_from_id = " + _accountID + " or account_to_id = " + _accountID + ") and date > '" + _dateAfter + "'");
+        ArrayList<HashMap<String, String>> transactions = Kman.getDB().selectData(params);
+        for (HashMap<String, String> param: transactions){
+            Transaction transaction = Transaction.getTransaction(Integer.parseInt(param.get("id")), Account.getAccount(_accountID));
+
+            if (transaction != null) transaction.setFields(param);
+        }
+
+        return result;
     }
     
     /**
@@ -707,7 +731,7 @@ public class Transaction {
         //but for one date transactions ordered by id ascendinly
         //
         String account_from_id, account_to_id;
-        if (null == _accountTake){ //not acceptible
+        if (null == _accountTake){ //not acceptable
             return false;
         }else switch (_accountTake) {
             case FROM:
@@ -722,9 +746,12 @@ public class Transaction {
                 break;
             case BOTH:
                 //  for transfer
-                account_from_id = String.valueOf(_transaction.getAccountToId()) + ", " + String.valueOf(_transaction.getAccountToId());
-                account_to_id = account_from_id;
-                break;
+                //  transaction cannot belong to two accounts
+                log.severe(_accountTake.toString() + " is not applicable");
+                return false;
+//                account_from_id = String.valueOf(_transaction.getAccountToId()) + ", " + String.valueOf(_transaction.getAccountToId());
+//                account_to_id = account_from_id;
+//                break;
             default:
                 //  something is wrong
                 return false;
@@ -739,8 +766,21 @@ public class Transaction {
         params.put("table", "transactions");
         params.put("set", "balance_from = balance_from + case when account_from_id in (" + account_from_id + ") then " + _delta + " else 0 end, balance_to = balance_to + case when account_to_id in (" + account_to_id + ") then " + _delta + " else 0 end");
         params.put("where", "(account_from_id in (" + account_from_id + ") or account_to_id in (" + account_to_id + ") ) and ( (date > '" + _transaction.getDate() + "') or ( date = '" + _transaction.getDate() + "' and id > " + _transaction.getId() + " ) )");
-        
-        return (Kman.getDB().updateData(false, params) != 0);
+
+        boolean result = (Kman.getDB().updateData(false, params) != 0);
+
+        //  all updated transactions need to re-read data from DB
+        params.clear();
+        params.put("table", "transactions");
+        params.put("where", "(account_from_id in (" + account_from_id + ") or account_to_id in (" + account_to_id + ") ) and ( (date > '" + _transaction.getDate() + "') or ( date = '" + _transaction.getDate() + "' and id > " + _transaction.getId() + " ) )");
+        ArrayList<HashMap<String, String>> transactions = Kman.getDB().selectData(params);
+        for (HashMap<String, String> param: transactions){
+            Transaction transaction = Transaction.getTransaction(Integer.parseInt(param.get("id")), _transaction.getAccount(_accountTake == AccountTake.TO));
+
+            if (transaction != null) transaction.setFields(param);
+        }
+
+        return result;
     }
 
     /**
