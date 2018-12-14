@@ -83,7 +83,7 @@ public class Kman extends Application {
         alert.setHeaderText(null);
         alert.setContentText(_message);
         java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-        
+
         return (result.get() == javafx.scene.control.ButtonType.OK);
     }
     
