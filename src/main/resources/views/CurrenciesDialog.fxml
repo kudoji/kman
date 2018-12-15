@@ -14,7 +14,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.CurrenciesDialogController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.CurrenciesDialogController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -89,6 +89,11 @@
       </HBox>
       <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
          <children>
+            <Label fx:id="lbStatus" maxHeight="26.0" maxWidth="1.7976931348623157E308" minHeight="26.0" minWidth="70.0" prefHeight="26.0" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font name="System Bold" size="17.0" />
+               </font>
+            </Label>
             <Button maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCancelOnAction" prefWidth="70.0" text="Close" />
          </children>
       </HBox>
