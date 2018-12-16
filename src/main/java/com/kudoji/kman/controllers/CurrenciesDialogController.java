@@ -215,7 +215,7 @@ public class CurrenciesDialogController extends Controller {
                 }
                 
                 String valueNewLC = valueNew.toLowerCase();
-                Currency currencyCurrent = (Currency)currency;
+                Currency currencyCurrent = currency;
                 if ( currencyCurrent.getName().toLowerCase().contains(valueNewLC)){
                     //value matches currency name
                     return true;
@@ -224,7 +224,7 @@ public class CurrenciesDialogController extends Controller {
                     return true;
                 }
                 
-                //value doen't match
+                //value doesn't match
                 return false;
             });
         });
