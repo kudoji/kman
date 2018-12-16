@@ -431,11 +431,13 @@ public class KmanController implements Initializable {
 
     /**
      * Does all necessary operations for clearing app's screen
+     * Used to prepare app's window for another DB file
      */
     private void clearAppScreen(){
         tiAccounts = Account.populateAccountsTree(tvNavigation);
         tvNavigation.getSelectionModel().select(tiAccounts);
         tvTransactions.getItems().clear();
+        taTransactionNote.setText("");
     }
 
     //**************************************  reports tab  **************************************//
