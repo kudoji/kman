@@ -15,6 +15,7 @@ import com.kudoji.kman.models.Transaction;
 import com.kudoji.kman.reports.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -44,6 +45,11 @@ public class KmanController implements Initializable {
     private TableView<Transaction> tvTransactions;
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
+
+    @FXML
+    private TextField tfFilter;
+    //  used along with tfFilter
+    private FilteredList<Transaction> transactionsFiltered;
 
     //**************************************  reports tab  **************************************//
     @FXML
@@ -334,13 +340,22 @@ public class KmanController implements Initializable {
         TreeItem<Account> tiSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
         if (tiSelected != null){
             Account aSelected = tiSelected.getValue();
-            
+
+            //  drop transactions' filter
+            tfFilter.setText("");
+
             Transaction.populateTransactionsTable(tvTransactions, aSelected);
+
+            //  re-create filtered list based on transactions list
+            transactionsFiltered = new FilteredList<>(tvTransactions.getItems());
+            //  set transactions list based on filtered which is based on filter
+            tvTransactions.setItems(transactionsFiltered);
+
             //  update transaction note as well
             tvTransactionsOnSelect();
         }
     }
-    
+
     /**
      * Called every time tvTransactions is selected by mouse or keyboard
      */
@@ -627,6 +642,28 @@ public class KmanController implements Initializable {
 
         spMainContainer.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
             Kman.getSettings().setWindowDividerPosition(newValue.doubleValue());
+        });
+
+        //  transaction filter (feature #9)
+        transactionsFiltered = new FilteredList<>(tvTransactions.getItems());
+        tfFilter.textProperty().addListener((observable, oldValue, newValue) -> {
+            transactionsFiltered.setPredicate(transaction -> {
+                //  filter is empty. Thus, show all transactions
+                if ( (newValue == null) || (newValue.isEmpty()) ){
+                    return true;
+                }
+
+                //  value in text filter
+                String filterValue = newValue.toLowerCase();
+                //
+                String transactionValue = transaction.toSearchString().toLowerCase();
+
+                if (transactionValue.contains(filterValue)){
+                    return true;
+                }
+
+                return false;
+            });
         });
     }
 

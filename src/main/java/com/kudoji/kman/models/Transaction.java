@@ -10,6 +10,7 @@ import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import com.kudoji.kman.enums.AccountTake;
+import javafx.scene.control.TableView;
 
 /**
  *
@@ -197,6 +198,10 @@ public class Transaction {
             this.transaction_types_id = _id;
             this.typeUserFormat.set(TransactionType.getTransactionType(this.transaction_types_id).toString());
         }
+    }
+
+    public String getTypeUserFormat(){
+        return this.typeUserFormat.get();
     }
 
     public StringProperty typeUserFormatProperty(){
@@ -786,9 +791,11 @@ public class Transaction {
     /**
      * 
      * @param _tvTransactions
-     * @param _accountFilter filter transactions for the account. No filter if _accountFilter is null or its ID < 1
+     * @param _accountFilter filter transactions for the account.
+     *                       No filter if _accountFilter is null or its ID < 1
      */
-    public static void populateTransactionsTable(javafx.scene.control.TableView<Transaction> _tvTransactions, Account _accountFilter){
+    public static void populateTransactionsTable(TableView<Transaction> _tvTransactions,
+                                                 Account _accountFilter){
         if (_accountFilter == null || _accountFilter.getId() == 0){
             //  show no transactions for root account
             return;
@@ -797,5 +804,12 @@ public class Transaction {
         _tvTransactions.setItems(_accountFilter.getTransactions());
         //  scroll to the bottom of the list
         _tvTransactions.scrollTo(_tvTransactions.getItems().size() - 1);
+    }
+
+    //  convert current transaction to String for filtering data if needed
+    public String toSearchString(){
+        return Integer.toString(this.getId()) + this.getDate() + this.getTypeUserFormat() +
+                this.getAccountString() + this.getCategoryString() + this.getAmountString() +
+                this.getBalanceString() + this.getNotes();
     }
 }

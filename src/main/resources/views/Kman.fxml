@@ -16,6 +16,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.input.KeyCodeCombination?>
@@ -23,6 +24,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="469.0" prefWidth="774.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.KmanController">
    <top>
@@ -129,7 +131,19 @@
                                                       <Insets right="3.0" />
                                                    </HBox.margin>
                                                 </Button>
-                                                <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionDeleteOnAction" prefHeight="26.0" prefWidth="70.0" text="Delete" />
+                                                <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionDeleteOnAction" prefHeight="26.0" prefWidth="70.0" text="Delete">
+                                                   <HBox.margin>
+                                                      <Insets right="3.0" />
+                                                   </HBox.margin></Button>
+                                                <Label text="filter:">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets right="3.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <TextField fx:id="tfFilter" promptText="transaction filter" HBox.hgrow="ALWAYS" />
                                              </children>
                                           </HBox>
                                        </top>
