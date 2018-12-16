@@ -181,10 +181,10 @@ public class Kman extends Application {
     public void start(Stage stage) throws Exception {
         Kman.kmanStage = stage;
 
-        settings = new Settings(stage);
+        settings = Settings.getInstance(stage);
         settings.readSettings();
 
-        kmanDB = DB.getInstance();
+        kmanDB = DB.getInstance(Kman.KMAN_DB_NAME_DEFAULT);
         kmanDB.setLogLevel(Level.ALL);
         kmanDB.connect(settings.getDBName());
         kmanDB.createAllTables(true);

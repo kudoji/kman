@@ -5,6 +5,8 @@ import javafx.stage.Stage;
 import java.util.prefs.*;
 
 public class Settings {
+    private static Settings instance;
+
     private final static String KMAN_DB_NAME = "kmanDBName";
     private final static String WINDOW_SAVE_NAME = "saveWindowPosition";
     private final static String WINDOW_X_NAME = "windowsX";
@@ -20,9 +22,17 @@ public class Settings {
 
     private boolean saveWindowPosition;
 
-    public Settings(Stage stage){
+    private Settings(Stage stage){
         this.prefs = Preferences.userNodeForPackage(Settings.class);
         this.stage = stage;
+    }
+
+    public static Settings getInstance(Stage stage){
+        if (instance == null){
+            instance = new Settings(stage);
+        }
+
+        return instance;
     }
 
     /**

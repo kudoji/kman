@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.kudoji.kman.Kman.KMAN_DB_NAME_DEFAULT;
 import static java.lang.String.format;
 
 /**
@@ -20,7 +19,7 @@ public class DB {
     private String dbUrl;
     private final static Logger log = Logger.getLogger(DB.class.getName());
 
-    private static final DB instance = new DB(KMAN_DB_NAME_DEFAULT);
+    private static DB instance;
     
     private DB(String _dbFile) {
         if (_dbFile == null) throw new IllegalArgumentException();
@@ -31,7 +30,11 @@ public class DB {
         log.setLevel(Level.ALL);
     }
 
-    public static DB getInstance(){
+    public static DB getInstance(String _dbFile){
+        if (instance == null){
+            instance = new DB(_dbFile);
+        }
+
         return instance;
     }
     
