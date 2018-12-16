@@ -809,7 +809,9 @@ public class Transaction {
     //  convert current transaction to String for filtering data if needed
     public String toSearchString(){
         return Integer.toString(this.getId()) + this.getDate() + this.getTypeUserFormat() +
-                this.getAccountString() + this.getCategoryString() + this.getAmountString() +
-                this.getBalanceString() + this.getNotes();
+                this.getAccountString() + this.getCategoryString() +
+                Strings.userFormatRemove(this.getAmountString()) + //6,234.39 -> 6234.39
+                Strings.userFormatRemove(this.getBalanceString()) +
+                this.getNotes();
     }
 }
