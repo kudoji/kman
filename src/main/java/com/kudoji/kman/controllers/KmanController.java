@@ -15,6 +15,7 @@ import com.kudoji.kman.models.Transaction;
 import com.kudoji.kman.reports.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -46,6 +47,8 @@ public class KmanController implements Initializable {
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
 
+    @FXML
+    private Label lbTransactions; //    shows amount of filtered or total transactions
     @FXML
     private TextField tfFilter;
     //  used along with tfFilter
@@ -350,6 +353,13 @@ public class KmanController implements Initializable {
             transactionsFiltered = new FilteredList<>(tvTransactions.getItems());
             //  set transactions list based on filtered which is based on filter
             tvTransactions.setItems(transactionsFiltered);
+
+            //  show current amount of transactions
+            lbTransactions.setText(Integer.toString(tvTransactions.getItems().size()));
+            transactionsFiltered.addListener((ListChangeListener<Transaction>) c -> {
+                //  update transactions' amount any time changes occur
+                lbTransactions.setText(Integer.toString(tvTransactions.getItems().size()));
+            });
 
             //  update transaction note as well
             tvTransactionsOnSelect();

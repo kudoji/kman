@@ -17,6 +17,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.input.KeyCodeCombination?>
@@ -49,7 +50,8 @@
                         <MenuItem mnemonicParsing="false" onAction="#miPreferencesOnAction" text="Preferences">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
-                           </accelerator></MenuItem>
+                           </accelerator>
+                        </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#miExitOnAction" text="Exit">
                            <accelerator>
@@ -144,6 +146,20 @@
                                                    </HBox.margin>
                                                 </Label>
                                                 <TextField fx:id="tfFilter" promptText="transaction filter" HBox.hgrow="ALWAYS" />
+                                                <Label fx:id="lbTransactions" text="0">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <opaqueInsets>
+                                                      <Insets />
+                                                   </opaqueInsets>
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" right="3.0" />
+                                                   </HBox.margin>
+                                                   <tooltip>
+                                                      <Tooltip text="Transaction's amount" />
+                                                   </tooltip>
+                                                </Label>
                                              </children>
                                           </HBox>
                                        </top>
