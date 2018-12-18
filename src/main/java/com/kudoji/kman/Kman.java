@@ -187,7 +187,7 @@ public class Kman extends Application {
         kmanDB = DB.getInstance(Kman.KMAN_DB_NAME_DEFAULT);
         kmanDB.setLogLevel(Level.ALL);
         kmanDB.connect(settings.getDBName());
-        kmanDB.createAllTables(true);
+        kmanDB.createAllTables(false);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Kman.fxml"));
         Parent root = loader.load();
