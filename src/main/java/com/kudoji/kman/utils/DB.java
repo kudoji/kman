@@ -733,8 +733,9 @@ public class DB {
     }
     
     /**
-     * 
-     * @param dropTables adds drop table sql statement
+     * Creates all necessary tables for the program
+     *
+     * @param dropTables drops tables even if they already exist
      * @return 
      */
     public boolean createAllTables(boolean dropTables){
@@ -749,12 +750,28 @@ public class DB {
             rs.next();
             
             Integer tablesAmount = rs.getInt("c");
+
+            if ((tablesAmount > 0) && dropTables){    //  need to drop tables the program uses
+                sqlText = "drop table if exists currencies;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists accounts;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists payees;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists categories;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists transaction_types;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists transactions;";
+                sqlStatement.execute(sqlText);
+            }
+
             if (tablesAmount == 0){//there are no tables in db; let's create them...
-                if (dropTables){
-                    sqlText = "drop table if exists currencies;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table currencies\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -764,11 +781,6 @@ public class DB {
                 "   rate real\n" +
                 ");";
                 sqlStatement.execute(sqlText);
-                
-                if (dropTables){
-                    sqlText = "drop table if exists accounts;";
-                    sqlStatement.execute(sqlText);
-                }
                 
                 sqlText = "create table accounts\n" +
                 "(\n" +
@@ -781,11 +793,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists payees;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table payees\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -798,11 +805,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists categories;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table categories\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -812,11 +814,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists transaction_types;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table transaction_types\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -824,11 +821,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists transactions;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table transactions\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -867,5 +859,4 @@ public class DB {
         
         return result;
     }
-    
 }
