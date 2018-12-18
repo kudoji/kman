@@ -29,7 +29,17 @@ public class PayeeDialogController extends Controller {
     private ComboBox<Category> cbCategoryDeposit, cbCategoryWithdrawal;
 
     private final int MAX_PAYEE_NAMELENGTH = 15;
-    
+
+    @FXML
+    private void btnCategoryDepositClearOnAction(ActionEvent event){
+        cbCategoryDeposit.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    private void btnCategoryWithdrawalClearOnAction(ActionEvent event){
+        cbCategoryWithdrawal.getSelectionModel().clearSelection();
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent event){
         if (!validateFields()){
@@ -74,6 +84,9 @@ public class PayeeDialogController extends Controller {
         if (this.payee != null){
             //update the DB record
             params.put("id", Integer.toString(payee.getId()));
+            params.put("usage_freq", String.valueOf(this.payee.getUsageFreq()));
+        }else{
+            params.put("usage_freq", String.valueOf(0));
         }
         int payeeID;
         payeeID = Kman.getDB().updateData((this.payee == null), params);

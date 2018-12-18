@@ -64,6 +64,10 @@ public class Controller implements Initializable {
      * @param _stage 
      */
     public void setStage(Stage _stage){
+        if (_stage == null){
+            throw new IllegalArgumentException("Stage cannot be null");
+        }
+
         this.stage = _stage;
         this.stage.addEventHandler(javafx.scene.input.KeyEvent.KEY_RELEASED, (javafx.scene.input.KeyEvent ke) -> {
             if (ke.getCode() == javafx.scene.input.KeyCode.ESCAPE){

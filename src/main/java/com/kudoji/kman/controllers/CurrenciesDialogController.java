@@ -1,13 +1,20 @@
 package com.kudoji.kman.controllers;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.kudoji.kman.models.Currency;
 import com.kudoji.kman.Kman;
 import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javax.xml.soap.Node;
@@ -18,11 +25,15 @@ import javax.xml.soap.Node;
  * @author kudoji
  */
 public class CurrenciesDialogController extends Controller {
+    private static final Logger log = Logger.getLogger(CurrenciesDialogController.class.getName());
+
     @FXML private javafx.scene.control.TextField tfFilter;
     @FXML private javafx.scene.control.TableView<Currency> tvCurrencies;
     @FXML private javafx.scene.control.TableColumn<Currency, String> tcName;
     @FXML private javafx.scene.control.TableColumn<Currency, String> tcSample;
     @FXML private javafx.scene.control.TableColumn<Currency, String> tcRate;
+    @FXML
+    private Label lbStatus;
 
     @FXML
     private void btnCurrencyInsertOnAction(ActionEvent event){
@@ -62,23 +73,26 @@ public class CurrenciesDialogController extends Controller {
             Currency.getCurrencies().remove(currencySelected);
         }
     }
-    
-    @FXML
-    private void btnCurrencyUpdateOnAction(ActionEvent event){
-        java.util.HashMap<String, Float> currenciesData = new java.util.HashMap<>();
+
+    /**
+     *
+     * @param currenciesData
+     * @return
+     */
+    private void downloadCurrenciesToMap(Map<String, Float> currenciesData){
         //all currencies' rates are relative to EUR, but base currency is Currency.BASE_CURRENCY_CODE (USD)
-        Float baseCurrencyRateToEUR = 0.0f;
-                    
+        float baseCurrencyRateToEUR = 0.0f;
+
         javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
         factory.setIgnoringElementContentWhitespace(true);
         factory.setValidating(false);
         try{
             javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();
             org.w3c.dom.Document xml = builder.parse(Currency.URL_CURRENCY_RATES);
-            
+
             xml.getDocumentElement().normalize();
             org.w3c.dom.NodeList nodeList = xml.getElementsByTagName("Cube");
-            
+
             for (int i = 0; i < nodeList.getLength(); i++){
                 org.w3c.dom.Node node = nodeList.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE){
@@ -86,43 +100,50 @@ public class CurrenciesDialogController extends Controller {
                     String code = element.getAttribute("currency");
                     String rate = element.getAttribute("rate");
                     if (code.isEmpty() || rate.isEmpty()) continue;
-                    
+
                     try{
                         if (code.toLowerCase().equals(Currency.BASE_CURRENCY_CODE.toLowerCase())){
                             baseCurrencyRateToEUR = Float.parseFloat(rate);
                         }
                         currenciesData.put(code, Float.parseFloat(rate));
                     }catch (NumberFormatException ne){
-                        System.err.println("Cannot load currency: " + code + ", rate: " + rate);
+                        log.log(Level.WARNING, ne.getMessage() + " (Cannot load currency: " + code + ", rate: " + rate + ")", ne);
                     }
                 }
             }
         }catch (Exception e){
-            System.err.println(e.getClass() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
         }
-        
-        if (currenciesData.isEmpty()){
+
+        currenciesData.put("baseCurrencyRateToEUR", baseCurrencyRateToEUR);
+    }
+
+    private void loadCurrenciesToDB(Map<String, Float> currenciesData){
+        //currenciesData.isEmpty() ||
+        if (currenciesData.size() == 1){ // it contains "baseCurrencyRateToEUR" key
             Kman.showErrorMessage("Error to load currencies data");
             return;
         }
-        
-        if (baseCurrencyRateToEUR == 0){ //couldn't find base rate
+
+        float baseCurrencyRateToEUR = currenciesData.get("baseCurrencyRateToEUR");
+
+        if (baseCurrencyRateToEUR == 0f){ //couldn't find base rate
             Kman.showErrorMessage("Base currency (" + Currency.BASE_CURRENCY_CODE + ") is not found");
             return;
         }
-        
+
         boolean resultUpdate = true;
         for (java.util.Map.Entry<String, Float> currency : currenciesData.entrySet()) {
-            java.util.HashMap<String, String> row = new java.util.HashMap<>();
+            java.util.HashMap<String, String> row = new HashMap<>();
             row.put("table", "currencies");
             row.put("where", "code = '" + currency.getKey() + "'");
             row.put("rate", Float.toString(currency.getValue() / baseCurrencyRateToEUR));
-            
+
             if (Kman.getDB().updateData(false, row) != 1){
                 resultUpdate = false;
             }
         }
-        
+
         //also need to update EUR
         java.util.HashMap<String, String> row = new java.util.HashMap<>();
         row.put("table", "currencies");
@@ -132,7 +153,7 @@ public class CurrenciesDialogController extends Controller {
         if (Kman.getDB().updateData(false, row) != 1){
             resultUpdate = false;
         }
-        
+
         if (!resultUpdate){
             Kman.showErrorMessage("Couldn't update rate for some currencies...");
         }else{
@@ -140,6 +161,32 @@ public class CurrenciesDialogController extends Controller {
         }
     }
 
+    @FXML
+    private void btnCurrencyUpdateOnAction(ActionEvent event){
+        final Map<String, Float> currenciesData = new ConcurrentHashMap<>();
+
+        Task <Void> task = new Task<Void>(){
+            @Override
+            public Void call(){
+                updateMessage("Please wait, currencies are loading...");
+
+                downloadCurrenciesToMap(currenciesData);
+
+                return null;
+            }
+        };
+
+        lbStatus.textProperty().bind(task.messageProperty());
+        task.setOnSucceeded(e -> {
+            loadCurrenciesToDB(currenciesData);
+            lbStatus.textProperty().unbind();
+            lbStatus.setText("");
+        });
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+    }
 
     /**
      * Initializes the controller class.
@@ -168,7 +215,7 @@ public class CurrenciesDialogController extends Controller {
                 }
                 
                 String valueNewLC = valueNew.toLowerCase();
-                Currency currencyCurrent = (Currency)currency;
+                Currency currencyCurrent = currency;
                 if ( currencyCurrent.getName().toLowerCase().contains(valueNewLC)){
                     //value matches currency name
                     return true;
@@ -177,7 +224,7 @@ public class CurrenciesDialogController extends Controller {
                     return true;
                 }
                 
-                //value doen't match
+                //value doesn't match
                 return false;
             });
         });

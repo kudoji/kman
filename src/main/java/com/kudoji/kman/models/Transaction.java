@@ -1,12 +1,16 @@
 package com.kudoji.kman.models;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import com.kudoji.kman.Kman;
 import com.kudoji.kman.utils.Strings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import com.kudoji.kman.enums.AccountTake;
+import javafx.scene.control.TableView;
 
 /**
  *
@@ -36,23 +40,6 @@ public class Transaction {
     private String notes;
 
     /**
-     * What account to take into consideration
-     */
-    public static enum AccountTake {
-        /**
-         * take account_to
-         */
-        TO,
-        /**
-         * take account_from
-         */
-        FROM,
-        /**
-         * take both account_to and account_from
-         */
-        BOTH
-    }
-    /**
      * Keeps payee for the transaction
      */
     private Payee payee = null;
@@ -74,8 +61,12 @@ public class Transaction {
      * Keeps category for the transaction
      */
     private Category category = null;
+
+    private static final Logger log = Logger.getLogger(Transaction.class.getName());
     
     public Transaction(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = Integer.parseInt(_params.get("id"));
         this.date = new SimpleStringProperty(_params.get("date"));
 
@@ -136,6 +127,8 @@ public class Transaction {
      * @param _params 
      */
     public void setFields(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
 //        this.id = (int)_params.get("id");
         setDate(_params.get("date"));
         setTypeId(Integer.parseInt(_params.get("transaction_types_id")));
@@ -176,6 +169,8 @@ public class Transaction {
     }
 
     public final void setDate(String _date){
+        if (_date == null) throw new IllegalArgumentException();
+
         this.date.set(_date);
     }
 
@@ -203,6 +198,10 @@ public class Transaction {
             this.transaction_types_id = _id;
             this.typeUserFormat.set(TransactionType.getTransactionType(this.transaction_types_id).toString());
         }
+    }
+
+    public String getTypeUserFormat(){
+        return this.typeUserFormat.get();
     }
 
     public StringProperty typeUserFormatProperty(){
@@ -463,10 +462,10 @@ public class Transaction {
         switch (this.getTypeId()){
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
                 //increase all transactions after the current one
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
+                if (!Transaction.increaseBalance(this, AccountTake.TO, -this.getAmountTo())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountToId());
 
                     return false;
@@ -474,20 +473,20 @@ public class Transaction {
                 //decrease accounts balance
                 account = this.getAccount(true);
                 account.increaseBalanceCurrent(new BigDecimal(-this.getAmountTo()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
 
                 break;
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.FROM, this.getAmountFrom())){
+                if (!Transaction.increaseBalance(this, AccountTake.FROM, this.getAmountFrom())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
@@ -495,10 +494,10 @@ public class Transaction {
                 //increase accounts balance
                 account = this.getAccount(false);
                 account.increaseBalanceCurrent(new BigDecimal(this.getAmountFrom()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
@@ -506,10 +505,10 @@ public class Transaction {
                 break;
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
                 //in case of transfer, transaction touches both accounts
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.FROM, this.getAmountFrom())){
+                if (!Transaction.increaseBalance(this, AccountTake.FROM, this.getAmountFrom())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountFromId());
 
                     return false;
@@ -517,18 +516,18 @@ public class Transaction {
                 //increase accounts balance
                 account = this.getAccount(false);
                 account.increaseBalanceCurrent(new BigDecimal(this.getAmountFrom()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
 
-                if (!Transaction.increaseBalance(this, Transaction.AccountTake.TO, -this.getAmountTo())){
+                if (!Transaction.increaseBalance(this, AccountTake.TO, -this.getAmountTo())){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to update transactions' balance after '" +
+                    log.warning("Unable to update transactions' balance after '" +
                             this.getId() + "' for accountID: " + this.getAccountToId());
 
                     return false;
@@ -536,10 +535,10 @@ public class Transaction {
                 //decrese accounts balance
                 account = this.getAccount(true);
                 account.increaseBalanceCurrent(new BigDecimal(-this.getAmountTo()));
-                if (!account.update()){
+                if (!account.save()){
                     if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-                    System.err.println("Unable to save current balance for " + account + " account");
+                    log.severe("Unable to save current balance for " + account + " account");
 
                     return false;
                 }
@@ -556,7 +555,7 @@ public class Transaction {
         if (!Kman.getDB().deleteData(params)){
             if (_useDBTransaction) Kman.getDB().rollbackTransaction();
 
-            System.err.println("Unable to detele transaction with id: " + this.getId());
+            log.warning("Unable to detele transaction with id: " + this.getId());
 
             return false;
         }
@@ -564,7 +563,7 @@ public class Transaction {
         if (_useDBTransaction){
             if (!Kman.getDB().commitTransaction()){
                 Kman.getDB().rollbackTransaction();
-                System.err.println("Unable to commit SQL transaction");
+                log.warning("Unable to commit SQL transaction");
                 return false;
             }
         }
@@ -656,6 +655,16 @@ public class Transaction {
         return true;
     }
 
+    public static Transaction getTransaction(int id, Account account){
+        for (Transaction transaction: account.getTransactions()){
+            if (transaction.getId() == id){
+                return transaction;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Increases transactions' balance for the _accountID after particular _dateAfter (excluding it)
      * Make sense of using this method with NEW transaction ONLY
@@ -685,7 +694,20 @@ public class Transaction {
         // need to change transactions after its date only
         params.put("where", "(account_from_id = " + _accountID + " or account_to_id = " + _accountID + ") and date > '" + _dateAfter + "'");
 
-        return (Kman.getDB().updateData(false, params) != 0);
+        boolean result = (Kman.getDB().updateData(false, params) != 0);
+
+        //  all updated transactions need to re-read data from DB
+        params.clear();
+        params.put("table", "transactions");
+        params.put("where", "(account_from_id = " + _accountID + " or account_to_id = " + _accountID + ") and date > '" + _dateAfter + "'");
+        ArrayList<HashMap<String, String>> transactions = Kman.getDB().selectData(params);
+        for (HashMap<String, String> param: transactions){
+            Transaction transaction = Transaction.getTransaction(Integer.parseInt(param.get("id")), Account.getAccount(_accountID));
+
+            if (transaction != null) transaction.setFields(param);
+        }
+
+        return result;
     }
     
     /**
@@ -714,26 +736,29 @@ public class Transaction {
         //but for one date transactions ordered by id ascendinly
         //
         String account_from_id, account_to_id;
-        if (null == _accountTake){ //not acceptible
+        if (null == _accountTake){ //not acceptable
             return false;
         }else switch (_accountTake) {
             case FROM:
-                // for withdrawal
+                //  for withdrawal
                 account_from_id = String.valueOf(_transaction.getAccountFromId());
                 account_to_id = account_from_id;
                 break;
             case TO:
-                // for deposit
+                //  for deposit
                 account_from_id = String.valueOf(_transaction.getAccountToId());
                 account_to_id = account_from_id;
                 break;
             case BOTH:
-                // for transfer
-                account_from_id = String.valueOf(_transaction.getAccountToId()) + ", " + String.valueOf(_transaction.getAccountToId());
-                account_to_id = account_from_id;
-                break;
+                //  for transfer
+                //  transaction cannot belong to two accounts
+                log.severe(_accountTake.toString() + " is not applicable");
+                return false;
+//                account_from_id = String.valueOf(_transaction.getAccountToId()) + ", " + String.valueOf(_transaction.getAccountToId());
+//                account_to_id = account_from_id;
+//                break;
             default:
-                //somethin is wrong
+                //  something is wrong
                 return false;
         }
 
@@ -746,16 +771,31 @@ public class Transaction {
         params.put("table", "transactions");
         params.put("set", "balance_from = balance_from + case when account_from_id in (" + account_from_id + ") then " + _delta + " else 0 end, balance_to = balance_to + case when account_to_id in (" + account_to_id + ") then " + _delta + " else 0 end");
         params.put("where", "(account_from_id in (" + account_from_id + ") or account_to_id in (" + account_to_id + ") ) and ( (date > '" + _transaction.getDate() + "') or ( date = '" + _transaction.getDate() + "' and id > " + _transaction.getId() + " ) )");
-        
-        return (Kman.getDB().updateData(false, params) != 0);
+
+        boolean result = (Kman.getDB().updateData(false, params) != 0);
+
+        //  all updated transactions need to re-read data from DB
+        params.clear();
+        params.put("table", "transactions");
+        params.put("where", "(account_from_id in (" + account_from_id + ") or account_to_id in (" + account_to_id + ") ) and ( (date > '" + _transaction.getDate() + "') or ( date = '" + _transaction.getDate() + "' and id > " + _transaction.getId() + " ) )");
+        ArrayList<HashMap<String, String>> transactions = Kman.getDB().selectData(params);
+        for (HashMap<String, String> param: transactions){
+            Transaction transaction = Transaction.getTransaction(Integer.parseInt(param.get("id")), _transaction.getAccount(_accountTake == AccountTake.TO));
+
+            if (transaction != null) transaction.setFields(param);
+        }
+
+        return result;
     }
 
     /**
      * 
      * @param _tvTransactions
-     * @param _accountFilter filter transactions for the account. No filter if _accountFilter is null or its ID < 1
+     * @param _accountFilter filter transactions for the account.
+     *                       No filter if _accountFilter is null or its ID < 1
      */
-    public static void populateTransactionsTable(javafx.scene.control.TableView<Transaction> _tvTransactions, Account _accountFilter){
+    public static void populateTransactionsTable(TableView<Transaction> _tvTransactions,
+                                                 Account _accountFilter){
         if (_accountFilter == null || _accountFilter.getId() == 0){
             //  show no transactions for root account
             return;
@@ -764,5 +804,14 @@ public class Transaction {
         _tvTransactions.setItems(_accountFilter.getTransactions());
         //  scroll to the bottom of the list
         _tvTransactions.scrollTo(_tvTransactions.getItems().size() - 1);
+    }
+
+    //  convert current transaction to String for filtering data if needed
+    public String toSearchString(){
+        return Integer.toString(this.getId()) + this.getDate() + this.getTypeUserFormat() +
+                this.getAccountString() + this.getCategoryString() +
+                Strings.userFormatRemove(this.getAmountString()) + //6,234.39 -> 6234.39
+                Strings.userFormatRemove(this.getBalanceString()) +
+                this.getNotes();
     }
 }

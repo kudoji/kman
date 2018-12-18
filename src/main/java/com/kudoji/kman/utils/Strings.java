@@ -16,13 +16,15 @@ public class Strings {
     }
 
     /**
-     * Removes user format
+     * Removes user format from formatted string
      *
-     * @param _value
+     * @param formattedString
      * @return
      */
-    public static String userFormatRemove(String _value){
-        return _value.trim().replace(",", "");
+    public static String userFormatRemove(String formattedString){
+        if (formattedString == null) throw new IllegalArgumentException();
+
+        return formattedString.trim().replace(",", "");
     }
 
     /**

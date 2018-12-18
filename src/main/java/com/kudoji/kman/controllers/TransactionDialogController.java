@@ -5,6 +5,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import com.kudoji.kman.*;
 import com.kudoji.kman.models.*;
@@ -25,6 +26,8 @@ import javafx.scene.control.Label;
  * @author kudoji
  */
 public class TransactionDialogController extends Controller {
+    private final static Logger log = Logger.getLogger(TransactionDialogController.class.getName());
+
     private java.util.HashMap<String, Object> formObject;
     
     private Category category = null; //selected by user category
@@ -249,15 +252,15 @@ public class TransactionDialogController extends Controller {
 
             //  without 100f (f) it would devide without digits (.00)® after point
             account.setBalanceCurrent(amountToNew.add(account.getBalanceCurrent()));
-            accountSaved = account.update();
+            accountSaved = account.save();
             if (!accountSaved){
-                System.err.println("Unable to save current balance for " + account + " account");
+                log.warning("Unable to save current balance for " + account + " account");
                 return false;
             }
 
             transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew.floatValue());
             if (!transactionsUpdated) {
-                System.err.println("Unable to update transactions' balance after '" +
+                log.warning("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountToIDNew);
                 return false;
             }
@@ -270,15 +273,15 @@ public class TransactionDialogController extends Controller {
             balanceFromNew = account.getBalanceDate(tdNew, -1).subtract(amountFromNew);
 
             account.setBalanceCurrent(account.getBalanceCurrent().subtract(amountFromNew));
-            accountSaved = account.update();
+            accountSaved = account.save();
             if (!accountSaved) {
-                System.err.println("Unable to save current balance for " + account + " account");
+                log.warning("Unable to save current balance for " + account + " account");
                 return false;
             }
 
             transactionsUpdated = Transaction.increaseBalance(tdNew, accountFromIDNew, -amountFromNew.floatValue());
             if (!transactionsUpdated) {
-                System.err.println("Unable to update transactions' balance after '" +
+                log.warning("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountFromIDNew);
                 return false;
             }
@@ -298,15 +301,15 @@ public class TransactionDialogController extends Controller {
             balanceToNew = account.getBalanceDate(tdNew, -1).add(amountToNew);
             account.setBalanceCurrent(account.getBalanceCurrent().add(amountToNew));
 
-            accountSaved = account.update();
+            accountSaved = account.save();
             if (!accountSaved){
-                System.err.println("Unable to save current balance for " + account + " account");
+                log.warning("Unable to save current balance for " + account + " account");
                 return false;
             }
 
             transactionsUpdated = Transaction.increaseBalance(tdNew, accountToIDNew, amountToNew.floatValue());
             if (!transactionsUpdated){
-                System.err.println("Unable to update transactions' balance after '" +
+                log.warning("Unable to update transactions' balance after '" +
                         tdNew + "' for accountID: " + accountToIDNew);
                 return false;
             }

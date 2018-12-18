@@ -1,37 +1,49 @@
 package com.kudoji.kman.utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static java.lang.String.format;
 
 /**
  *
  * @author kudoji
  */
 public class DB {
-    private Connection dbConnection = null;
-    private String dbFile = null;
-    private String dbUrl = null;
-    private boolean debug = false;
+    private Connection dbConnection;
+    private String dbFile;
+    private String dbUrl;
+    private final static Logger log = Logger.getLogger(DB.class.getName());
+
+    private static DB instance;
     
-    public DB(String _dbFile) {
+    private DB(String _dbFile) {
+        if (_dbFile == null) throw new IllegalArgumentException();
+
         dbFile = _dbFile;
         dbUrl = "jdbc:sqlite:" + dbFile;
+
+        log.setLevel(Level.ALL);
+    }
+
+    public static DB getInstance(String _dbFile){
+        if (instance == null){
+            instance = new DB(_dbFile);
+        }
+
+        return instance;
     }
     
     public Connection getConnection(){
         return this.dbConnection;
     }
     
-    public void setDebugMode(boolean _debug){
-        this.debug = _debug;
+    public void setLogLevel(Level level){
+        log.setLevel(level);
     }
     
     public boolean connect(){
@@ -40,14 +52,10 @@ public class DB {
             dbConnection = DriverManager.getConnection(dbUrl);
             //force using koreign key constrain
             dbConnection.createStatement().execute("PRAGMA foreign_keys = ON;");
-            if (debug){
-                System.out.println("sqlite connected");
-            }
+            log.info("sqlite connected");
             result = true;
         }catch (SQLException e){
-            if (debug){
-                System.out.println(e.getMessage());
-            }
+            log.log(Level.SEVERE, e.getMessage(), e);
             result = false;
         }
         
@@ -60,6 +68,8 @@ public class DB {
      * @return
      */
     public boolean connect(String _file){
+        if (_file == null) throw new IllegalArgumentException();
+
         this.dbFile = _file;
         this.dbUrl = "jdbc:sqlite:" + dbFile;
 
@@ -84,9 +94,7 @@ public class DB {
             }
         }catch (SQLException ex){
             result = false;
-            if (debug){
-                System.out.println(ex.getMessage());
-            }
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
         
         return result;
@@ -117,23 +125,26 @@ public class DB {
             String col_name = rsmd.getColumnName(i);
             
             switch (rsmd.getColumnType(i)) {
-                case java.sql.Types.INTEGER:
+                case Types.INTEGER:
                     result.put(col_name, Integer.toString(_rs.getInt(i)));
                     break;
-                case java.sql.Types.VARCHAR:
+                case Types.VARCHAR:
                     if (_rs.getString(i) == null){ //can return null if value in DB is null
                         result.put(col_name, "");
                     }else{
                         result.put(col_name, _rs.getString(i));
                     }
                     break;
-                case java.sql.Types.REAL:
+                case Types.FLOAT:
                     result.put(col_name, Float.toString(_rs.getFloat(i)));
                     break;
-                case java.sql.Types.BLOB:
+                case Types.REAL:
+                    result.put(col_name, Float.toString(_rs.getFloat(i)));
+                    break;
+                case Types.BLOB:
                     result.put(col_name, new String(_rs.getBlob(i).getBytes(1l, (int) _rs.getBlob(i).length())) );
                     break;
-                case java.sql.Types.NUMERIC:
+                case Types.NUMERIC:
                     if (_rs.getBigDecimal(i) == null){
                         result.put(col_name, "");
                     }else{
@@ -141,7 +152,7 @@ public class DB {
                     }
                     break;
                 default:
-                    System.out.println(rsmd.getColumnType(i));
+                    log.severe(format("Error in DB.convertRS2Dic(%d)", rsmd.getColumnType(i)));
                     break;
             }
         }
@@ -169,7 +180,7 @@ public class DB {
         String sqlText = "";
         Object param = _parameters.get("table");
         if (param == null){ //table is not set
-            System.err.println(this.getClass().getName() + ": " + "table is not set");
+            log.warning("table is not set");
             return 0;
         }
 
@@ -184,7 +195,7 @@ public class DB {
         Object paramWhere = _parameters.get("where");
         //  id or where condition must be set for update statement
         if ( (paramWhere == null) && (paramID == null) && (!_insert) ){
-            System.err.println(this.getClass().getName() + ": " + "id field or where condition is not set");
+            log.warning("id field or where condition is not set");
             return 0;
         }
         if (!_insert){
@@ -196,13 +207,13 @@ public class DB {
         
         Object paramOrder = _parameters.get("order");
         if ( (paramOrder != null) && (_insert) ){
-            System.err.println(this.getClass().getName() + ": " + "order by cannot be used with insert");
+            log.warning("order by cannot be used with insert");
             return 0;
         }
         _parameters.remove("order");
 
         if (_parameters.isEmpty()){ //no fields to update/insert
-            System.err.println(this.getClass().getName() + ": " + "no fields are set for update/insert");
+            log.warning("no fields are set for update/insert");
             return 0;
         }
         
@@ -271,7 +282,7 @@ public class DB {
                 }
             }
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             return 0;
         }
         
@@ -284,6 +295,7 @@ public class DB {
     
     /**
      * Executes raw sql sentence
+     *
      * @param _sqlText sql sentence
      * @return 
      */
@@ -294,7 +306,7 @@ public class DB {
         ){
             statement.execute(_sqlText);
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
         
@@ -305,14 +317,14 @@ public class DB {
         String sqlText = "delete from ";
         Object param = _params.get("table");
         if (param == null){ //table is not set
-            System.err.println(this.getClass().getName() + ": " + "table is not set");
+            log.warning("table is not set");
             return false;
         }
         sqlText += param.toString();
         
         param = _params.get("where");
         if (param == null){ //table is not set
-            System.err.println(this.getClass().getName() + ": " + "where condition is not set");
+            log.warning("where condition is not set");
             return false;
         }
         
@@ -324,13 +336,13 @@ public class DB {
         ){
             statement.execute(sqlText);
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
         
         return true;
     }
-    
+
     /**
      * Selects data from a table
      * 
@@ -351,7 +363,7 @@ public class DB {
         String sqlText = "select * from ";
         Object param = _parameters.get("table");
         if (param == null){
-            System.err.println(this.getClass().getName() + ": " + " table is not set");
+            log.warning("table is not set");
         }else{
             sqlText = sqlText + param.toString();
         }
@@ -390,19 +402,48 @@ public class DB {
                 result.add(row);
             }
         }catch (SQLException e){
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
         }
         
         return result;
     }
-    
+
+    /**
+     * Runs select sql statement
+     *
+     * @param sql - sql query
+     *
+     * @return Array of HashMaps where each HashMap is a table row
+     */
+    public ArrayList<HashMap<String, String>> selectData(String sql){
+        ArrayList<HashMap<String, String>> result = new ArrayList<>();
+
+        try
+                (
+                        Statement st = this.dbConnection.createStatement();
+                        ResultSet rs = st.executeQuery(sql);
+                )
+        {
+            while (rs.next()){
+                HashMap<String, String> row = convertRS2Dic(rs);
+
+                result.add(row);
+            }
+        }catch (SQLException e){
+            log.log(Level.WARNING, e.getMessage(), e);
+        }
+
+        return result;
+    }
+
     public boolean startTransaction(){
         boolean result = true;
         try{
             this.dbConnection.setAutoCommit(false);
         }catch (SQLException e){
             result = false;
-            System.err.println(e.getClass() + ": " + e.getMessage() + " (couldn't start transaction)");
+
+            log.log(Level.WARNING, e.getMessage() + " (couldn't start transaction)", e);
         }
         
         return result;
@@ -414,7 +455,8 @@ public class DB {
             this.dbConnection.rollback();
         }catch (SQLException e){
             result = false;
-            System.err.println(e.getClass() + ": " + e.getMessage() + " (couldn't start transaction)");
+
+            log.log(Level.WARNING, e.getMessage() + " couldn't rollback transaction)", e);
         }
         
         return result;
@@ -426,7 +468,8 @@ public class DB {
             this.dbConnection.commit();
         }catch (SQLException e){
             result = false;
-            System.err.println(e.getClass() + ": " + e.getMessage() + " (couldn't start transaction)");
+
+            log.log(Level.WARNING, e.getMessage() + " (couldn't commit transaction)", e);
         }
         
         return result;
@@ -690,8 +733,9 @@ public class DB {
     }
     
     /**
-     * 
-     * @param dropTables adds drop table sql statement
+     * Creates all necessary tables for the program
+     *
+     * @param dropTables drops tables even if they already exist
      * @return 
      */
     public boolean createAllTables(boolean dropTables){
@@ -706,30 +750,41 @@ public class DB {
             rs.next();
             
             Integer tablesAmount = rs.getInt("c");
+
+            if ((tablesAmount > 0) && dropTables){    //  need to drop tables the program uses
+                sqlText = "drop table if exists currencies;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists accounts;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists payees;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists categories;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists transaction_types;";
+                sqlStatement.execute(sqlText);
+
+                sqlText = "drop table if exists transactions;";
+                sqlStatement.execute(sqlText);
+            }
+
             if (tablesAmount == 0){//there are no tables in db; let's create them...
-                if (dropTables){
-                    sqlText = "drop table if exists currencies;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table currencies\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
-                "       name text not null unique,\n" +
-                "       code text not null unique collate nocase,\n" + //make the column case-insensitive
-                "       starts_with_code integer check(starts_with_code in (0,1)),\n" +
-                "       rate real\n" +
+                "   id integer primary key,\n" +
+                "   name text not null unique,\n" +
+                "   code text not null unique collate nocase,\n" + //make the column case-insensitive
+                "   starts_with_code integer check(starts_with_code in (0,1)),\n" +
+                "   rate real\n" +
                 ");";
                 sqlStatement.execute(sqlText);
                 
-                if (dropTables){
-                    sqlText = "drop table if exists accounts;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table accounts\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
+                "   id integer primary key,\n" +
                 "	name text not null,\n" +
                 "	balance_initial real,\n" +
                 "	balance_current real,\n" +
@@ -738,14 +793,9 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists payees;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table payees\n" +
                 "(\n" +
-                "       id integer primary key,\n" +
+                "   id integer primary key,\n" +
 		        "	name text not null,\n" +
                 "	category_deposit int,\n" +
                 "	category_withdrawal int,\n" +
@@ -755,11 +805,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists categories;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table categories\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -769,11 +814,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists transaction_types;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table transaction_types\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -781,11 +821,6 @@ public class DB {
                 ");";
                 sqlStatement.execute(sqlText);
          
-                if (dropTables){
-                    sqlText = "drop table if exists transactions;";
-                    sqlStatement.execute(sqlText);
-                }
-                
                 sqlText = "create table transactions\n" +
                 "(\n" +
                 "   id integer primary key,\n" +
@@ -818,12 +853,10 @@ public class DB {
             sqlStatement.close();
         }catch (SQLException e){
             result = false;
-            if (this.debug){
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            }
+
+            log.log(Level.WARNING, e.getMessage(), e);
         }
         
         return result;
     }
-    
 }

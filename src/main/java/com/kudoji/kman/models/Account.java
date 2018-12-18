@@ -54,6 +54,10 @@ public class Account {
     }
     
     public Account(int _id, String _name){
+        if (_name == null){
+            throw new IllegalArgumentException("Account name cannot be null");
+        }
+
         this.id = new SimpleIntegerProperty(_id);
         this.name = new SimpleStringProperty(_name);
 
@@ -61,6 +65,8 @@ public class Account {
     }
     
     public Account(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException("Account's constructor cannot accept null parameter");
+
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
         this.balanceInitial = new SimpleObjectProperty<>(new BigDecimal(_params.get("balance_initial")));
@@ -74,8 +80,9 @@ public class Account {
         return this.id.get();
     }
 
-    public final void setId(int _value)
-    {
+    public final void setId(int _value) {
+        if (_value < 0) throw new IllegalArgumentException("Account id must not be negative");
+
         this.id.set(_value);
 
         //  update account's user name as well
@@ -87,6 +94,8 @@ public class Account {
     }
 
     public final void setName(String _name){
+        if (_name == null) throw new IllegalArgumentException("Account name must not be null");
+
         this.name.set(_name);
 
         //  update account's user name as well
@@ -102,6 +111,8 @@ public class Account {
     }
 
     public final void setBalanceInitial(BigDecimal _value){
+        if (_value == null) throw new IllegalArgumentException("Balance must not be null");
+
         this.balanceInitial.set(_value);
     }
 
@@ -114,6 +125,8 @@ public class Account {
     }
 
     public final void setBalanceCurrent(BigDecimal _value){
+        if (_value == null) throw new IllegalArgumentException("Current balance must not be null");
+
         this.balanceCurrent.set(_value);
 
         //  update account's user name as well
@@ -148,6 +161,8 @@ public class Account {
     }
 
     public final void setCurrencyId(int _value){
+        if (_value <= 0) throw new IllegalArgumentException("Currency ID mst not be negative");
+
         this.currencyId.set(_value);
     }
 
@@ -156,6 +171,8 @@ public class Account {
     }
 
     public final void increaseBalanceCurrent(BigDecimal _delta){
+        if (_delta == null) throw new IllegalArgumentException("Account's delta must not be null");
+
         setBalanceCurrent(this.balanceCurrent.get().add(_delta));
     }
 
@@ -174,12 +191,16 @@ public class Account {
      *
      * @param _date date to return balance on
      * @param _tid transaction id
-     *             can be -1, in this case doesn't compare ids but dates only
+     *             can be -1 or less, in this case doesn't compare ids but dates only
      *             if it's not -1, method returns balance BEFORE _tid for _date
      *
      * @return float
      */
     public BigDecimal getBalanceDate(String _date, int _tid){
+        if (_date == null) throw new IllegalArgumentException("Date must not be null");
+
+        if (_tid < 0) _tid = -1;
+
         if ( (LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE).equals(_date))
         && (_tid == -1) ){
             // this is the recent transaction for the account
@@ -231,6 +252,8 @@ public class Account {
      * @return root item for other accounts 
      */
     public static TreeItem<Account> populateAccountsTree(TreeView<Account> _tvAccounts){
+        if (_tvAccounts == null) throw new IllegalArgumentException("TreeView must not be null");
+
         TreeItem<Account> tiAccounts; //root item for other accounts
         
         if (_tvAccounts.getRoot() == null){ //tree view is empty
@@ -390,7 +413,7 @@ public class Account {
             olTransactions.add(transaction);
         }
 
-        //  all transactions are already sorted, no need to additional sort
+        //  all transactions are already sorted, no need for additional sort
     }
 
     /**
@@ -415,7 +438,7 @@ public class Account {
      *
      * @return
      */
-    public boolean update(){
+    public boolean save(){
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "accounts");
         params.put("name", this.getName());

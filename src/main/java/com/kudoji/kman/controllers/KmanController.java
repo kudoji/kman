@@ -6,17 +6,26 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 
+import com.kudoji.kman.enums.ReportPeriod;
 import com.kudoji.kman.models.Account;
 import com.kudoji.kman.Kman;
+import com.kudoji.kman.models.Category;
+import com.kudoji.kman.models.Payee;
 import com.kudoji.kman.models.Transaction;
+import com.kudoji.kman.reports.*;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -27,6 +36,8 @@ import javafx.stage.FileChooser;
 public class KmanController implements Initializable {
     private TreeItem<Account> tiAccounts; //root item for all accounts
 
+    @FXML
+    private SplitPane spMainContainer;
     @FXML private VBox vbMenu;
     @FXML private MenuBar mbApplication;
     @FXML
@@ -35,6 +46,40 @@ public class KmanController implements Initializable {
     private TableView<Transaction> tvTransactions;
     @FXML
     private javafx.scene.control.TextArea taTransactionNote;
+
+    @FXML
+    private Label lbTransactions; //    shows amount of filtered or total transactions
+    @FXML
+    private TextField tfFilter;
+    //  used along with tfFilter
+    private FilteredList<Transaction> transactionsFiltered;
+
+    //**************************************  reports tab  **************************************//
+    @FXML
+    private Tab tabReports, tabStats, tabAccounts, tabPayees, tabCategories;
+    @FXML
+    private ComboBox<ReportPeriod> cbReportsPeriod;
+    @FXML
+    private DatePicker dpReportsFrom;
+    @FXML
+    private DatePicker dpReportsTo;
+    /**
+     * Container for statistics report
+     */
+    @FXML
+    private AnchorPane apReportsStats;
+    @FXML
+    private CheckBox cbxReportsAccountFilter, cbxReportsPayeeFilter, cbxReportsCategoryFilter;
+    @FXML
+    private ComboBox<Account> cbReportsAccounts;
+    @FXML
+    private ComboBox<Payee> cbReportsPayees;
+    @FXML
+    private ComboBox<Category> cbReportsCategories;
+    @FXML
+    private TreeTableView<ReportRow> ttvReportsAccounts, ttvReportsPayees, ttvReportsCategories;
+    //**************************************  /reports tab  **************************************//
+
     
     //  menu actions
     @FXML
@@ -298,13 +343,29 @@ public class KmanController implements Initializable {
         TreeItem<Account> tiSelected = (TreeItem<Account>)tvNavigation.getSelectionModel().getSelectedItem();
         if (tiSelected != null){
             Account aSelected = tiSelected.getValue();
-            
+
+            //  drop transactions' filter
+            tfFilter.setText("");
+
             Transaction.populateTransactionsTable(tvTransactions, aSelected);
+
+            //  re-create filtered list based on transactions list
+            transactionsFiltered = new FilteredList<>(tvTransactions.getItems());
+            //  set transactions list based on filtered which is based on filter
+            tvTransactions.setItems(transactionsFiltered);
+
+            //  show current amount of transactions
+            lbTransactions.setText(Integer.toString(tvTransactions.getItems().size()));
+            transactionsFiltered.addListener((ListChangeListener<Transaction>) c -> {
+                //  update transactions' amount any time changes occur
+                lbTransactions.setText(Integer.toString(tvTransactions.getItems().size()));
+            });
+
             //  update transaction note as well
             tvTransactionsOnSelect();
         }
     }
-    
+
     /**
      * Called every time tvTransactions is selected by mouse or keyboard
      */
@@ -395,12 +456,139 @@ public class KmanController implements Initializable {
 
     /**
      * Does all necessary operations for clearing app's screen
+     * Used to prepare app's window for another DB file
      */
     private void clearAppScreen(){
         tiAccounts = Account.populateAccountsTree(tvNavigation);
         tvNavigation.getSelectionModel().select(tiAccounts);
         tvTransactions.getItems().clear();
+        taTransactionNote.setText("");
     }
+
+    //**************************************  reports tab  **************************************//
+    @FXML
+    private void tabReportsOnSelectionChanged(javafx.event.Event value){
+        if (tabReports.isSelected()){
+            //  reports tab is selected
+            if (cbReportsPeriod.getItems().isEmpty()){
+                cbReportsPeriod.setItems(FXCollections.observableArrayList(ReportPeriod.values()));
+                cbReportsPeriod.getSelectionModel().select(ReportPeriod.THISMONTH);
+            }
+
+            if (cbReportsAccounts.getItems().isEmpty()){
+                cbReportsAccounts.setItems(Account.getAccounts());
+                //  select first value to make sure that ComboBox has selected value
+                if (cbReportsAccounts.getItems().size() > 0)
+                    cbReportsAccounts.getSelectionModel().select(0);
+            }
+
+            if (cbReportsPayees.getItems().isEmpty()){
+                cbReportsPayees.setItems(Payee.getPayees());
+                //  select first value to make sure that ComboBox has selected value
+                if (cbReportsPayees.getItems().size() > 0)
+                    cbReportsPayees.getSelectionModel().select(0);
+            }
+
+            if (cbReportsCategories.getItems().isEmpty()){
+                cbReportsCategories.setItems(Category.getCategories());
+                //  select first value to make sure that ComboBox has a selected value
+                if (cbReportsCategories.getItems().size() > 0)
+                    cbReportsCategories.getSelectionModel().select(0);
+            }
+        }
+    }
+
+    @FXML
+    private void cbReportsPeriodOnAction(ActionEvent event){
+        if (cbReportsPeriod.getItems().isEmpty()){
+            return;
+        }
+
+        java.util.HashMap<String, java.time.LocalDate> period = cbReportsPeriod.getSelectionModel().getSelectedItem().getPeriod();
+
+        EventHandler<ActionEvent> onAction = dpReportsFrom.getOnAction();
+        //  avoid calling dpReportsFromOnAction event
+        dpReportsFrom.setOnAction(null);
+        dpReportsFrom.setValue(period.get("start"));
+        dpReportsFrom.setOnAction(onAction);
+
+        onAction = dpReportsTo.getOnAction();
+        //  avoid calling dpReportsToOnAction event
+        dpReportsTo.setOnAction(null);
+        dpReportsTo.setValue(period.get("end"));
+        dpReportsTo.setOnAction(onAction);
+    }
+
+    @FXML
+    private void dpReportsFromOnAction(ActionEvent event){
+        EventHandler<ActionEvent> onAction = cbReportsPeriod.getOnAction();
+        //  avoid calling cbReportsPeriodOnAction() event when date is changing
+        cbReportsPeriod.setOnAction(null);
+
+        cbReportsPeriod.getSelectionModel().select(ReportPeriod.CUSTOM);
+
+        cbReportsPeriod.setOnAction(onAction);
+    }
+
+    @FXML
+    private void dpReportsToOnAction(ActionEvent event){
+        EventHandler<ActionEvent> onAction = cbReportsPeriod.getOnAction();
+        //  avoid calling cbReportsPeriodOnAction() event when date is changing
+        cbReportsPeriod.setOnAction(null);
+
+        cbReportsPeriod.getSelectionModel().select(ReportPeriod.CUSTOM);
+
+        cbReportsPeriod.setOnAction(onAction);
+    }
+
+    @FXML
+    private void btnReportsGenerateOnAction(ActionEvent event){
+        //  is reports tab selected?
+        if (tabReports.isSelected()){
+            //  is stats tab selected
+            if (tabStats.isSelected()){
+                //  generate statistics
+                StatsReport sr = new StatsReport(dpReportsFrom.getValue(), dpReportsTo.getValue());
+
+                final TreeTableView<ReportRow> ttvContent = new TreeTableView<>();
+                apReportsStats.getChildren().add(ttvContent);
+                AnchorPane.setTopAnchor(ttvContent, 0.0);
+                AnchorPane.setBottomAnchor(ttvContent, 0.0);
+                AnchorPane.setLeftAnchor(ttvContent, 0.0);
+                AnchorPane.setRightAnchor(ttvContent, 0.0);
+
+                sr.generate(ttvContent);
+            }else if (tabAccounts.isSelected()) {
+                //  generate accounts report
+                AccountsReport ar = new AccountsReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsAccountFilter.isSelected() ? cbReportsAccounts.getValue() : null
+                );
+
+                ar.generate(ttvReportsAccounts);
+            }else if (tabPayees.isSelected()){
+                //  generate payees report
+                PayeesReport payeesReport = new PayeesReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsPayeeFilter.isSelected() ? cbReportsPayees.getValue() : null
+                );
+
+                payeesReport.generate(ttvReportsPayees);
+            }else if (tabCategories.isSelected()){
+                //  generate categories report
+                CaterogiesReport caterogiesReport = new CaterogiesReport(
+                        dpReportsFrom.getValue(),
+                        dpReportsTo.getValue(),
+                        cbxReportsCategoryFilter.isSelected() ? cbReportsCategories.getValue() : null
+                );
+
+                caterogiesReport.generate(ttvReportsCategories);
+            }
+        }
+    }
+    //**************************************  /reports tab  **************************************//
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -461,5 +649,35 @@ public class KmanController implements Initializable {
                 tvTransactionsOnSelect();
             }
         });
+
+        spMainContainer.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+            Kman.getSettings().setWindowDividerPosition(newValue.doubleValue());
+        });
+
+        //  transaction filter (feature #9)
+        transactionsFiltered = new FilteredList<>(tvTransactions.getItems());
+        tfFilter.textProperty().addListener((observable, oldValue, newValue) -> {
+            transactionsFiltered.setPredicate(transaction -> {
+                //  filter is empty. Thus, show all transactions
+                if ( (newValue == null) || (newValue.isEmpty()) ){
+                    return true;
+                }
+
+                //  value in text filter
+                String filterValue = newValue.toLowerCase();
+                //
+                String transactionValue = transaction.toSearchString().toLowerCase();
+
+                if (transactionValue.contains(filterValue)){
+                    return true;
+                }
+
+                return false;
+            });
+        });
+    }
+
+    public void setDividerPosition(double position){
+        spMainContainer.setDividerPosition(0, position);
     }
 }

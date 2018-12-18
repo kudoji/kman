@@ -1,6 +1,7 @@
 package com.kudoji.kman;
 
 import com.kudoji.kman.controllers.Controller;
+import com.kudoji.kman.controllers.KmanController;
 import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.DB;
 import com.kudoji.kman.utils.Settings;
@@ -10,6 +11,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author kudoji
@@ -18,9 +22,11 @@ public class Kman extends Application {
     public final static String KMAN_NAME = "kman";
     public final static String KMAN_DB_NAME_DEFAULT = "kman.kmd";
     //  current app version
-    public final static String KMAN_VERSION = "0.5.5";
+    public final static String KMAN_VERSION = "0.9";
     //  github repository url
     public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
+
+    private static final Logger log = Logger.getLogger(Kman.class.getName());
 
     private static DB kmanDB;
     private static Stage kmanStage;
@@ -77,7 +83,7 @@ public class Kman extends Application {
         alert.setHeaderText(null);
         alert.setContentText(_message);
         java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-        
+
         return (result.get() == javafx.scene.control.ButtonType.OK);
     }
     
@@ -110,7 +116,7 @@ public class Kman extends Application {
             
             result = controller.isChanged();
         }catch (Exception e){
-            System.err.println(e.getClass() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
             result = false;
         }
         
@@ -175,21 +181,26 @@ public class Kman extends Application {
     public void start(Stage stage) throws Exception {
         Kman.kmanStage = stage;
 
-        settings = new Settings(stage);
+        settings = Settings.getInstance(stage);
         settings.readSettings();
 
-        kmanDB = new DB(settings.getDBName());
-        kmanDB.setDebugMode(true);
-        kmanDB.connect();
-        kmanDB.createAllTables(true);
+        kmanDB = DB.getInstance(Kman.KMAN_DB_NAME_DEFAULT);
+        kmanDB.setLogLevel(Level.ALL);
+        kmanDB.connect(settings.getDBName());
+        kmanDB.createAllTables(false);
 
-        Parent root = FXMLLoader.load(getClass().getResource("/views/Kman.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Kman.fxml"));
+        Parent root = loader.load();
+        KmanController kmanController = loader.getController();
         Scene scene = new Scene(root);
 
         setWindowTitle();
         stage.setScene(scene);
         stage.getIcons().add(new javafx.scene.image.Image(Kman.class.getResourceAsStream("/images/icon.png")));
         stage.show();
+
+        //  have to apply divider position after form is shown...
+        kmanController.setDividerPosition(settings.getWindowDividerPosition());
     }
 
     @Override

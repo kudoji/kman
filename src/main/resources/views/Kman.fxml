@@ -3,6 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -12,12 +16,16 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="469.0" prefWidth="774.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.KmanController">
    <top>
@@ -42,7 +50,8 @@
                         <MenuItem mnemonicParsing="false" onAction="#miPreferencesOnAction" text="Preferences">
                            <accelerator>
                               <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
-                           </accelerator></MenuItem>
+                           </accelerator>
+                        </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#miExitOnAction" text="Exit">
                            <accelerator>
@@ -97,7 +106,7 @@
                <content>
                   <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                      <children>
-                        <SplitPane dividerPositions="0.2979274611398964" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane fx:id="spMainContainer" dividerPositions="0.2979274611398964" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <items>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                  <children>
@@ -124,7 +133,33 @@
                                                       <Insets right="3.0" />
                                                    </HBox.margin>
                                                 </Button>
-                                                <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionDeleteOnAction" prefHeight="26.0" prefWidth="70.0" text="Delete" />
+                                                <Button maxHeight="26.0" maxWidth="70.0" minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnTransactionDeleteOnAction" prefHeight="26.0" prefWidth="70.0" text="Delete">
+                                                   <HBox.margin>
+                                                      <Insets right="3.0" />
+                                                   </HBox.margin></Button>
+                                                <Label text="filter:">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets right="3.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <TextField fx:id="tfFilter" promptText="transaction filter" HBox.hgrow="ALWAYS" />
+                                                <Label fx:id="lbTransactions" text="0">
+                                                   <font>
+                                                      <Font name="System Bold" size="13.0" />
+                                                   </font>
+                                                   <opaqueInsets>
+                                                      <Insets />
+                                                   </opaqueInsets>
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" right="3.0" />
+                                                   </HBox.margin>
+                                                   <tooltip>
+                                                      <Tooltip text="Transaction's amount" />
+                                                   </tooltip>
+                                                </Label>
                                              </children>
                                           </HBox>
                                        </top>
@@ -153,9 +188,108 @@
                   </AnchorPane>
                </content>
             </Tab>
-            <Tab text="reports">
+            <Tab fx:id="tabReports" onSelectionChanged="#tabReportsOnSelectionChanged" text="reports">
                <content>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <TabPane layoutX="64.0" layoutY="44.0" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                          <tabs>
+                            <Tab fx:id="tabStats" closable="false" text="stats">
+                              <content>
+                                <AnchorPane fx:id="apReportsStats" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                              </content>
+                            </Tab>
+                            <Tab fx:id="tabAccounts" text="accounts">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <HBox layoutX="14.0" layoutY="14.0" maxHeight="28.0" minHeight="28.0" prefHeight="28.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                             <children>
+                                                <CheckBox fx:id="cbxReportsAccountFilter" maxHeight="26.0" minHeight="26.0" mnemonicParsing="false" prefHeight="26.0" text="Filter by account:" />
+                                                <ComboBox fx:id="cbReportsAccounts" prefHeight="26.0" prefWidth="225.0">
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" />
+                                                   </HBox.margin>
+                                                </ComboBox>
+                                             </children>
+                                          </HBox>
+                                          <TreeTableView fx:id="ttvReportsAccounts" layoutX="31.0" layoutY="67.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
+                                       </children></AnchorPane>
+                              </content>
+                            </Tab>
+                              <Tab fx:id="tabPayees" text="payees">
+                                 <content>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <HBox maxHeight="28.0" minHeight="28.0" prefHeight="28.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                             <children>
+                                                <CheckBox fx:id="cbxReportsPayeeFilter" maxHeight="26.0" minHeight="26.0" mnemonicParsing="false" prefHeight="26.0" text="Filter by payee:" />
+                                                <ComboBox fx:id="cbReportsPayees" prefHeight="26.0" prefWidth="225.0">
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" />
+                                                   </HBox.margin>
+                                                </ComboBox>
+                                             </children>
+                                          </HBox>
+                                          <TreeTableView fx:id="ttvReportsPayees" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
+                                       </children></AnchorPane>
+                                 </content>
+                              </Tab>
+                              <Tab fx:id="tabCategories" text="categories">
+                                 <content>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <HBox maxHeight="28.0" minHeight="28.0" prefHeight="28.0" prefWidth="200.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <CheckBox fx:id="cbxReportsCategoryFilter" maxHeight="26.0" minHeight="26.0" mnemonicParsing="false" prefHeight="26.0" text="Filter by category:" />
+                                                <ComboBox fx:id="cbReportsCategories" prefHeight="26.0" prefWidth="225.0">
+                                                   <HBox.margin>
+                                                      <Insets left="3.0" />
+                                                   </HBox.margin>
+                                                </ComboBox>
+                                             </children>
+                                          </HBox>
+                                          <TreeTableView fx:id="ttvReportsCategories" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0" />
+                                       </children></AnchorPane>
+                                 </content>
+                              </Tab>
+                          </tabs>
+                        </TabPane>
+                        <HBox layoutX="14.0" layoutY="-30.0" maxHeight="28.0" minHeight="28.0" prefHeight="28.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label minHeight="26.0" text="Period:">
+                                 <HBox.margin>
+                                    <Insets left="3.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <ComboBox fx:id="cbReportsPeriod" onAction="#cbReportsPeriodOnAction" prefHeight="26.0" prefWidth="225.0">
+                                 <HBox.margin>
+                                    <Insets left="3.0" />
+                                 </HBox.margin>
+                              </ComboBox>
+                              <Label minHeight="26.0" text="from:">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <DatePicker fx:id="dpReportsFrom" maxHeight="26.0" maxWidth="125.0" minHeight="26.0" onAction="#dpReportsFromOnAction" prefHeight="26.0" prefWidth="125.0" />
+                              <Label minHeight="26.0" text="to:">
+                                 <HBox.margin>
+                                    <Insets left="3.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <DatePicker fx:id="dpReportsTo" maxHeight="26.0" maxWidth="125.0" minHeight="26.0" onAction="#dpReportsToOnAction" prefHeight="26.0" prefWidth="125.0" />
+                              <Button minHeight="26.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnReportsGenerateOnAction" text="Generate">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets top="2.0" />
+                           </padding>
+                        </HBox>
+                     </children></AnchorPane>
                </content>
             </Tab>
          </tabs>

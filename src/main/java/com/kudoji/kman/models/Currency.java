@@ -41,6 +41,8 @@ public class Currency {
     private final static ObservableList<Currency> olCurrenciesList = FXCollections.observableArrayList();
     
     public Currency(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
         this.code = new SimpleStringProperty(_params.get("code"));
@@ -51,6 +53,8 @@ public class Currency {
     }
     
     public void setFields(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
 //        this.id.set((int)_params.get("id"));
         this.name.set(_params.get("name"));
         this.code.set(_params.get("code"));
@@ -69,6 +73,8 @@ public class Currency {
     }
     
     public void setName(String _name){
+        if (_name == null) throw new IllegalArgumentException();
+
         this.name.set(_name);
     }
     
@@ -81,6 +87,8 @@ public class Currency {
     }
     
     public void setCode(String _code){
+        if (_code == null) throw new IllegalArgumentException();
+
         this.code.set(_code);
     }
     
@@ -100,7 +108,9 @@ public class Currency {
         return this.starts_with_code;
     }
     
-    public void setRate(Float _rate){
+    public void setRate(float _rate){
+        if (_rate < 0f) throw new IllegalArgumentException();
+
         this.rate.set(_rate);
         this.rateString.set(this.getRateString());
     }
@@ -206,7 +216,7 @@ public class Currency {
      * @return 
      */
     public static Currency getCurrency(int _id){
-        if (_id == 0) return null;
+        if (_id <= 0) return null;
         
         if (Currency.hmCurrenciesList.isEmpty()){
             Currency.getCurrenciesCache();

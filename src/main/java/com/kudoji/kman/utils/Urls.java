@@ -1,11 +1,17 @@
 package com.kudoji.kman.utils;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Urls {
+    private static final Logger log = Logger.getLogger(Urls.class.getName());
     /**
      * Opens provided _url
      * @param _url
      */
     public static void openUrl(String _url){
+        if (_url == null) throw new IllegalArgumentException();
+
         Runtime rt = Runtime.getRuntime();
 
         //  check for OS first
@@ -28,7 +34,7 @@ public class Urls {
         try{
             rt.exec(command);
         }catch (Exception e){
-            System.err.println(e.getClass() + ": " + e.getMessage());
+            log.log(Level.WARNING, e.getMessage(), e);
         }
     }
 }

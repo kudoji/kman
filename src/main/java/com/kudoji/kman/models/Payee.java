@@ -18,7 +18,7 @@ public class Payee {
     private StringProperty name;
     private IntegerProperty categoryDepositId;
     private IntegerProperty categoryWithdrawalId;
-    private int usageFreq; //   keeps usage frequency
+    private IntegerProperty usageFreq; //   keeps usage frequency
     
     /**
      * Keeps information about payees which allows reduce DB usage
@@ -26,14 +26,29 @@ public class Payee {
     private final static javafx.collections.ObservableList<Payee> payeesCache = FXCollections.observableArrayList();
     
     public Payee(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = new SimpleIntegerProperty(Integer.parseInt(_params.get("id")));
         this.name = new SimpleStringProperty(_params.get("name"));
-        this.categoryDepositId = new SimpleIntegerProperty(Integer.parseInt(_params.get("category_deposit")));
-        this.categoryWithdrawalId = new SimpleIntegerProperty(Integer.parseInt(_params.get("category_withdrawal")));
-        this.usageFreq = Integer.parseInt(_params.get("usage_freq"));
+
+        String categoryId = _params.get("category_deposit");
+        this.categoryDepositId = new SimpleIntegerProperty(categoryId == null ? 0 : Integer.parseInt(categoryId));
+        categoryId = _params.get("category_withdrawal");
+        this.categoryWithdrawalId = new SimpleIntegerProperty(categoryId == null? 0 : Integer.parseInt(categoryId));
+
+        this.usageFreq = new SimpleIntegerProperty(Integer.parseInt(_params.get("usage_freq")));
+
+        this.usageFreq.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != newValue){
+                //  sort Payees list by usage frequency (bug #27)
+                sortPayees();
+            }
+        });
     }
     
     public void setFields(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
 //        this.id = new SimpleIntegerProperty((int)_params.get("id"));
         this.name.set(_params.get("name"));
         //for categories
@@ -41,7 +56,7 @@ public class Payee {
         this.categoryDepositId.set(categoryId == null ? 0 : Integer.parseInt(categoryId));
         categoryId = _params.get("category_withdrawal");
         this.categoryWithdrawalId.set(categoryId == null ? 0 : Integer.parseInt(categoryId));
-        this.usageFreq = Integer.parseInt(_params.get("usage_freq"));
+        this.usageFreq.set(Integer.parseInt(_params.get("usage_freq")));
     }
 
     public int getId(){
@@ -53,6 +68,8 @@ public class Payee {
     }
     
     public void setName(String _name){
+        if (_name == null) throw new IllegalArgumentException();
+
         this.name.set(_name);
     }
     
@@ -73,13 +90,13 @@ public class Payee {
     }
 
     public int getUsageFreq(){
-        return this.usageFreq;
+        return this.usageFreq.get();
     }
 
     public void setUsageFreq(int _value){
-        if (_value < 0 || _value > Integer.MAX_VALUE) return;
+        if (_value < 0 || _value > Integer.MAX_VALUE) throw new IllegalArgumentException();
 
-        this.usageFreq = _value;
+        this.usageFreq.set(_value);
     }
 
     /**
@@ -88,21 +105,20 @@ public class Payee {
      * @param _delta
      * @return true than value changed, false otherwise
      */
-    public boolean incUsageFreq(int _delta){
+    public void incUsageFreq(int _delta){
         if (_delta < 0){
-            if (this.usageFreq == Integer.MIN_VALUE){
-                return false;
+            if (this.usageFreq.get() == Integer.MIN_VALUE){
+                throw new IllegalArgumentException();
             }
         }else if (_delta == 0){
-            return false;
+            throw new IllegalArgumentException();
         }else{
-            if (this.usageFreq == Integer.MAX_VALUE){
-                return false;
+            if (this.usageFreq.get() == Integer.MAX_VALUE){
+                throw new IllegalArgumentException();
             }
         }
 
-        this.usageFreq += _delta;
-        return true;
+        this.usageFreq.set(this.usageFreq.get() + _delta);
     }
 
     public static Payee getPayee(int _id){
@@ -133,6 +149,24 @@ public class Payee {
         }
         
         return Payee.payeesCache;
+    }
+
+    private void sortPayees(){
+        if (Payee.getPayees().size() > 0){
+            Payee.getPayees().sort((o1, o2) -> {
+                int usageFreq1 = o1.getUsageFreq();
+                int usegeFreq2 = o2.getUsageFreq();
+                if (usageFreq1 > usegeFreq2){
+                    //  payee with higher freq move to the top of the list
+                    return -1;
+                }else if (usageFreq1 == usegeFreq2){
+                    return 0;
+                }else{
+                    //  payee with lower freq move to the bottom of the list
+                    return 1;
+                }
+            });
+        }
     }
     
     @Override

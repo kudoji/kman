@@ -12,10 +12,11 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane maxHeight="240.0" minHeight="240.0" minWidth="370.0" prefHeight="240.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.PayeeDialogController">
+<GridPane maxHeight="240.0" minHeight="240.0" minWidth="370.0" prefHeight="240.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kudoji.kman.controllers.PayeeDialogController">
   <columnConstraints>
-    <ColumnConstraints hgrow="ALWAYS" minWidth="158.0" prefWidth="180.0" />
-    <ColumnConstraints hgrow="NEVER" maxWidth="206.0" minWidth="119.0" prefWidth="184.0" />
+    <ColumnConstraints hgrow="NEVER" maxWidth="158.0" minWidth="158.0" prefWidth="158.0" />
+    <ColumnConstraints hgrow="ALWAYS" prefWidth="186.0" />
+      <ColumnConstraints hgrow="NEVER" maxWidth="29.0" minWidth="29.0" prefWidth="29.0" />
   </columnConstraints>
   <rowConstraints>
     <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
@@ -39,26 +40,26 @@
             <Font name="System Bold" size="17.0" />
          </font>
       </Label>
-      <TextField fx:id="tfId" disable="true" prefHeight="26.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <TextField fx:id="tfId" disable="true" maxWidth="1.7976931348623157E308" prefHeight="26.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
       <Label text="name:" GridPane.rowIndex="2">
          <font>
             <Font name="System Bold" size="17.0" />
          </font>
       </Label>
-      <TextField fx:id="tfName" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <TextField fx:id="tfName" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
       <Label prefHeight="50.0" prefWidth="184.0" text="category for deposit:" wrapText="true" GridPane.rowIndex="3">
          <font>
             <Font name="System Bold" size="17.0" />
          </font>
       </Label>
-      <ComboBox fx:id="cbCategoryDeposit" minWidth="168.0" prefHeight="26.0" prefWidth="184.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <ComboBox fx:id="cbCategoryDeposit" maxWidth="1.7976931348623157E308" minWidth="158.0" prefHeight="26.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
       <Label prefHeight="46.0" prefWidth="180.0" text="category for withdrawal:" wrapText="true" GridPane.rowIndex="4">
          <font>
             <Font name="System Bold" size="17.0" />
          </font>
       </Label>
-      <ComboBox fx:id="cbCategoryWithdrawal" minWidth="168.0" prefHeight="26.0" prefWidth="186.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-      <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+      <ComboBox fx:id="cbCategoryWithdrawal" maxWidth="1.7976931348623157E308" minWidth="158.0" prefHeight="26.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" />
+      <HBox alignment="BOTTOM_RIGHT" maxWidth="1.7976931348623157E308" prefHeight="100.0" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5">
          <children>
             <Button fx:id="btnCancel" maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnCancelOnAction" prefWidth="70.0" text="Cancel" textAlignment="CENTER">
                <HBox.margin>
@@ -68,5 +69,15 @@
             <Button fx:id="btnOK" maxWidth="70.0" minWidth="70.0" mnemonicParsing="false" onAction="#btnOKOnAction" prefWidth="70.0" text="OK" />
          </children>
       </HBox>
+      <Button alignment="CENTER" maxHeight="26.0" maxWidth="26.0" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" onAction="#btnCategoryDepositClearOnAction" prefHeight="26.0" prefWidth="26.0" text="X" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Button>
+      <Button alignment="CENTER" maxHeight="26.0" maxWidth="26.0" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" onAction="#btnCategoryWithdrawalClearOnAction" prefHeight="26.0" prefWidth="26.0" text="X" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Button>
    </children>
 </GridPane>

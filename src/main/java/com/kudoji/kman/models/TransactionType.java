@@ -20,6 +20,8 @@ public class TransactionType {
     private String name;
     
     public TransactionType(HashMap<String, String> _params){
+        if (_params == null) throw new IllegalArgumentException();
+
         this.id = Integer.parseInt(_params.get("id"));
         this.name = _params.get("name");
     }
@@ -34,6 +36,8 @@ public class TransactionType {
      * @return 
      */
     public static TransactionType getTransactionType(int _id){
+        if (_id <= 0) throw new IllegalArgumentException();
+
         HashMap<String, String> params = new HashMap<>();
         params.put("table", "transaction_types");
         params.put("id", Integer.toString(_id));
