@@ -461,7 +461,11 @@ public class KmanController implements Initializable {
     private void clearAppScreen(){
         tiAccounts = Account.populateAccountsTree(tvNavigation);
         tvNavigation.getSelectionModel().select(tiAccounts);
-        tvTransactions.getItems().clear();
+        //  bug #58
+        //  cannot be used here since tvTransactions contains FilteredList which doesn't have clear()
+        // method implementation
+//        tvTransactions.getItems().clear();
+        tvTransactions.setItems(null);
         taTransactionNote.setText("");
     }
 
