@@ -153,7 +153,9 @@ public class DB {
                     break;
                 default:
                     log.severe(format("Error in DB.convertRS2Dic(%d)", rsmd.getColumnType(i)));
-                    break;
+                    throw new UnsupportedOperationException(
+                            format("Error in DB.convertRS2Dic(%d)", rsmd.getColumnType(i))
+                    );
             }
         }
         
