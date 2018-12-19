@@ -52,7 +52,7 @@ public class DB {
             dbConnection = DriverManager.getConnection(dbUrl);
             //force using koreign key constrain
             dbConnection.createStatement().execute("PRAGMA foreign_keys = ON;");
-            log.info("sqlite connected");
+            log.info("sqlite connected to '" + dbUrl + "'");
             result = true;
         }catch (SQLException e){
             log.log(Level.SEVERE, e.getMessage(), e);
