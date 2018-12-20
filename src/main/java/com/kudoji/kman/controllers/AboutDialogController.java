@@ -21,6 +21,11 @@ public class AboutDialogController extends Controller {
     @FXML
     private Hyperlink hlGitHub;
 
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent action){
         super.closeStage();

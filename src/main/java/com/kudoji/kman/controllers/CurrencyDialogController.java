@@ -51,7 +51,12 @@ public class CurrencyDialogController extends Controller {
     private void tfRateOnKeyReleased(KeyEvent event){
         setRateLabel();
     }
-    
+
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent event){
         if (!validateFields()){

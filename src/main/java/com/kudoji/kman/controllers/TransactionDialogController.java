@@ -132,7 +132,12 @@ public class TransactionDialogController extends Controller {
             setCategory(params.get("object"));
         }
     }
-    
+
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent event){
         if (!validateFields()){
