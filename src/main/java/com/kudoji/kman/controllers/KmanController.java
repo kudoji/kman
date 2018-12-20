@@ -652,6 +652,8 @@ public class KmanController implements Initializable {
         tvTransactions.setOnKeyReleased(event -> {
             if (event.getCode().isNavigationKey()){
                 tvTransactionsOnSelect();
+            }else if (event.getCode() == KeyCode.ENTER){
+                btnTransactionEditOnAction(null);
             }
         });
 
