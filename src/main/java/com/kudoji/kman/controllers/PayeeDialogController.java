@@ -40,6 +40,11 @@ public class PayeeDialogController extends Controller {
         cbCategoryWithdrawal.getSelectionModel().clearSelection();
     }
 
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent event){
         if (!validateFields()){
