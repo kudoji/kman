@@ -23,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -678,6 +679,13 @@ public class KmanController implements Initializable {
 
                 return false;
             });
+        });
+
+        tfFilter.setOnKeyReleased(event -> {
+            if (event.getCode() == KeyCode.ESCAPE){
+                tfFilter.setText("");
+                tvTransactions.requestFocus();
+            }
         });
     }
 

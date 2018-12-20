@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javax.xml.soap.Node;
 
@@ -231,6 +232,13 @@ public class CurrenciesDialogController extends Controller {
         
 //        tvCurrencies.setItems(Currency.getCurrencies());
         tvCurrencies.setItems(dataFiltered);
+
+        tfFilter.setOnKeyReleased(event -> {
+            if (event.getCode() == KeyCode.ESCAPE){
+                tfFilter.setText("");
+                tvCurrencies.requestFocus();
+            }
+        });
     }   
 
     @SuppressWarnings("unchecked")
