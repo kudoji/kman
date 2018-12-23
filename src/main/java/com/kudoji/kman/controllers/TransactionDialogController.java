@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import com.kudoji.kman.*;
 import com.kudoji.kman.models.*;
 import com.kudoji.kman.utils.Strings;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -156,6 +157,67 @@ public class TransactionDialogController extends Controller {
     @FXML
     private void chbAdvancedOnAction(ActionEvent event){
         tfAmountTo.setDisable(!chbAdvanced.isSelected());
+
+        setAmountTo();
+    }
+
+    /**
+     * Returns currently selected rate for account
+     *
+     * @param from if true rate returned for from account, to account otherwise
+     *
+     * @return
+     */
+    private float getRate(boolean from){
+        Account account = from ?
+                cbAccountFrom.getSelectionModel().getSelectedItem() :
+                cbAccountTo.getSelectionModel().getSelectedItem();
+
+        if (account == null) return 0f;
+
+        Currency currency = account.getCurrency();
+        if (currency == null) return 0f;
+
+        float rate = currency.getRate();
+
+        return rate;
+    }
+
+    /**
+     * Sets amount to if both from and to accounts are set and amount is not zero
+     * Sets only if tfAmountTo does not contain number already
+     *
+     */
+    private void setAmountTo(){
+//        float amountTo = 0f;
+//        try{
+//            amountTo = Float.parseFloat(tfAmountTo.getText());
+//        }catch (NumberFormatException e){
+//
+//        }
+        //  amount already by possibly user. Do not change it
+//        if (amountTo != 0f) return;
+
+        float amountFrom = 0f;
+
+        try{
+            amountFrom = Float.parseFloat(tfAmountFrom.getText());
+        }catch (NumberFormatException e){
+
+        }
+        if (amountFrom == 0f) return;
+
+        TransactionType type = cbType.getSelectionModel().getSelectedItem();
+        if ((type == null) || (type.getId() != TransactionType.ACCOUNT_TYPES_TRANSFER)) return;
+
+        float rateFrom = getRate(true);
+        if (rateFrom == 0f) return;
+
+        float rateTo = getRate(false);
+        if (rateTo == 0f) return;
+
+        //  could be implemented using BigDecimal but precision at this point is not as important
+        tfAmountTo.setText(Float.toString(rateTo * amountFrom / rateFrom));
     }
 
     private void setCategory(Category _category){
@@ -565,5 +627,11 @@ public class TransactionDialogController extends Controller {
 
         tfAmountFrom.setText("0.00");
         tfAmountTo.setText("0.00");
+
+        //  sets amount to any time amount from get changed
+        tfAmountFrom.textProperty().addListener((observable, oldValue, newValue) -> setAmountTo());
+        //  sets amount to any time action happened
+        cbAccountFrom.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
+        cbAccountTo.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
     }
 }
