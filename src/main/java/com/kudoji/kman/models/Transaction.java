@@ -313,7 +313,7 @@ public class Transaction {
     }
 
     /**
-     * Returns accountTo instance for the current transaction
+     * Returns accountTo/accountFrom instance for the current transaction
      * @param _getAccountTo if true get accountTo, otherwise - accountFrom
      * @return 
      */
