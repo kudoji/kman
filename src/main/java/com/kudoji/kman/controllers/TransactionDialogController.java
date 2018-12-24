@@ -157,8 +157,6 @@ public class TransactionDialogController extends Controller {
     @FXML
     private void chbAdvancedOnAction(ActionEvent event){
         tfAmountTo.setDisable(!chbAdvanced.isSelected());
-
-        setAmountTo();
     }
 
     /**
@@ -185,25 +183,26 @@ public class TransactionDialogController extends Controller {
 
     /**
      * Sets amount to if both from and to accounts are set and amount is not zero
-     * Sets only if tfAmountTo does not contain number already
      *
      */
     private void setAmountTo(){
+        //  advanced checkbox is not selected, thus, no calculation needed
+        if (!chbAdvanced.isSelected()) return;
+
+        //  was thinking to not allow changing the value if it's already set
+        //  but decided to re-calculate it any time changes happened
 //        float amountTo = 0f;
 //        try{
 //            amountTo = Float.parseFloat(tfAmountTo.getText());
 //        }catch (NumberFormatException e){
-//
 //        }
         //  amount already by possibly user. Do not change it
 //        if (amountTo != 0f) return;
 
         float amountFrom = 0f;
-
         try{
             amountFrom = Float.parseFloat(tfAmountFrom.getText());
         }catch (NumberFormatException e){
-
         }
         if (amountFrom == 0f) return;
 
@@ -287,6 +286,18 @@ public class TransactionDialogController extends Controller {
             //new element dialog
             Kman.selectItemInCombobox(cbAccountFrom, account.getId());
         }
+
+        //  this is important to set all listeners at the BOTTOM here but not in the initialize() method
+        //  because of calling actions during this method will force to calculate amount to using
+        //  recent currency rate but not the one transaction was saved (applicable for already
+        //  saved transactions
+        //  sets amount to any time amount from get changed
+        tfAmountFrom.textProperty().addListener((observable, oldValue, newValue) -> setAmountTo());
+        //  sets amount to any time action happened
+        cbAccountFrom.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
+        cbAccountTo.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
+        //  sets event for advanced check box as well
+        chbAdvanced.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
     }
     
     /**
@@ -627,11 +638,5 @@ public class TransactionDialogController extends Controller {
 
         tfAmountFrom.setText("0.00");
         tfAmountTo.setText("0.00");
-
-        //  sets amount to any time amount from get changed
-        tfAmountFrom.textProperty().addListener((observable, oldValue, newValue) -> setAmountTo());
-        //  sets amount to any time action happened
-        cbAccountFrom.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
-        cbAccountTo.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
     }
 }
