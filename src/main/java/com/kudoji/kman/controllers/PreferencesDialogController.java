@@ -12,11 +12,6 @@ public class PreferencesDialogController extends Controller {
     @FXML
     private CheckBox cbSaveWindowPosition;
 
-    @Override
-    public void btnEnterOnAction(){
-        btnOKOnAction(null);
-    }
-
     @FXML
     private void btnOKOnAction(ActionEvent action){
         Kman.getSettings().setSaveWindowPosition(cbSaveWindowPosition.isSelected());
