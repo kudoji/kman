@@ -21,7 +21,8 @@ import javafx.collections.ObservableList;
  * @author kudoji
  */
 public class Currency {
-    public static final String URL_CURRENCY_RATES = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+    //  bug #54
+    public static final String URL_CURRENCY_RATES = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
     private final String URL_CURRENCY_RATES_HISTORY = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml";
     public static final String BASE_CURRENCY_CODE = "USD";
     

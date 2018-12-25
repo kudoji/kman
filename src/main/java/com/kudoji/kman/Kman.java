@@ -22,7 +22,7 @@ public class Kman extends Application {
     public final static String KMAN_NAME = "kman";
     public final static String KMAN_DB_NAME_DEFAULT = "kman.kmd";
     //  current app version
-    public final static String KMAN_VERSION = "0.9";
+    public final static String KMAN_VERSION = "0.9.1";
     //  github repository url
     public final static String KMAN_GH_URL = "https://github.com/kudoji/kman/";
 

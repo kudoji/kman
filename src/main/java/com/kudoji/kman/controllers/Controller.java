@@ -5,6 +5,8 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 /**
@@ -57,6 +59,13 @@ public class Controller implements Initializable {
     private void btnCancelOnAction(ActionEvent action){
         stage.close();
     }
+
+    /**
+     * Called any time Enter button is hit.
+     * Can be overridden in sub-classes
+     */
+    public void btnEnterOnAction(){
+    }
     
     /**
      * Set the stage for the controller which makes possible to attach listeners
@@ -69,11 +78,16 @@ public class Controller implements Initializable {
         }
 
         this.stage = _stage;
-        this.stage.addEventHandler(javafx.scene.input.KeyEvent.KEY_RELEASED, (javafx.scene.input.KeyEvent ke) -> {
-            if (ke.getCode() == javafx.scene.input.KeyCode.ESCAPE){
-                this.stage.close();
-            }
-        });
+        this.stage.addEventHandler(
+                KeyEvent.KEY_RELEASED,
+                (KeyEvent ke) -> {
+                    if (ke.getCode() == KeyCode.ESCAPE){
+                        this.stage.close();
+                    }else if (ke.getCode() == KeyCode.ENTER){
+                        btnEnterOnAction();
+                    }
+                }
+        );
     }
     
     public Stage getStage(){

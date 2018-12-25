@@ -132,7 +132,12 @@ public class TransactionDialogController extends Controller {
             setCategory(params.get("object"));
         }
     }
-    
+
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent event){
         if (!validateFields()){
@@ -151,6 +156,66 @@ public class TransactionDialogController extends Controller {
     @FXML
     private void chbAdvancedOnAction(ActionEvent event){
         tfAmountTo.setDisable(!chbAdvanced.isSelected());
+    }
+
+    /**
+     * Returns currently selected rate for account
+     *
+     * @param from if true rate returned for from account, to account otherwise
+     *
+     * @return
+     */
+    private float getRate(boolean from){
+        Account account = from ?
+                cbAccountFrom.getSelectionModel().getSelectedItem() :
+                cbAccountTo.getSelectionModel().getSelectedItem();
+
+        if (account == null) return 0f;
+
+        Currency currency = account.getCurrency();
+        if (currency == null) return 0f;
+
+        float rate = currency.getRate();
+
+        return rate;
+    }
+
+    /**
+     * Sets amount to if both from and to accounts are set and amount is not zero
+     *
+     */
+    private void setAmountTo(){
+        //  advanced checkbox is not selected, thus, no calculation needed
+        if (!chbAdvanced.isSelected()) return;
+
+        //  was thinking to not allow changing the value if it's already set
+        //  but decided to re-calculate it any time changes happened
+//        float amountTo = 0f;
+//        try{
+//            amountTo = Float.parseFloat(tfAmountTo.getText());
+//        }catch (NumberFormatException e){
+//        }
+        //  amount already by possibly user. Do not change it
+//        if (amountTo != 0f) return;
+
+        float amountFrom = 0f;
+        try{
+            amountFrom = Float.parseFloat(tfAmountFrom.getText());
+        }catch (NumberFormatException e){
+        }
+        if (amountFrom == 0f) return;
+
+        TransactionType type = cbType.getSelectionModel().getSelectedItem();
+        if ((type == null) || (type.getId() != TransactionType.ACCOUNT_TYPES_TRANSFER)) return;
+
+        float rateFrom = getRate(true);
+        if (rateFrom == 0f) return;
+
+        float rateTo = getRate(false);
+        if (rateTo == 0f) return;
+
+        //  could be implemented using BigDecimal but precision at this point is not as important
+        tfAmountTo.setText(Float.toString(rateTo * amountFrom / rateFrom));
     }
 
     private void setCategory(Category _category){
@@ -220,6 +285,18 @@ public class TransactionDialogController extends Controller {
             //new element dialog
             Kman.selectItemInCombobox(cbAccountFrom, account.getId());
         }
+
+        //  this is important to set all listeners at the BOTTOM here but not in the initialize() method
+        //  because of calling actions during this method will force to calculate amount to using
+        //  recent currency rate but not the one transaction was saved (applicable for already
+        //  saved transactions
+        //  sets amount to any time amount from get changed
+        tfAmountFrom.textProperty().addListener((observable, oldValue, newValue) -> setAmountTo());
+        //  sets amount to any time action happened
+        cbAccountFrom.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
+        cbAccountTo.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
+        //  sets event for advanced check box as well
+        chbAdvanced.addEventHandler(ActionEvent.ACTION, event -> setAmountTo());
     }
     
     /**

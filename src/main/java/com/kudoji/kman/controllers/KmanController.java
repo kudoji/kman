@@ -23,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -461,7 +462,11 @@ public class KmanController implements Initializable {
     private void clearAppScreen(){
         tiAccounts = Account.populateAccountsTree(tvNavigation);
         tvNavigation.getSelectionModel().select(tiAccounts);
-        tvTransactions.getItems().clear();
+        //  bug #58
+        //  cannot be used here since tvTransactions contains FilteredList which doesn't have clear()
+        // method implementation
+//        tvTransactions.getItems().clear();
+        tvTransactions.setItems(null);
         taTransactionNote.setText("");
     }
 
@@ -647,6 +652,8 @@ public class KmanController implements Initializable {
         tvTransactions.setOnKeyReleased(event -> {
             if (event.getCode().isNavigationKey()){
                 tvTransactionsOnSelect();
+            }else if (event.getCode() == KeyCode.ENTER){
+                btnTransactionEditOnAction(null);
             }
         });
 
@@ -674,6 +681,13 @@ public class KmanController implements Initializable {
 
                 return false;
             });
+        });
+
+        tfFilter.setOnKeyReleased(event -> {
+            if (event.getCode() == KeyCode.ESCAPE){
+                tfFilter.setText("");
+                tvTransactions.requestFocus();
+            }
         });
     }
 

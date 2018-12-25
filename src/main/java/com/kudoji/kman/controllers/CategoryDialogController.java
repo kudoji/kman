@@ -22,7 +22,12 @@ public class CategoryDialogController extends Controller {
     
     @FXML private javafx.scene.control.TextField tfId, tfName;
     @FXML private javafx.scene.control.ComboBox<Category> cbParent;
-    
+
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     public void btnOKOnAction(ActionEvent event){
         if (!validateFields()){

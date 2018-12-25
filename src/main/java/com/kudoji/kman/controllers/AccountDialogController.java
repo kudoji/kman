@@ -34,7 +34,12 @@ public class AccountDialogController extends Controller {
     
     @FXML private TextField tfId, tfName, tfBalanceInitial, tfBalanceCurrent;
     @FXML private javafx.scene.control.Button btnCurrency;
-    
+
+    @Override
+    public void btnEnterOnAction(){
+        btnOKOnAction(null);
+    }
+
     @FXML
     private void btnOKOnAction(ActionEvent action){
         if (!validateFields()){
