@@ -1,3 +1,16 @@
+[0.9.1]
+
+ * transfer glitch (bug #38)
+ * currency's rate is not used (bug #44)
+ * error while loading currencies data (bug #54)
+ * changing DB to new one causes UnsupportedOperationException (bug #58)
+ * edit transaction by hitting Enter (feature #46)
+ * close dialogs by hitting Enter (feature #47)
+ * convert settings class to singleton (feature #48)
+ * DB.connect() needs detailed log information (feature #49)
+ * cancel filter by Esc button (feature #56)
+ * use UnsupportedOperationException (feature #57)
+
 [0.9]
 
  * empty item selection in Payee's dialog combobox is not possible (bug #5)
