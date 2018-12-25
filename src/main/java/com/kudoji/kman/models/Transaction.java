@@ -583,28 +583,69 @@ public class Transaction {
      */
     public boolean addToAccounts(){
         Account account;
+
         switch (this.getTypeId()){
             case TransactionType.ACCOUNT_TYPES_DEPOSIT:
-                this.accountForTransaction.addTransaction(this);
+                //  might happen situation when transaction moved to another account from
+                //  the one it had been shown (accountForTransaction)
+                account = this.getAccount(true);
+                if (account.getId() != this.accountForTransaction.getId()){
+                    //  transaction's been moved to another account which is not currently visible
+                    this.setAccountForTransaction(account);
+                    //  to avoid transaction duplicate easier is to drop transactions cache
+                    //  for the account which is going to be re-created when user goes there
+                    account.dropTransactions();
+                }else{
+                    //  transaction is still on the same account
+                    //  just add it to the account's cache
+                    this.accountForTransaction.addTransaction(this);
+                }
 
                 break;
             case TransactionType.ACCOUNT_TYPES_WITHDRAWAL:
-                this.accountForTransaction.addTransaction(this);
+                //  might happen situation when transaction moved to another account from
+                //  the one it had been shown (accountForTransaction)
+                account = this.getAccount(false);
+                if (account.getId() != this.accountForTransaction.getId()){
+                    //  transaction's been moved to another account which is not currently visible
+                    this.setAccountForTransaction(account);
+                    //  to avoid transaction duplicate easier is to drop transactions cache
+                    //  for the account which is going to be re-created when user goes there
+                    account.dropTransactions();
+                }else{
+                    //  transaction is still on the same account
+                    //  just add it to the account's cache
+                    this.accountForTransaction.addTransaction(this);
+                }
 
                 break;
             case TransactionType.ACCOUNT_TYPES_TRANSFER:
-                this.accountForTransaction.addTransaction(this);
-
+                //  might happen situation when transaction moved to another account from
+                //  the one it had been shown (accountForTransaction)
                 account = this.getAccount(true);
-                if (this.accountForTransaction.getId() == account.getId()){
-                    account = this.getAccount(false);
-                    //  transaction with the same id should be added to the account
-                    //  but instance should be different
-                    //  this is why let's drop transactions cache so it will be re-created then user goes there
+                Account accountFrom = this.getAccount(false);
+                if (account.getId() != this.accountForTransaction.getId() &&
+                    accountFrom.getId() != this.accountForTransaction.getId()){
+                    //  transaction's been moved to another account
+                    //  which means that currently selected account doesn't have the transaction
+
+                    //  drop accounts' cache to make be re-created when user goes there
                     account.dropTransactions();
+                    accountFrom.dropTransactions();
                 }else{
-                    //  accountForTransaction == getAccount(false)
-                    account.dropTransactions();
+                    //  transaction belongs to the selected account
+                    this.accountForTransaction.addTransaction(this);
+
+                    if (this.accountForTransaction.getId() == account.getId()){
+                        account = this.getAccount(false);
+                        //  transaction with the same id should be added to the account
+                        //  but instance should be different
+                        //  this is why let's drop transactions cache so it will be re-created then user goes there
+                        account.dropTransactions();
+                    }else{
+                        //  accountForTransaction == getAccount(false)
+                        account.dropTransactions();
+                    }
                 }
 
                 break;

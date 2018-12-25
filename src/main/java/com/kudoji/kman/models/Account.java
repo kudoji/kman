@@ -513,7 +513,7 @@ public class Account {
         //  do not use getTransactions() method here because
         //  cache is going to be re-built in case it is empty
 
-        if (_transaction != null){
+        if (_transaction != null && !this.olTransactions.contains(_transaction)){
             this.olTransactions.add(_transaction);
 
             //  need to sort list after transaction is added
