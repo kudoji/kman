@@ -1,5 +1,7 @@
 package com.kudoji.kman.utils;
 
+import com.kudoji.kman.Kman;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,11 +24,7 @@ public class DB {
     private static DB instance;
     
     private DB(String _dbFile) {
-        if (_dbFile == null) throw new IllegalArgumentException();
-
-        dbFile = _dbFile;
-        dbUrl = "jdbc:sqlite:" + dbFile;
-
+        setDBFile(_dbFile);
         log.setLevel(Level.ALL);
     }
 
@@ -50,7 +48,7 @@ public class DB {
         boolean result = false;
         try{
             dbConnection = DriverManager.getConnection(dbUrl);
-            //force using koreign key constrain
+            //force using foreign key constrain
             dbConnection.createStatement().execute("PRAGMA foreign_keys = ON;");
             log.info("sqlite connected to '" + dbUrl + "'");
             result = true;
@@ -68,12 +66,17 @@ public class DB {
      * @return
      */
     public boolean connect(String _file){
-        if (_file == null) throw new IllegalArgumentException();
+        setDBFile(_file);
 
-        this.dbFile = _file;
-        this.dbUrl = "jdbc:sqlite:" + dbFile;
+        boolean result = connect();
+        if (!result){
+            //  e.g. file path is not accessible
+            //  connect to the default DB
+            setDBFile(Kman.KMAN_DB_NAME_DEFAULT);
+            result = connect();
+        }
 
-        return connect();
+        return result;
     }
 
     /**
@@ -83,6 +86,13 @@ public class DB {
      */
     public String getFile(){
         return this.dbFile;
+    }
+
+    public void setDBFile(String file){
+        if (file == null) throw new IllegalArgumentException();
+
+        this.dbFile = file;
+        this.dbUrl = "jdbc:sqlite:" + dbFile;
     }
     
     public boolean close(){
